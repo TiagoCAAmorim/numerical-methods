@@ -24,7 +24,7 @@ double max(double a, double b){
 bool is_root(double fx, double x, int i, bool debug){
     if( fabs(fx) < epsilon){
         if( debug){
-            printf("  Early exit after %i interations: f(%g) = %g.\n", i, x, fx);
+            printf("Early exit after %i interations: f(%g) = %g.\n", i, x, fx);
         }
         return true;
     }
@@ -42,6 +42,12 @@ double calculate_convergence(double x_current, double x_previous, bool relative_
             return 0.;
         }
     return fabs( (x_current - x_previous) / reference );
+}
+
+void print_error(char *message, double true_value, double calculated_value){
+    double relative_error;
+    relative_error = calculate_convergence(true_value, calculated_value, true);
+    printf("%s: True=%g Calculated=%g Error=%g\n", message, true_value, calculated_value, relative_error);
 }
 
 double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_interations, bool debug) {
@@ -124,12 +130,11 @@ int estimate_bissection_interations(double x_a, double x_b, double x_root, doubl
 }
 
 void test_bissection(double (*func)(double), double x_root, double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_interations, bool debug, char *message){
-    printf("Test Bissection Method: %s\n", message);
+    printf("\nTest Bissection Method: %s\n", message);
     int interations = estimate_bissection_interations(x_a, x_b, x_root, convergence_tol, false);
-    printf("  Estimated number of interations: %i\n", interations);
-    double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_interations, debug); 
-    double convergence = calculate_convergence(x_root, x_root_bissection, false);
-    printf("  Root=%g. Found x=%g.\nError on root: %g.\n\n", x_root, x_root_bissection, convergence);
+    printf("Estimated number of interations: %i\n", interations);
+    double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_interations, debug);
+    print_error(" => Root", x_root, x_root_bissection);
 }
 
 // Root at x=0.3
@@ -192,7 +197,7 @@ int tests_bissection(){
 // Minimum Curvature Method
 double alfa(double theta1, double phi1, double theta2, double phi2){
     double x, y;
-    x = cos( (theta2 - theta1)/2 );
+    x = sin( (theta2 - theta1)/2 );
     x *= x;
     y = sin( (phi2 - phi1)/2 );
     y *= y;
@@ -260,20 +265,26 @@ void tests_minimum_curvature(){
     double a, fa;
     double dS, dN, dE, dV;
 
-    printf("Vertical line\n");
+    printf("\n#### Minimum Curvatura Method Tests ####\n");
+
+    printf("\nVertical well\n");
     theta1=0;
     phi1=0.88*pi;
     theta2=0;
     phi2=0.124*pi;
     dS=10;
     a = alfa(theta1, phi1, theta2, phi2);
-    printf("  Alfa: calculated=%g  true=%g\n",a,pi);
+    printf("  Alfa: calculated=%g  true=%g\n",a,0.);
     fa = f_alfa(a);
     printf("  f(alfa): calculated=%g  true=%g\n",fa,1.);
+    dN = deltaN(dS, theta1, phi1, theta2, phi2);
+    printf("  Delta N: calculated=%g  true=%g\n",dN,0.);
+    dE = deltaE(dS, theta1, phi1, theta2, phi2);
+    printf("  Delta E: calculated=%g  true=%g\n",dE,0.);
+    dV = deltaV(dS, theta1, phi1, theta2, phi2);
+    printf("  Delta V: calculated=%g  true=%g\n",dV,dS);
 
-    
-
-    // Straght line
+    printf("\nSlant well\n");
     theta1=pi/4;
     phi1= 0;
 
