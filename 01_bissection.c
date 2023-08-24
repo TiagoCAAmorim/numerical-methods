@@ -9,7 +9,6 @@
 
 const double epsilon = 1E-7;
 const double pi = 3.14159265358979323846;
-// const double error_number = -9999.8999;
 
 bool is_root(double fx, double x, int i, bool debug){
     if( fabs(fx) < epsilon){
@@ -145,19 +144,114 @@ double f_trigonometric(double x){
     return cos(x) + sin(x);
 }
 
+int tests_bissection(){
+
+    test_bissection(f_linear, 0.3, 0, 1, 0.001, false, 50, true, "Linear function");
+    test_bissection(f_linear, 0.3, 0.3, 1, 0.001, false, 50, false, "Linear function with root in x_a");
+    test_bissection(f_linear, 0.3, 0, 0.3, 0.001, false, 50, false, "Linear function with root in x_b");
+    // test_bissection(f_linear, 0.3, 1, 2.3, 0.001, false, 50, false, "Linear function with error in [x_a,x_b]");
+    // test_bissection(f_linear, 0.3, -2, 0., 0.001, false, 50, false, "Linear function with error in [x_a,x_b]");
+    
+    test_bissection(f_quadratic, -0.1, -0.25, 1, 0.001, false, 50, true, "Quadratic function, root#1");
+    test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, false, 50, true, "Quadratic function, root#2");
+    
+    test_bissection(f_cos, pi/2, 0, 2, 0.001, false, 50, true, "Cossine function");
+    test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, false, 50, true, "Trigonometric function");
+}
+
+
+// Minimum Curvature Method
+double alfa(double theta1, double phi1, double theta2, double phi2){
+    double x, y;
+    x = cos( (theta2 - theta1)/2 );
+    x *= x;
+    y = sin( (phi2 - phi1)/2 );
+    y *= y;
+    y *= sin(theta1)*sin(theta2);
+    x += y;
+    x = sqrt(x);
+    return 2* asin(x);
+}
+
+double f_alfa(double a){
+    if( a<0.02){
+        double x;
+        double a2 = a*a;
+        x = 1 + 32*a2/18;
+        x = 1 + a2/168*x;
+        x = 1+ a2/10*x;
+        return 1+ a2/12*x;
+    } else{
+        return 2/a * tan(a/2);
+    }
+}
+
+double deltaN_with_deltaSfa(double deltaSfa, double theta1, double phi1, double theta2, double phi2){
+    return deltaSfa/2*(sin(theta1)*cos(phi1) + sin(theta2)*cos(phi2));
+}
+
+double deltaN_with_fa(double deltaS, double fa, double theta1, double phi1, double theta2, double phi2){
+    return deltaN_with_deltaSfa(deltaS*fa, theta1, phi1, theta2, phi2);
+}
+
+double deltaN(double deltaS, double theta1, double phi1, double theta2, double phi2){
+    double fa = f_alfa( alfa(theta1, phi1, theta2, phi2) );
+    return deltaN_with_fa(deltaS, fa, theta1, phi1, theta2, phi2);
+}
+
+double deltaE_with_deltaSfa(double deltaSfa, double theta1, double phi1, double theta2, double phi2){
+    return deltaSfa/2*(sin(theta1)*sin(phi1) + sin(theta2)*sin(phi2));
+}
+
+double deltaE_with_fa(double deltaS, double fa, double theta1, double phi1, double theta2, double phi2){
+    return deltaE_with_deltaSfa(deltaS*fa, theta1, phi1, theta2, phi2);
+}
+
+double deltaE(double deltaS, double theta1, double phi1, double theta2, double phi2){
+    double fa = f_alfa( alfa(theta1, phi1, theta2, phi2) );
+    return deltaE_with_fa(deltaS, fa, theta1, phi1, theta2, phi2);
+}
+
+
+double deltaV_with_deltaSfa(double deltaSfa, double theta1, double theta2){
+    return deltaSfa/2*(cos(theta1) + cos(theta2));
+}
+
+double deltaV_with_fa(double deltaS, double fa, double theta1, double theta2){
+    return deltaV_with_deltaSfa(deltaS*fa, theta1, theta2);
+}
+
+double deltaV(double deltaS, double theta1, double phi1, double theta2, double phi2){
+    double fa = f_alfa( alfa(theta1, phi1, theta2, phi2) );
+    return deltaV_with_fa(deltaS, fa, theta1, theta2);
+}
+
+void tests_minimum_curvature(){
+    double theta1, phi1, theta2, phi2;
+    double a, fa;
+    double dS, dN, dE, dV;
+
+    printf("Vertical line\n");
+    theta1=0;
+    phi1=0.88*pi;
+    theta2=0;
+    phi2=0.124*pi;
+    dS=10;
+    a = alfa(theta1, phi1, theta2, phi2);
+    printf("  Alfa: calculated=%g  true=%g\n",a,pi);
+    fa = f_alfa(a);
+    printf("  f(alfa): calculated=%g  true=%g\n",fa,1.);
+
+    
+
+    // Straght line
+    theta1=pi/4;
+    phi1= 0;
+
+}
+
 int main(){
-
-    test_bissection(f_linear, 0.3, 0, 1, 0.001, false, 50, true, "Linear function: ");
-    test_bissection(f_linear, 0.3, 0.3, 1, 0.001, false, 50, false, "Linear function with root in x_a: ");
-    test_bissection(f_linear, 0.3, 0, 0.3, 0.001, false, 50, false, "Linear function with root in x_b: ");
-    // test_bissection(f_linear, 0.3, 1, 2.3, 0.001, false, 50, false, "Linear function with error in [x_a,x_b]: ");
-    // test_bissection(f_linear, 0.3, -2, 0., 0.001, false, 50, false, "Linear function with error in [x_a,x_b]: ");
-    
-    test_bissection(f_quadratic, -0.1, -0.25, 1, 0.001, false, 50, true, "Quadratic function, root#1: ");
-    test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, false, 50, true, "Quadratic function, root#2: ");
-    
-    test_bissection(f_cos, pi/2, 0, 2, 0.001, false, 50, true, "Cossine function: ");
-    test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, false, 50, true, "Trigonometric function: ");
-
+    // tests_bissection();
+    tests_minimum_curvature();
     return 0;
 }
