@@ -269,29 +269,77 @@ void tests_minimum_curvature(){
 
     printf("\nVertical well\n");
     theta1=0;
-    phi1=0.88*pi;
+    phi1=0.88*pi; // any value
     theta2=0;
-    phi2=0.124*pi;
+    phi2=0.124*pi; // any value
     dS=10;
     a = alfa(theta1, phi1, theta2, phi2);
-    printf("  Alfa: calculated=%g  true=%g\n",a,0.);
+    print_error("  Alfa",0.,a);
     fa = f_alfa(a);
-    printf("  f(alfa): calculated=%g  true=%g\n",fa,1.);
+    print_error("  f(alfa)",1.,fa);
     dN = deltaN(dS, theta1, phi1, theta2, phi2);
-    printf("  Delta N: calculated=%g  true=%g\n",dN,0.);
+    print_error("  Delta N",0.,dN);
     dE = deltaE(dS, theta1, phi1, theta2, phi2);
-    printf("  Delta E: calculated=%g  true=%g\n",dE,0.);
+    print_error("  Delta E",0.,dE);
     dV = deltaV(dS, theta1, phi1, theta2, phi2);
-    printf("  Delta V: calculated=%g  true=%g\n",dV,dS);
+    print_error("  Delta V",dS,dV);
 
-    printf("\nSlant well\n");
+    printf("\nSlant straight well\n");
     theta1=pi/4;
-    phi1= 0;
+    phi1= pi/6;
+    theta2=pi/4;
+    phi2= pi/6;
+    dS=10;
+    a = alfa(theta1, phi1, theta2, phi2);
+    print_error("  Alfa",0.,a);
+    fa = f_alfa(a);
+    print_error("  f(alfa)",1.,fa);
+    dN = deltaN(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta N",dS*sin(pi/4)*cos(pi/6),dN);
+    dE = deltaE(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta E",dS*sin(pi/4)*sin(pi/6),dE);
+    dV = deltaV(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta V",dS*cos(pi/4),dV);
+
+    printf("\n1/4 circle horizontal well\n");
+    theta1=pi/2;
+    phi1= -pi/2;
+    theta2=pi/2;
+    phi2= 0;
+    dS=10*pi/2;
+    a = alfa(theta1, phi1, theta2, phi2);
+    print_error("  Alfa",pi/2,a);
+    fa = f_alfa(a);
+    print_error("  f(alfa)",f_alfa(pi/2),fa);
+    dN = deltaN(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta N",10,dN);
+    dE = deltaE(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta E",-10,dE);
+    dV = deltaV(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta V",0,dV);
+
+    printf("\n1/4 circle vertical to horizontal well\n");
+    theta1=0;
+    phi1=0.187*pi;  // any value
+    theta2=pi/2;
+    phi2= 0;
+    dS=10*pi/2;
+    a = alfa(theta1, phi1, theta2, phi2);
+    print_error("  Alfa",pi/2,a);
+    fa = f_alfa(a);
+    print_error("  f(alfa)",f_alfa(pi/2),fa);
+    dN = deltaN(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta N",10,dN);
+    dE = deltaE(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta E",0,dE);
+    dV = deltaV(dS, theta1, phi1, theta2, phi2);
+    print_error("  Delta V",10,dV);
+
 
 }
 
 int main(){
-    tests_bissection();
+    // tests_bissection();
     tests_minimum_curvature();
     return 0;
 }
