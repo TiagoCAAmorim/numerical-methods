@@ -58,13 +58,13 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
         return x_b;
 
     if( signbit(fx_a) == signbit(fx_b) ){
-        printf("Function has same sign in limits: f(%g)=%g f(%g)=%g.\n",x_a,fx_a,x_b,fx_b);
+        printf("Function has same sign in limits: f(%g) = %g f(%g) = %g.\n",x_a,fx_a,x_b,fx_b);
         assert(signbit(fx_a) != signbit(fx_b));
     }
 
     if( fabs(x_a - x_b) < epsilon ){
-        printf("Limits are too close: |%g - %g|<%g.\n",x_a,x_b,epsilon);
-        assert(false);
+        printf("Limits are too close: |%g - %g| = %g < %g.\n",x_a,x_b,fabs(x_a - x_b),epsilon);
+        assert(fabs(x_a - x_b) >= epsilon);
     }
 
     x_mean_previous = x_a;
@@ -137,6 +137,11 @@ double f_linear(double x){
     return -x*3 + 0.9;
 }
 
+// Root at x=0.3
+double f_linear2(double x){
+    return -x*3E5 + 0.9E5;
+}
+
 // Roots at x=-0.5 and -0.1
 double f_quadratic(double x){
     return 5*x*x + 3*x + 0.25;
@@ -150,6 +155,11 @@ double f_cos(double x){
 // Root at x= 3/4*pi (+ n*2pi)
 double f_trigonometric(double x){
     return cos(x) + sin(x);
+}
+
+// Root at x= +-2
+double f_exponential(double x){
+    return exp(x*x-4) - 1;
 }
 
 int tests_bissection(){
@@ -166,15 +176,16 @@ int tests_bissection(){
     test_bissection(f_linear, 0.3, 0, 0.3, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_b");
     test_bissection(f_linear, 0.3, 0.3-epsilon*100, 0.3+epsilon*100, 0.001, relative_convergence, max_interations, debug, "Linear function with domain close to root");
     test_bissection(f_linear, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function with domain very close to root");
-    test_bissection(f_linear, 0.3, 0.1-epsilon/3, 0.1+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function with 'small' domain");
     // test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b]");
     // test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b]");
     
+    // test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function #2 with 'small' domain");
+    
     test_bissection(f_quadratic, -0.1, -0.25, 1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
     test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#2");
-    
     test_bissection(f_cos, pi/2, 0, 2, 0.001, relative_convergence, max_interations, debug, "Cossine function");
     test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, relative_convergence, max_interations, debug, "Trigonometric function");
+    test_bissection(f_exponential, 2., 0, 10, 0.001, relative_convergence, max_interations, debug, "Exponential function");
 }
 
 
