@@ -47,7 +47,11 @@ double calculate_convergence(double x_current, double x_previous, bool relative_
 void print_error(char *message, double true_value, double calculated_value){
     double relative_error;
     relative_error = calculate_convergence(true_value, calculated_value, true);
-    printf("%s: True=%g Calculated=%g Error=%g\n", message, true_value, calculated_value, relative_error);
+    printf("%s: True=%g Calculated=%g Error=%g", message, true_value, calculated_value, relative_error);
+    if( relative_error > 0.01){
+        printf("  <= ######### Atention ###########");
+    }
+    printf("\n");
 }
 
 double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_interations, bool debug) {
@@ -260,82 +264,213 @@ double deltaV(double deltaS, double theta1, double phi1, double theta2, double p
     return deltaV_with_fa(deltaS, fa, theta1, theta2);
 }
 
+struct tangle{
+    double cos, sin, rad;
+};
+
+double calculate_rad(struct tangle angle, bool debug){
+    assert(fabs(angle.cos) <= 1.);
+    assert(fabs(angle.sin) <= 1.);
+    
+    double a_cos = acos(angle.cos);
+    double a_sin = asin(angle.sin);
+
+    if( angle.sin < 0){
+        a_cos = 2*pi - a_cos;
+        if( angle.cos > 0){
+            a_sin = 2*pi + a_sin;
+        }
+    }
+    if( angle.cos < 0){
+        a_sin = pi - a_sin;
+    }
+
+    double a = (a_sin + a_cos)/2;
+    if( debug){
+        double convergence = calculate_convergence(a, a_cos, true);
+        printf("Convergence error in angle calculation (%4g.pi rad): %g\n", a/pi, convergence);
+    }
+    return a;
+}
+
+struct tangle calculate_theta2(double deltaV, double deltaSfa, double cos_theta1){
+    struct tangle theta2;
+    theta2.cos = 2*deltaV / deltaSfa - cos_theta1;
+    assert(fabs(theta2.cos) <= 1.);
+    theta2.sin = sqrt(1 - theta2.cos * theta2.cos);
+    return theta2;    
+}
+
+struct tangle calculate_phi2_deltaE_zero(double deltaN, double sin_theta1, double cos_phi1, double sin_phi1, double sin_theta2){
+    struct tangle phi2;
+    if( fabs(sin_theta2)<epsilon && fabs(sin_theta1)<epsilon){
+        phi2.sin = -sin_phi1;
+    } else{
+        assert(fabs(sin_theta2) > 0);
+        phi2.sin = - sin_theta1 / sin_theta2 * sin_phi1;
+    }
+    assert(fabs(phi2.sin) <= 1);
+    phi2.cos = sqrt(1 - phi2.sin*phi2.sin);
+    if( cos_phi1 < 0){
+        phi2.cos = -phi2.cos;
+    }
+    return phi2;
+}
+
+struct tangle calculate_phi2_deltaN_zero(double deltaE, double sin_theta1, double cos_phi1, double sin_phi1, double sin_theta2){
+    struct tangle phi2;
+    if( fabs(sin_theta2)<epsilon && fabs(sin_theta1)<epsilon){
+        phi2.cos = -cos_phi1;
+    } else{
+        assert(fabs(sin_theta2) > 0);
+        phi2.cos = - sin_theta1 / sin_theta2 * cos_phi1;
+    }
+    phi2.sin = sqrt(1 - phi2.sin*phi2.sin);
+    if( sin_phi1 > 0){
+        phi2.sin = -phi2.sin;
+    }
+    return phi2;
+}
+
+struct tangle calculate_phi2(double deltaE, double deltaN, double sin_theta1, double cos_phi1, double sin_phi1, double sin_theta2){
+    struct tangle phi2;
+
+    if( fabs(deltaE) < epsilon && fabs(deltaN) < epsilon){
+        phi2.cos = cos_phi1;
+        phi2.sin = sin_phi1;
+    } else if( fabs(deltaE) < epsilon){
+        phi2 = calculate_phi2_deltaE_zero(deltaN, sin_theta1, cos_phi1, sin_phi1, sin_theta2);
+    } else if( fabs(deltaN) < epsilon){
+        phi2 = calculate_phi2_deltaN_zero(deltaE, sin_theta1, cos_phi1, sin_phi1, sin_theta2);
+     } else{
+        double deltaEpsilon = deltaN * sin_phi1 - deltaE * cos_phi1;
+        double deltaEpsilon_sin_theta1 = deltaEpsilon * sin_theta1;
+        double deltaH2 = deltaE*deltaE + deltaN*deltaN;
+        double deltaBeta2 = deltaH2 * sin_theta2*sin_theta2 - deltaEpsilon_sin_theta1*deltaEpsilon_sin_theta1;
+        assert(deltaBeta2 >= 0);
+        double deltaBeta = sqrt(deltaBeta2);
+        double deltaH2_sin_theta2 = deltaH2 * sin_theta2;
+        assert(fabs(deltaH2_sin_theta2) > 0);
+
+        phi2.sin = (-deltaN * deltaEpsilon_sin_theta1 + deltaE*deltaBeta) / deltaH2_sin_theta2;
+        phi2.cos = ( deltaE * deltaEpsilon_sin_theta1 + deltaN*deltaBeta) / deltaH2_sin_theta2;
+    }
+    return phi2;
+}
+
+double calculate_deltaSfa(double deltaE, double deltaN, double deltaV, double cos_theta1, double sin_theta1, double cos_phi1, double sin_phi1, double cos_theta2, double sin_theta2, double cos_phi2, double sin_phi2){
+    double aE = sin_theta1 * sin_phi1 + sin_theta2 * sin_phi2;
+    double aN = sin_theta1 * cos_phi1 + sin_theta2 * cos_phi2;
+    double aV = cos_theta1 + cos_theta2;
+    return 2 * sqrt( (deltaE*deltaE + deltaN*deltaN + deltaV*deltaV) / (aE*aE + aN*aN + aV*aV) );
+}
+
+void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1, double theta2, double phi2, double true_alfa, double true_deltaE, double true_deltaN, double true_deltaV, bool report_alfa_dEdNdV){
+
+    printf("\n%s\n", message);
+
+    double a = alfa(theta1, phi1, theta2, phi2);
+    double dE = deltaE(deltaS, theta1, phi1, theta2, phi2);
+    double dN = deltaN(deltaS, theta1, phi1, theta2, phi2);
+    double dV = deltaV(deltaS, theta1, phi1, theta2, phi2);
+
+    if( report_alfa_dEdNdV){
+        print_error("  Alfa",true_alfa,a);
+        print_error("  Delta E", true_deltaE,dE);
+        print_error("  Delta N", true_deltaN,dN);
+        print_error("  Delta V", true_deltaV,dV);
+    } else{
+        printf("  Calculated displacement: dE=%g dN=%g dV=%g\n", dE, dN, dV);
+        printf("  Calculated alfa=%g\n",a);
+    }
+
+    double deltaSfa = deltaS * f_alfa(a);
+    struct tangle theta2_ = calculate_theta2(dV, deltaSfa, cos(theta1));
+    print_error("  theta2", theta2, calculate_rad(theta2_, false));
+
+    struct tangle phi2_ = calculate_phi2(dE, dN, sin(theta1), cos(phi1), sin(phi1), sin(theta2));
+    print_error("  phi2", phi2, calculate_rad(phi2_, false));
+
+    double deltaSfa_calc = calculate_deltaSfa(dE, dN, dV, cos(theta1), sin(theta1), cos(phi1), sin(phi1), cos(theta2), sin(theta2), cos(phi2), sin(phi2));
+    double dS = deltaSfa_calc / f_alfa(a);
+    print_error("  Delta S", deltaS, dS);
+}
+
+
 void tests_minimum_curvature(){
     double theta1, phi1, theta2, phi2;
-    double a, fa;
-    double dS, dN, dE, dV;
+    double a;
+    double dS, dE, dN, dV;
+    struct tangle theta2_, phi2_;
+    double theta2_calc, phi2_calc;
+    double dSfa, dS_calc;
 
     printf("\n#### Minimum Curvatura Method Tests ####\n");
 
-    printf("\nVertical well\n");
-    theta1=0;
-    phi1=0.88*pi; // any value
-    theta2=0;
-    phi2=0.124*pi; // any value
+    printf("\nAngle calculation\n");
+    for(int i=0; i<=10; i++){
+        a = 0.2*i*pi;
+        theta2_.cos = cos(a);
+        theta2_.sin = sin(a);
+        theta2_.rad = calculate_rad(theta2_, true);
+        print_error(" Angle calculation",a,theta2_.rad);
+    }
+
     dS=10;
-    a = alfa(theta1, phi1, theta2, phi2);
-    print_error("  Alfa",0.,a);
-    fa = f_alfa(a);
-    print_error("  f(alfa)",1.,fa);
-    dN = deltaN(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta N",0.,dN);
-    dE = deltaE(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta E",0.,dE);
-    dV = deltaV(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta V",dS,dV);
+    theta1=0;    phi1=0.88*pi;
+    theta2=0;    phi2=0.88*pi;
+    a=0.;
+    dE=0., dN=0., dV=dS;
+    test_MCM_formulas("Vertical well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
 
-    printf("\nSlant straight well\n");
-    theta1=pi/4;
-    phi1= pi/6;
-    theta2=pi/4;
-    phi2= pi/6;
     dS=10;
-    a = alfa(theta1, phi1, theta2, phi2);
-    print_error("  Alfa",0.,a);
-    fa = f_alfa(a);
-    print_error("  f(alfa)",1.,fa);
-    dN = deltaN(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta N",dS*sin(pi/4)*cos(pi/6),dN);
-    dE = deltaE(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta E",dS*sin(pi/4)*sin(pi/6),dE);
-    dV = deltaV(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta V",dS*cos(pi/4),dV);
-
-    printf("\n1/4 circle horizontal well\n");
-    theta1=pi/2;
-    phi1= -pi/2;
-    theta2=pi/2;
-    phi2= 0;
+    theta1=pi/4;    phi1=pi/6;
+    theta2=pi/4;    phi2=pi/6;
+    a=0.;
+    dE=dS*sin(pi/4)*sin(pi/6);
+    dN=dS*sin(pi/4)*cos(pi/6);
+    dV=dS*cos(pi/4);
+    test_MCM_formulas("Slant straight well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    
     dS=10*pi/2;
-    a = alfa(theta1, phi1, theta2, phi2);
-    print_error("  Alfa",pi/2,a);
-    fa = f_alfa(a);
-    print_error("  f(alfa)",f_alfa(pi/2),fa);
-    dN = deltaN(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta N",10,dN);
-    dE = deltaE(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta E",-10,dE);
-    dV = deltaV(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta V",0,dV);
+    theta1=pi/2;    phi1=3*pi/2;
+    theta2=pi/2;    phi2=0.;
+    a=pi/2;
+    dE=-10;    dN=10;    dV=0.;
+    test_MCM_formulas("1/4 circle horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
 
-    printf("\n1/4 circle vertical to horizontal well\n");
-    theta1=0;
-    phi1=0.187*pi;  // any value
-    theta2=pi/2;
-    phi2= 0;
     dS=10*pi/2;
-    a = alfa(theta1, phi1, theta2, phi2);
-    print_error("  Alfa",pi/2,a);
-    fa = f_alfa(a);
-    print_error("  f(alfa)",f_alfa(pi/2),fa);
-    dN = deltaN(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta N",10,dN);
-    dE = deltaE(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta E",0,dE);
-    dV = deltaV(dS, theta1, phi1, theta2, phi2);
-    print_error("  Delta V",10,dV);
+    theta1=pi/2;    phi1=pi/4;
+    theta2=pi/2;    phi2=7*pi/4.;
+    a=pi/2;
+    dE=0.;    dN=10*sqrt(2);    dV=0.;
+    test_MCM_formulas("1/4 circle alligned north horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    
+    dS=10*pi/2;
+    theta1=0;        phi1=0.1871*pi;
+    theta2=pi/2;     phi2=0.;
+    a=pi/2;
+    dE=0.;    dN=10.;    dV=10.;
+    test_MCM_formulas("1/4 circle alligned north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+
+    dS=10*pi/2;
+    theta1=0;        phi1=0.1871*pi;
+    theta2=pi/2;     phi2=pi/6;
+    a=pi/2;
+    dE=10.*sin(pi/6);    dN=10.*cos(pi/6);    dV=10.;
+    test_MCM_formulas("1/4 circle 30o north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    
+    dS=10.;
+    theta1=pi/10;      phi1=3*pi/4;
+    theta2=pi/6;       phi2=7*pi/4;
+    a=0.;
+    dE=0.;    dN=0.;    dV=0.;
+    test_MCM_formulas("3D path well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false);
 
 
+
+    assert(false);
+    
 }
 
 int main(){
