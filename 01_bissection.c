@@ -13,6 +13,18 @@ const double pi = 3.14159265358979323846;
 const int default_interations = 100;
 const double default_convergence = 1E-4;
 
+const bool stop_on_error = true;
+
+bool check_error(bool ok_condition, char *error_message){
+    if( !ok_condition){
+        printf(error_message);
+        if( stop_on_error){
+            assert(false);
+        }
+    }
+    return ok_condition;
+}
+
 double min(double a, double b){
     return a<b? a: b;
 }
@@ -207,7 +219,7 @@ int tests_bissection(){
 
 
 // Minimum Curvature Method
-double angle_difference(double a1, double a2){
+double angle_subtraction(double a2, double a1){
     double dif = a2 - a1;
     if( dif < -pi){
         dif = dif + 2*pi;
@@ -219,9 +231,9 @@ double angle_difference(double a1, double a2){
 
 double alfa(double theta1, double phi1, double theta2, double phi2){
     double x, y;
-    x = sin( angle_difference(theta1, theta2)/2 );
+    x = sin( angle_subtraction(theta2, theta1)/2 );
     x *= x;
-    y = sin( angle_difference(phi1, phi2)/2 );
+    y = sin( angle_subtraction(phi2, phi1)/2 );
     y *= y;
     y *= sin(theta1)*sin(theta2);
     x += y;
@@ -287,14 +299,9 @@ struct tangle{
 };
 
 double calculate_rad(struct tangle angle, bool debug){
-    // assert(fabs(angle.cos) <= 1.);
-    if( fabs(angle.cos) > 1.){
-        printf("## Failed cos<=1.\n");
-    }
-    // assert(fabs(angle.sin) <= 1.);
-    if( fabs(angle.sin) > 1.){
-        printf("## Failed sin<=1.\n");
-    }
+    check_error( fabs(angle.cos) <= 1., "## Failed |cos(angle)| <= 1.\n");
+    check_error( fabs(angle.sin) <= 1., "## Failed |sin(angle)| <= 1.\n");
+    
     angle.cos = min(1,max(angle.cos,-1));
     angle.sin = min(1,max(angle.sin,-1));
     
@@ -322,11 +329,9 @@ double calculate_rad(struct tangle angle, bool debug){
 struct tangle calculate_theta2(double deltaV, double deltaSfa, double cos_theta1){
     struct tangle theta2;
     theta2.cos = 2*deltaV / deltaSfa - cos_theta1;
-    // assert(fabs(theta2.cos) <= 1.);
-    if( fabs(theta2.cos) <= 1.){
+    if( check_error( fabs(theta2.cos) <= 1., "## Failed |cos(theta2)| <= 1.\n")){
         theta2.sin = sqrt(1 - theta2.cos * theta2.cos);
     } else{
-        printf("## Failed cos(theta2)<=1.\n");
         theta2.sin = 0;
     }
     return theta2;    
@@ -337,18 +342,19 @@ struct tangle calculate_phi2_deltaE_zero(double deltaN, double sin_theta1, doubl
     if( fabs(sin_theta2)<epsilon && fabs(sin_theta1)<epsilon){
         phi2.sin = -sin_phi1;
     } else{
-        // assert(fabs(sin_theta2) > 0);
-        if( sin_theta2 == 0){
-            printf("## Failed sin_theta2 != 0\n");
-            phi2.sin = -sin_phi1;
-        } else{
+        if( check_error( fabs(sin_theta2) > epsilon, "## Failed sin(theta2) !=0.\n")){
             phi2.sin = - sin_theta1 / sin_theta2 * sin_phi1;
+        } else{
+            phi2.sin = -sin_phi1;
         }
     }
-    assert(fabs(phi2.sin) <= 1);
-    phi2.cos = sqrt(1 - phi2.sin*phi2.sin);
-    if( cos_phi1 < 0){
-        phi2.cos = -phi2.cos;
+    if( check_error( fabs(phi2.sin) <= 1, "## Failed |sin(phi2)| <= 1.\n")){
+        phi2.cos = sqrt(1 - phi2.sin*phi2.sin);
+        if( cos_phi1 < 0){
+            phi2.cos = -phi2.cos;
+        }
+    } else{
+        phi2.cos = 0;
     }
     return phi2;
 }
@@ -358,7 +364,7 @@ struct tangle calculate_phi2_deltaN_zero(double deltaE, double sin_theta1, doubl
     if( fabs(sin_theta2)<epsilon && fabs(sin_theta1)<epsilon){
         phi2.cos = -cos_phi1;
     } else{
-        assert(fabs(sin_theta2) > 0);
+        check_error( fabs(sin_theta2) > epsilon, "## Failed sin(theta2) != 0.\n");
         phi2.cos = - sin_theta1 / sin_theta2 * cos_phi1;
     }
     phi2.sin = sqrt(1 - phi2.sin*phi2.sin);
@@ -386,20 +392,14 @@ struct tangle calculate_phi2(double deltaE, double deltaN, double sin_theta1, do
         double deltaEpsilon_sin_theta1 = deltaEpsilon * sin_theta1;
         double deltaH2 = deltaE*deltaE + deltaN*deltaN;
         double deltaBeta2 = deltaH2 * sin_theta2*sin_theta2 - deltaEpsilon_sin_theta1*deltaEpsilon_sin_theta1;
-        // assert(deltaBeta2 >= 0);
-        if( deltaBeta2 < 0){
-           printf("## failed deltaBeta2 >= 0\n");
-        }
+        
+        check_error( deltaBeta2 >= 0, "## Failed deltaBeta2 >= 0.\n");
         deltaBeta2 = max(0, deltaBeta2);
         double deltaBeta = sqrt(deltaBeta2);
 
         double deltaH2_sin_theta2 = deltaH2 * sin_theta2;
-        // assert(fabs(deltaH2_sin_theta2) > 0);
-        if( fabs(deltaH2_sin_theta2) == 0){
-           printf("## failed deltaH2_sin_theta2 != 0\n");
-        }
-        if (deltaH2_sin_theta2 == 0.){
-            deltaH2_sin_theta2 = deltaH2*0.01;
+        if( !check_error( fabs(deltaH2_sin_theta2) > epsilon, "## Failed deltaH2_sin_theta2 != 0.\n")){
+            deltaH2_sin_theta2 = deltaH2*0.001;
         }
 
         phi2.sin = (-deltaN * deltaEpsilon_sin_theta1 + deltaE*deltaBeta) / deltaH2_sin_theta2;
@@ -483,8 +483,7 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
     }
 
     deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, 0.001, true, 100, true);
-    
-    
+        
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, 0.01);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
     print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.01);
@@ -494,7 +493,6 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
     dS = deltaSfa_calc / f_alfa(a);
     print_error("  Delta S", deltaS, dS, 0.01);
 }
-
 
 void tests_minimum_curvature(){
     double theta1, phi1, theta2, phi2;
