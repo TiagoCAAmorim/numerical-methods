@@ -94,7 +94,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
 
     if( fabs(x_a - x_b) < epsilon ){
         printf("Limits are too close: |%g - %g| = %g < %g.\n",x_a,x_b,fabs(x_a - x_b),epsilon);
-        assert(fabs(x_a - x_b) >= epsilon);
+        // assert(fabs(x_a - x_b) >= epsilon);
     }
 
     x_mean_previous = x_a;
@@ -208,7 +208,7 @@ int tests_bissection(){
     // test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b]");
     // test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b]");
     
-    // test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function #2 with 'small' domain");
+    test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function #2 with 'small' domain");
     
     test_bissection(f_quadratic, -0.1, -0.25, 1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
     test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#2");
@@ -587,7 +587,7 @@ void tests_minimum_curvature(){
 }
 
 int main(){
-    // tests_bissection();
+    tests_bissection();
     tests_minimum_curvature();
     return 0;
 }
