@@ -101,7 +101,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
 
         fx_mean = func(x_mean);
         if( debug)
-            printf("%3i.  f(%-10g) = %-10g\tf(%-10g) = %-10g\tConvergence=%-10g\n",i,x_a,fx_a,x_b,fx_b, convergence);
+            printf("%3i.  f(%-10g) = %-10g\tConvergence=%-10g\n",i,x_mean,fx_mean, convergence);
         
         if( is_root(fx_mean, x_mean, i, debug))
             return x_mean;
@@ -207,11 +207,21 @@ int tests_bissection(){
 
 
 // Minimum Curvature Method
+double angle_difference(double a1, double a2){
+    double dif = a2 - a1;
+    if( dif < -pi){
+        dif = dif + 2*pi;
+    } else if( dif > pi){
+        dif = dif - 2*pi;
+    }
+    return dif;
+}
+
 double alfa(double theta1, double phi1, double theta2, double phi2){
     double x, y;
-    x = sin( (theta2 - theta1)/2 );
+    x = sin( angle_difference(theta1, theta2)/2 );
     x *= x;
-    y = sin( (phi2 - phi1)/2 );
+    y = sin( angle_difference(phi1, phi2)/2 );
     y *= y;
     y *= sin(theta1)*sin(theta2);
     x += y;
@@ -361,9 +371,12 @@ struct tangle calculate_phi2_deltaN_zero(double deltaE, double sin_theta1, doubl
 struct tangle calculate_phi2(double deltaE, double deltaN, double sin_theta1, double cos_phi1, double sin_phi1, double sin_theta2){
     struct tangle phi2;
 
-    if( fabs(deltaE) < epsilon && fabs(deltaN) < epsilon){
+    if( fabs(sin_theta2) < epsilon){
         phi2.cos = cos_phi1;
         phi2.sin = sin_phi1;
+    } else if( fabs(deltaE) < epsilon && fabs(deltaN) < epsilon){
+        phi2.cos = -cos_phi1;
+        phi2.sin = -sin_phi1;
     } else if( fabs(deltaE) < epsilon){
         phi2 = calculate_phi2_deltaE_zero(deltaN, sin_theta1, cos_phi1, sin_phi1, sin_theta2);
     } else if( fabs(deltaN) < epsilon){
@@ -461,8 +474,18 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
 
     printf("Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.\n");
     define_well_path_data( dE, dN, dV, theta1, phi1);
-    double initial_deltaSfa = sqrt(dE*dE + dN*dN + dV*dV);
-    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, initial_deltaSfa, 3*initial_deltaSfa, 0.001, true, 100, true);
+    double deltaSfa_min = sqrt(dE*dE + dN*dN + dV*dV);
+    double deltaSfa_max = deltaSfa_min * f_alfa(0.95*pi);
+    if( dV > 0){
+        deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1+1) );
+    } else if( dV < 0){
+        deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
+    }
+
+    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, 0.001, true, 100, true);
+    
+    
+    print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, 0.01);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
     print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.01);
     phi2_ = calculate_phi2(dE, dN, sin(theta1), cos(phi1), sin(phi1), theta2_.sin);
@@ -558,7 +581,7 @@ void tests_minimum_curvature(){
     test_MCM_formulas("1/4 circle 30o north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
     
     dS=10.;
-    theta1=pi/10;      phi1=3*pi/4;
+    theta1=pi/10;      phi1=pi/4;
     theta2=pi/6;       phi2=7*pi/4;
     a=0.;
     dE=0.;    dN=0.;    dV=0.;
