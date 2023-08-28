@@ -56,9 +56,9 @@ double calculate_convergence(double x_current, double x_previous, bool relative_
     return fabs( (x_current - x_previous) / reference );
 }
 
-void print_error(char *message, double true_value, double calculated_value, double error_limit){
+void print_error(char *message, double true_value, double calculated_value, double error_limit, bool relative_convergence){
     double relative_error;
-    relative_error = calculate_convergence(true_value, calculated_value, true);
+    relative_error = calculate_convergence(true_value, calculated_value, relative_convergence);
     printf("%s: True=%g Calculated=%g Error=%g", message, true_value, calculated_value, relative_error);
     if( relative_error > error_limit){
         printf("  <= ######### Atention ###########");
@@ -207,7 +207,7 @@ void test_bissection(double (*func)(double), double x_root, double x_a, double x
     int interations = estimate_bissection_interations(x_a, x_b, x_root, convergence_tol, false);
     printf("Estimated number of interations: %i\n", interations);
     double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_interations, debug);
-    print_error(" => Root", x_root, x_root_bissection, convergence_tol);
+    print_error(" => Root", x_root, x_root_bissection, convergence_tol, relative_convergence);
 }
 
 // Root at x=0.3
@@ -252,11 +252,10 @@ int tests_bissection(){
     test_bissection(f_linear, 0.3, 0., 0.4, 0.001, relative_convergence, max_interations, debug, "Linear function with early exit");
     test_bissection(f_linear, 0.3, 0.3, 1, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_a");
     test_bissection(f_linear, 0.3, 0, 0.3, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_b");
-    // test_bissection(f_linear, 0.3, 0.3-epsilon*100, 0.3+epsilon*100, 0.001, relative_convergence, max_interations, debug, "Linear function with domain close to root");
-    test_bissection(f_linear, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function with domain very close to root");
     test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b] #1");
     test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b] #2");
     
+    test_bissection(f_linear, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function with domain very close to root");
     test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function #2 with 'small' domain");
     
     test_bissection(f_quadratic, -0.1, -0.25,  1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
@@ -500,10 +499,10 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
     double dV = deltaV(deltaS, theta1, phi1, theta2, phi2);
 
     if( report_alfa_dEdNdV){
-        print_error("  Alfa",true_alfa,a, 0.01);
-        print_error("  Delta E", true_deltaE,dE, 0.01);
-        print_error("  Delta N", true_deltaN,dN, 0.01);
-        print_error("  Delta V", true_deltaV,dV, 0.01);
+        print_error("  Alfa",true_alfa,a, 0.001, false);
+        print_error("  Delta E", true_deltaE,dE, 0.001, false);
+        print_error("  Delta N", true_deltaN,dN, 0.001, false);
+        print_error("  Delta V", true_deltaV,dV, 0.001, false);
     } else{
         printf("  Calculated displacement: dE=%g dN=%g dV=%g\n", dE, dN, dV);
         printf("  Calculated alfa=%g\n",a);
@@ -512,14 +511,14 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
 
     double deltaSfa = deltaS * f_alfa(a);
     struct tangle theta2_ = calculate_theta2(dV, deltaSfa, cos(theta1));
-    print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.01);
+    print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.001, false);
 
     struct tangle phi2_ = calculate_phi2(dE, dN, sin(theta1), cos(phi1), sin(phi1), sin(theta2));
-    print_error("  phi2", phi2, calculate_rad(phi2_, false), 0.01);
+    print_error("  phi2", phi2, calculate_rad(phi2_, false), 0.001, false);
 
     double deltaSfa_calc = calculate_deltaSfa(dE, dN, dV, cos(theta1), sin(theta1), cos(phi1), sin(phi1), cos(theta2), sin(theta2), cos(phi2), sin(phi2));
     double dS = deltaSfa_calc / f_alfa(a);
-    print_error("  Delta S", deltaS, dS, 0.01);
+    print_error("  Delta S", deltaS, dS, 0.001, false);
 
     printf("Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.\n");
     define_well_path_data( dE, dN, dV, theta1, phi1);
@@ -531,18 +530,18 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
-    int estimated_interations = estimate_bissection_interations(deltaSfa_min, deltaSfa_max, -9999, 0.001, true);
+    int estimated_interations = estimate_bissection_interations(deltaSfa_min, deltaSfa_max, -9999, 0.0001, false);
     printf("Estimated number of interations: %i\n", estimated_interations);
-    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, 0.001, true, 100, true);
+    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, 0.001, false, 100, true);
         
-    print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, 0.01);
+    print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, 0.001, false);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
-    print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.01);
+    print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.001, false);
     phi2_ = calculate_phi2(dE, dN, sin(theta1), cos(phi1), sin(phi1), theta2_.sin);
-    print_error("  phi2", phi2, calculate_rad(phi2_, false), 0.01);
+    print_error("  phi2", phi2, calculate_rad(phi2_, false), 0.001, false);
     a = alfa(theta1, phi1, calculate_rad(theta2_, false), calculate_rad(phi2_, false));
     dS = deltaSfa_calc / f_alfa(a);
-    print_error("  Delta S", deltaS, dS, 0.01);
+    print_error("  Delta S", deltaS, dS, 0.001, false);
 }
 
 void tests_minimum_curvature(){
@@ -552,6 +551,7 @@ void tests_minimum_curvature(){
     struct tangle theta2_, phi2_;
     double theta2_calc, phi2_calc;
     double dSfa, dS_calc;
+    char message[100];
 
     printf("\n#### Minimum Curvatura Method Tests ####\n");
 
@@ -561,7 +561,7 @@ void tests_minimum_curvature(){
         theta2_.cos = cos(a);
         theta2_.sin = sin(a);
         theta2_.rad = calculate_rad(theta2_, true);
-        print_error(" Angle calculation",a,theta2_.rad, 0.01);
+        print_error(" Angle calculation",a,theta2_.rad, 0.001, false);
     }
 
     dS=10;
@@ -647,16 +647,15 @@ void tests_minimum_curvature(){
     double S = 0., E = 0., N = 0., V = 0.;
     printf("\n'S-shaped' well (cumulative error calculation)\n");
     for( int i=0; i<5; i++){
-        printf("Section #%i",i+1);
-        test_MCM_formulas("", array_dS[i], array_theta[i], array_phi[i], array_theta[i+1], array_phi[i+1], array_a[i], array_dE[i], array_dN[i], array_dV[i], true);   
+        sprintf(message, "Section #%i",i+1);
+        test_MCM_formulas(message, array_dS[i], array_theta[i], array_phi[i], array_theta[i+1], array_phi[i+1], array_a[i], array_dE[i], array_dN[i], array_dV[i], true);   
 
     }
-
 
 }
 
 int main(){
-    tests_bissection();
-    // tests_minimum_curvature();
+    // tests_bissection();
+    tests_minimum_curvature();
     return 0;
 }
