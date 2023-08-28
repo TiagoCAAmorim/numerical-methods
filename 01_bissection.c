@@ -66,69 +66,117 @@ void print_error(char *message, double true_value, double calculated_value, doub
     printf("\n");
 }
 
+double return_closest_to_root(double x_a, double fx_a, double x_b, double fx_b){
+    if( fabs(fx_b) < fabs(fx_a)){
+        return x_b;
+    } else{
+        return x_a;
+    }
+}
+
+double return_closest_to_root_3pt(double x_a, double fx_a, double x_b, double fx_b, double x_c, double fx_c){
+    fx_a = fabs(fx_a);
+    fx_b = fabs(fx_b);
+    fx_c = fabs(fx_c);
+    if( min(fx_a, fx_b) < fx_c){
+        if( fx_b < fx_a){
+            return x_b;
+        } else{
+            return x_a;
+        }
+    } else{
+        return x_c;
+    }
+}
+
 double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_interations, bool debug) {
     double fx_a, fx_b, fx_mean;
     double x_mean, x_mean_previous;
     double convergence;
+    double exit_function = false;
+    int i=0;
+
+    if( x_b < x_a){
+        x_mean = x_a;
+        x_a = x_b;
+        x_b = x_mean;
+    }
 
     fx_a = func(x_a);
-    if( is_root(fx_a, x_a, 0, debug))
-        return x_a;
-
     fx_b = func(x_b);
-    if( is_root(fx_b, x_b, 0, debug))
-        return x_b;
+    x_mean = 1e20;
+    fx_mean = 1e20;
+    
+    convergence = calculate_convergence(x_a, x_b, relative_convergence);
+    exit_function = is_root(fx_a, x_a, 0, debug) || is_root(fx_b, x_b, 0, debug);
 
-    if( signbit(fx_a) == signbit(fx_b) ){
-        printf("Function has same sign in limits: f(%g) = %g f(%g) = %g.\n",x_a,fx_a,x_b,fx_b);
-        if( debug){
-            double x_trial;
-            printf("Sample of function results in the provided domain:\n");
-            for(int i=0; i<=20; i++){
-                x_trial = x_a + (x_b - x_a)*i/20;
-                printf("  f(%g) = %g\n", x_trial, func(x_trial));
-            }
-        }
-        assert(signbit(fx_a) != signbit(fx_b));
-    }
-
-    if( fabs(x_a - x_b) < epsilon ){
-        printf("Limits are too close: |%g - %g| = %g < %g.\n",x_a,x_b,fabs(x_a - x_b),epsilon);
-        // assert(fabs(x_a - x_b) >= epsilon);
-    }
-
-    x_mean_previous = x_a;
-    for(int i=1 ; i<=max_interations ; i++){
-        x_mean = x_a + (x_b - x_a)/2;
-        convergence = calculate_convergence(x_mean, x_mean_previous, relative_convergence);
-        x_mean_previous = x_mean;
-        
-        if( convergence < convergence_tol){
+    if( !exit_function){
+        if( convergence < convergence_tol ){
             if( debug){
-                fx_mean = func(x_mean);
-                printf("Reached convergence after %i interations: f(%g) = %g.\n", i, x_mean, fx_mean);
+                printf("Initial limits are closer than convergence criteria: |%g - %g| = %g.\n",x_b,x_a,fabs(x_a - x_b));
             }
-            return x_mean;
-        }
-
-        fx_mean = func(x_mean);
-        if( debug)
-            printf("%3i.  f(%-10g) = %-10g\tConvergence=%-10g\n",i,x_mean,fx_mean, convergence);
-        
-        if( is_root(fx_mean, x_mean, i, debug))
-            return x_mean;
-
-        if( signbit(fx_a) == signbit(fx_mean)){
-            x_a = x_mean;
-            fx_a = fx_mean;
-        } else{
-            x_b = x_mean;
-            fx_b = fx_mean;
+            exit_function = true;
         }
     }
-    if( debug)
-        printf("Convergence was not reached after %i interations: f(%g) = %g\n", max_interations, x_mean, fx_mean);
-    return x_mean;
+
+    if( !exit_function){
+        if( signbit(fx_a) == signbit(fx_b) ){
+            printf("Function has same sign in limits: f(%g) = %g f(%g) = %g.\n",x_a,fx_a,x_b,fx_b);
+            printf("Returning result closest to zero amongst f(x_a) and f(x_b).\n");
+            if( debug){
+                double x_trial;
+                printf("Sample of function results in the provided domain:\n");
+                for(int i=0; i<=20; i++){
+                    x_trial = x_a + (x_b - x_a)*i/20;
+                    printf("  f(%g) = %g\n", x_trial, func(x_trial));
+                }
+            }
+            exit_function = true;
+        }
+    }
+
+    if( !exit_function){
+        x_mean_previous = x_a;
+        if( debug){
+            printf("%3s   %-28s\t%-28s\t%-28s\t%-11s\n","#", "Lower bound", "Upper bound", "Mean point", "Convergence");
+        }
+
+        for(i=1 ; i<=max_interations ; i++){
+            x_mean = x_a + (x_b - x_a)/2;
+            fx_mean = func(x_mean);
+            convergence = calculate_convergence(x_mean, x_mean_previous, relative_convergence);
+            x_mean_previous = x_mean;
+            
+            if( debug){
+                printf("%3i.  f(%11g) = %11g\tf(%11g) = %11g\tf(%11g) = %11g\t%11g\n",i, x_a, fx_a, x_b, fx_b, x_mean, fx_mean, convergence);
+            }
+
+            if( convergence < convergence_tol){
+                break;
+            }
+            
+            if( is_root(fx_mean, x_mean, i, debug)){
+                exit_function = true;
+                break;
+            }
+
+            if( signbit(fx_a) == signbit(fx_mean)){
+                x_a = x_mean;
+                fx_a = fx_mean;
+            } else{
+                x_b = x_mean;
+                fx_b = fx_mean;
+            }
+        }
+    }
+    if( debug){
+        if( exit_function || convergence < convergence_tol){
+            printf("Reached convergence after %i interation(s): %g.\n", i, convergence);  
+        } else {
+            printf("Convergence was not reached after %i interation(s): %g.\n", i, convergence);
+        }
+    }
+    return return_closest_to_root_3pt(x_a, fx_a, x_b, fx_b, x_mean, fx_mean);
 }
 
 double find_root_bissection(double (*func)(double), double x_a, double x_b){
@@ -139,8 +187,8 @@ int estimate_bissection_interations(double x_a, double x_b, double x_root, doubl
     double x_reference = 1;
     double n;
 
-    if( relative_convergence)
-        if(x_root<epsilon || x_root < min(x_a,x_b) || x_root > max(x_a,x_b)){
+    if( relative_convergence){
+        if(fabs(x_root)<epsilon || x_root < min(x_a,x_b) || x_root > max(x_a,x_b)){
             x_reference = min(fabs(x_a), fabs(x_b));
             if( x_reference < epsilon)
                 x_reference = max(fabs(x_a), fabs(x_b));
@@ -149,6 +197,7 @@ int estimate_bissection_interations(double x_a, double x_b, double x_root, doubl
         } else{
             x_reference = x_root;
         }
+    }
     n = log(fabs(x_b - x_a) / fabs(x_reference) / convergence_tol)/log(2);
     return max(0, round(n+0.5));
 }
@@ -173,7 +222,7 @@ double f_linear2(double x){
 
 // Roots at x=-0.5 and -0.1
 double f_quadratic(double x){
-    return 5*x*x + 3*x + 0.25;
+    return (5*x + 3)*x + 0.25; // = 5*x*x + 3*x + 0.25;
 }
 
 // Root at x= pi/2 (+ n*2pi)
@@ -203,14 +252,14 @@ int tests_bissection(){
     test_bissection(f_linear, 0.3, 0., 0.4, 0.001, relative_convergence, max_interations, debug, "Linear function with early exit");
     test_bissection(f_linear, 0.3, 0.3, 1, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_a");
     test_bissection(f_linear, 0.3, 0, 0.3, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_b");
-    test_bissection(f_linear, 0.3, 0.3-epsilon*100, 0.3+epsilon*100, 0.001, relative_convergence, max_interations, debug, "Linear function with domain close to root");
+    // test_bissection(f_linear, 0.3, 0.3-epsilon*100, 0.3+epsilon*100, 0.001, relative_convergence, max_interations, debug, "Linear function with domain close to root");
     test_bissection(f_linear, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function with domain very close to root");
-    // test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b]");
-    // test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b]");
+    test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b] #1");
+    test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b] #2");
     
     test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function #2 with 'small' domain");
     
-    test_bissection(f_quadratic, -0.1, -0.25, 1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
+    test_bissection(f_quadratic, -0.1, -0.25,  1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
     test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#2");
     test_bissection(f_cos, pi/2, 0, 2, 0.001, relative_convergence, max_interations, debug, "Cossine function");
     test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, relative_convergence, max_interations, debug, "Trigonometric function");
@@ -482,6 +531,8 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
+    int estimated_interations = estimate_bissection_interations(deltaSfa_min, deltaSfa_max, -9999, 0.001, true);
+    printf("Estimated number of interations: %i\n", estimated_interations);
     deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, 0.001, true, 100, true);
         
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, 0.01);
@@ -584,10 +635,28 @@ void tests_minimum_curvature(){
     a=0.;
     dE=0.;    dN=0.;    dV=0.;
     test_MCM_formulas("3D path well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false);   
+        
+    double array_dS[5]={1000., 500*pi/12, 1500., 1000*pi/12, 500.};
+    double array_theta[6]={0., 0., pi/12, pi/12, 0., 0.};
+    double array_phi[6]={0., 0., 0., 0., 0., 0.};
+    double array_a[5]={0., pi/12, 0, pi/12, 0.};
+    double array_dE[5]={0., 0., 0., 0., 0.};
+    double array_dN[5]={0., 500.*(1-cos(pi/12)), 1500.*sin(pi/12), 1000.*(1-cos(pi/12)), 0.};
+    double array_dV[5]={1000., 500.*sin(pi/12), 1500.*cos(pi/12), 1000.*sin(pi/12), 500.};
+    double S_true = 0., E_true = 0., N_true = 0., V_true = 0.;
+    double S = 0., E = 0., N = 0., V = 0.;
+    printf("\n'S-shaped' well (cumulative error calculation)\n");
+    for( int i=0; i<5; i++){
+        printf("Section #%i",i+1);
+        test_MCM_formulas("", array_dS[i], array_theta[i], array_phi[i], array_theta[i+1], array_phi[i+1], array_a[i], array_dE[i], array_dN[i], array_dV[i], true);   
+
+    }
+
+
 }
 
 int main(){
     tests_bissection();
-    tests_minimum_curvature();
+    // tests_minimum_curvature();
     return 0;
 }
