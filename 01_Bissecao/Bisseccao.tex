@@ -266,9 +266,9 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
     \subsection{Método da Bissecção}
     
-    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o método da bissecção para buscar o resultado do problema proposto. O algoritmo foi baseado no pseudo-código descrito em \cite{burden2016analise}. O método da bissecção baseia-se no teorema do valor médio. O intervalo de busca pela raiz é sucessivamente divido em dois. O método tem garantia de que a raiz pertence ao intervalo ao manter os valores da função avaliada nos limites do intervalo com sinais opostos\footnote{Assumindo que o intervalo inicial fornecido também tem esta propriedade.}. 
+    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o Método da Bissecção para buscar o resultado do problema proposto. O algoritmo foi baseado no pseudo-código descrito em \cite{burden2016analise}. O Método da Bissecção baseia-se no teorema do valor médio. O intervalo de busca pela raiz é sucessivamente divido em dois. O método tem garantia de que a raiz pertence ao intervalo ao manter os valores da função avaliada nos limites do intervalo com sinais opostos\footnote{Assumindo que o intervalo inicial fornecido também tem esta propriedade.}. 
 
-    De modo simplificado o método da bissecção pode ser descrito como:
+    De modo simplificado o Método da Bissecção pode ser descrito como:
     
     \begin{enumerate}
         \item Definir $x_a$ e $x_b$ de modo que $sinal(f(x_a)) \neq sinal(f(x_b))$.
@@ -283,25 +283,95 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     Foram adicionados critérios adicionais ao algoritmo para controlar o processo interativo:
 
     \begin{itemize}
-        \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
-        \item Se $sinal(f(x_a)) = sinal(f(x_b))$ o código apresenta uma mensagem de alerta e não é feito o \emph{loop} do método. Optou-se por não gerar um erro, e mesmo neste caso é retornado um valor.
         \item Foram implementados dois métodos de cálculo do critério de convergência:
         \begin{itemize}
             \item Critério \emph{Direto}: $|x_i - x_{i-1}|$.
-            \item Critério \emph{Relativo}\footnote{Caso $|x_i| < \epsilon$, é utilizado $|x_{i-1}|$ no denominador. E se também $|x_{i-1}| < \epsilon$ o valor da convergência é \emph{zero}!}: $\frac{|x_i - x_{i-1}|}{|x_i|}$.
+            \item Critério \emph{Relativo}\footnote{Caso $|x_i| < \epsilon$, é utilizado $|x_{i-1}|$ no denominador. E se também $|x_{i-1}| < \epsilon$ o valor da convergência é considerado \emph{zero}!}: $\frac{|x_i - x_{i-1}|}{|x_i|}$.
         \end{itemize}
+        \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido\footnote{Definindo $c_{lim}$ o limite de convergência, se for utilizado o critério de convergência \emph{direto} então $\zeta = c_{lim}$. Se for utilizado o critério de convergência relativo então $\zeta = c_{lim} \min{|x_a|,|x_b|}$ (a avaliação do menor valor segue as mesmas regras do cálculo do critério de convergência, ignorando qualquer $|x| < \epsilon$ e retorna \emph{zero} caso ambos sejam valores pequenos).}. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
+        \item Se $sinal(f(x_a)) = sinal(f(x_b))$ o código apresenta uma mensagem de alerta e não é feito o \emph{loop} do método. Optou-se por não gerar um erro, e mesmo neste caso é retornado um valor.
+
         \item É feito um término prematuro do processo interativo caso algum $|f(x)| < \epsilon$. O valor padrão de $\epsilon$ é $10^{-7}$ (variável \verb|epsilon| no código). Este teste também é feito antes de entrar no \emph{loop}.
         \item Antes de sair da função, são comparados os três últimos resultados guardados ($f(x_a)$, $f(x_b)$, $f(x_{medio})$) e é retornado o valor de $x$ com $f(x)$ mais próximo de zero.
     \end{itemize}
-
     
     \section{Resultados}
     
-    Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções adicionais 
+    Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
+
+    \begin{description}
+        \item[tests\textunderscore bissection()] Testa o Método da Bissecção em diferentes funções: linear, quadrática, exponencial e com sen/cos. Também foram apicados casos específicos para o algoritmo tratar: raiz em um dos limites, uso de critério de convergência relativo, saída do \emph{loop} sem atingir o critério de convergência, má definição do intervalo inicial ($sinal(f(x_a)) = sinal(f(x_b))$) e intervalo inicial muito pequeno ($|x_b - x_a| < \zeta$).
+        
+        \item[tests\textunderscore minimum\textunderscore curvature()] Testa as funções implementadas para cálculo de coordenadas cartesianas em função de parâmetros de perfuração (cálculo direto), e de parâmetros de perfuração em função de coordenadas cartesianas (cálculo interativo).
+    \end{description}
+
+    Algumas definições que foram feitas no código que implementa o Método da Bissecção são resultado dos testes realizados.
+
+    A definição de um critério de parada prematura se mostrou importante para evitar que o método continue buscando uma raiz quando já encontrou uma solução \emph{aceitável}. A definição deste limite $|f(x)| < \epsilon = 10^{-7}$ foi empírica e deve ser revista para problemas com valores usuais de $f(x)$ com ordem de grandeza diferente da que foi utilizada nos testes ($\approx 10^1$). Um exemplo é o da função $f(x) = -3x+0.9$, que tem raiz em $0.3$. A função implementada retorna $f(0.3) \approx 1.11022 \cdot 10^{-16}$, de modo que é preciso levar em conta erros de aritmética de máquina na definição do critério de parada prematura.
+    
+    Todas as funções foram definidas para trabalhar com números do tipo \verb|double|. Inicialmente as funções estavam definidas para trabalhar com \verb|float|, mas estes mostraram não conseguirem trabalhar com valores de convergência muito baixos. A avaliação da função $f(x) = -3x+0.9$ na sua raiz foi testada usando diferentes tipos de números de ponto flutante:
+
+    \begin{itemize}
+        \item \verb|float|: $f(0.3) \approx -3.57628 \cdot 10^{-8}$ 
+        \item \verb|double|: $f(0.3) \approx 1.11022 \cdot 10^{-16}$ 
+        \item \verb|long double|: $f(0.3) \approx 5.35872 \cdot 10^{-312}$ 
+    \end{itemize}
+    
+    Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}.
+
+    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última interação. Um exemplo prático deste efeito é visto na Tabela \ref{table:fQuadratica}, onde o melhor resultado é alcançado na 8$^a$ interação, mas o critério de convergência\footnote{A coluna com os valores da convergência foi omitida por falta de espaço na página} só é alcançado na 11$^a$ interação.
+    
+    \begin{table}[h!] \label{table:fQuadratica}
+        \centering
+        \caption{Busca pela raiz de $5x^2+3x-0.25$ no intervalo $[-0.25; 1]$ pelo Método da Bissecção.}
+        \begin{tabular}{ c c c c c c c }
+            Int. & $x_a$   & $f(x_a)$    & $x_b$      & $f(x_b)$    & $x_{medio}$ & $f(x_{medio})$  \\
+            \hline
+             1 &     -0.25 &     -0.1875 &          1 &        8.25 &      0.375 &     2.07812   \\
+             2 &     -0.25 &     -0.1875 &      0.375 &     2.07812 &     0.0625 &    0.457031   \\
+             3 &     -0.25 &     -0.1875 &     0.0625 &    0.457031 &   -0.09375 &   0.0126953   \\
+             4 &     -0.25 &     -0.1875 &   -0.09375 &   0.0126953 &  -0.171875 &    -0.11792   \\
+             5 & -0.171875 &    -0.11792 &   -0.09375 &   0.0126953 &  -0.132812 &  -0.0602417   \\
+             6 & -0.132812 &  -0.0602417 &   -0.09375 &   0.0126953 &  -0.113281 &  -0.0256805   \\
+             7 & -0.113281 &  -0.0256805 &   -0.09375 &   0.0126953 &  -0.103516 & -0.00696945   \\
+             8 & -0.103516 & -0.00696945 &   -0.09375 &   0.0126953 & -0.0986328 &  0.00274372   \\
+             9 & -0.103516 & -0.00696945 & -0.0986328 &  0.00274372 &  -0.101074 & -0.00214267   \\
+            10 & -0.101074 & -0.00214267 & -0.0986328 &  0.00274372 & -0.0998535 & 0.000293076   \\
+            11 & -0.101074 & -0.00214267 & -0.0998535 & 0.000293076 &  -0.100464 & -0.000926659 
+        \end{tabular}
+    \end{table}
+    
+    A metodologia proposta para o cálculo de parâmetros de perfuração com o Método da Mínima Curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. A definição do intervalo de busca é direta, mas, devido a erros de aritmética de máquina, não é possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta está muito próxima de um dos limites. Desta forma, ao invés de gerar uma mensagem de erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
+    
+    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()|. O valor exato de $\theta_2$ e zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{EsquemaPoco}
+        \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
+        \label{fig:pocoS}
+    \end{figure}
+    
+    Foi implementada uma função para estimar o número de interações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência é \emph{direto}, a estimativa se mostrou correta (exceto nos casos em que há parada prematura). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, mas neste caso as estimativas são apenas boas aproximações, pois o numerador da equação não fica bem definido.
+
+    \begin{equation} \label{eq:nint}
+        n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
+    \end{equation}
+    \begin{align*}
+    \intertext{onde}
+    x_{referencia} = \begin{cases}
+        1,&\text{se Convergência Direta} \\
+        \min(|x_a|,|x_b|),&\text{c.c. }  
+    \end{cases}
+    \end{align*}
+
+    Um terceiro conjunto de testes foi construído para representar um cenário de aplicação da metodologia proposta a um caso real.
+        
+    
     
     \section{Conclusão}
     
-    \label{}
+    % \label{}
     
 %% The Appendices part is started with the command \appendix;
 %% appendix sections are then done as normal sections
@@ -333,7 +403,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
 \section{Código em C}
 
-\lstinputlisting[language=C]{../01_bissection.c}
+% \lstinputlisting[language=C]{../01_bissection.c}
 
 \end{document}
 \endinput

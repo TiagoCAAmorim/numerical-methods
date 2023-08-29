@@ -107,7 +107,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
     x_mean = 1e20;
     fx_mean = 1e20;
     
-    convergence = calculate_convergence(x_a, x_b, relative_convergence);
+    convergence = calculate_convergence(min(x_a, x_b), max(x_a, x_b), relative_convergence);
     exit_function = is_root(fx_a, x_a, 0, debug) || is_root(fx_b, x_b, 0, debug);
 
     if( !exit_function){
@@ -215,6 +215,14 @@ double f_linear(double x){
     return -x*3 + 0.9;
 }
 
+float f_linear_float(float x){
+    return -x*3 + 0.9;
+}
+
+long double f_linear_long_double(long double x){
+    return -x*3 + 0.9;
+}
+
 // Root at x=0.3
 double f_linear2(double x){
     return -x*3E5 + 0.9E5;
@@ -225,6 +233,16 @@ double f_quadratic(double x){
     return (5*x + 3)*x + 0.25; // = 5*x*x + 3*x + 0.25;
 }
 
+// Roots at x=-0.5 and -0.1
+double f_quadratic2(double x){
+    return 5*x*x + 3*x + 0.25;
+}
+
+// Root at x= +-2
+double f_exponential(double x){
+    return exp(x*x-4) - 1;
+}
+
 // Root at x= pi/2 (+ n*2pi)
 double f_cos(double x){
     return cos(x);
@@ -233,11 +251,6 @@ double f_cos(double x){
 // Root at x= 3/4*pi (+ n*2pi)
 double f_trigonometric(double x){
     return cos(x) + sin(x);
-}
-
-// Root at x= +-2
-double f_exponential(double x){
-    return exp(x*x-4) - 1;
 }
 
 int tests_bissection(){
@@ -260,9 +273,9 @@ int tests_bissection(){
     
     test_bissection(f_quadratic, -0.1, -0.25,  1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
     test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#2");
+    test_bissection(f_exponential, 2., 0, 10, 0.001, relative_convergence, max_interations, debug, "Exponential function");
     test_bissection(f_cos, pi/2, 0, 2, 0.001, relative_convergence, max_interations, debug, "Cossine function");
     test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, relative_convergence, max_interations, debug, "Trigonometric function");
-    test_bissection(f_exponential, 2., 0, 10, 0.001, relative_convergence, max_interations, debug, "Exponential function");
 }
 
 
@@ -629,13 +642,6 @@ void tests_minimum_curvature(){
     dE=10.*sin(pi/6);    dN=10.*cos(pi/6);    dV=10.;
     test_MCM_formulas("1/4 circle 30o north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
     
-    dS=10.;
-    theta1=pi/10;      phi1=pi/4;
-    theta2=pi/6;       phi2=7*pi/4;
-    a=0.;
-    dE=0.;    dN=0.;    dV=0.;
-    test_MCM_formulas("3D path well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false);   
-        
     double array_dS[5]={1000., 500*pi/12, 1500., 1000*pi/12, 500.};
     double array_theta[6]={0., 0., pi/12, pi/12, 0., 0.};
     double array_phi[6]={0., 0., 0., 0., 0., 0.};
@@ -643,15 +649,19 @@ void tests_minimum_curvature(){
     double array_dE[5]={0., 0., 0., 0., 0.};
     double array_dN[5]={0., 500.*(1-cos(pi/12)), 1500.*sin(pi/12), 1000.*(1-cos(pi/12)), 0.};
     double array_dV[5]={1000., 500.*sin(pi/12), 1500.*cos(pi/12), 1000.*sin(pi/12), 500.};
-    double S_true = 0., E_true = 0., N_true = 0., V_true = 0.;
-    double S = 0., E = 0., N = 0., V = 0.;
-    printf("\n'S-shaped' well (cumulative error calculation)\n");
+    printf("\n'S-shaped' well\n");
     for( int i=0; i<5; i++){
         sprintf(message, "Section #%i",i+1);
         test_MCM_formulas(message, array_dS[i], array_theta[i], array_phi[i], array_theta[i+1], array_phi[i+1], array_a[i], array_dE[i], array_dN[i], array_dV[i], true);   
-
     }
 
+    dS=10.;
+    theta1=pi/10;      phi1=pi/4;
+    theta2=pi/6;       phi2=7*pi/4;
+    a=0.;
+    dE=0.;    dN=0.;    dV=0.;
+    test_MCM_formulas("'3D' well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false);   
+        
 }
 
 int main(){
