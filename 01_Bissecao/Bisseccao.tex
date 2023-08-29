@@ -136,6 +136,8 @@ Este relatório apresenta uma proposta de metodologia para cálculo dos parâmet
 
 \section{Metodologia}
 
+\subsection{Método da Mínima Curvatura}
+
 Ao longo da perfuração de um poço de petróleo são realizadas medições do comprimento perfurado (comumente chamado de comprimento medido), inclinação (ângulo com relação à direção vertical) e azimute (ângulo entre a direção horizontal e o norte). A partir das coordenadas geográficas do ponto inicial do poço e deste conjunto de medições ao longo da trajetória, é possível calcular as coordenadas cartesianas (N, E, V) de qualquer posição do poço. A figura \ref{fig:parametros} apresenta um esquema dos parâmetros de perfuração de um poço direcional:
 \begin{itemize}
     \item $\Delta$S: comprimento medido entre dois pontos ao longo da trajetória.
@@ -174,41 +176,75 @@ As fórmulas que associam os parâmetros de perfuração e as coordenadas cartes
     \end{cases}
 \end{equation}
 
-A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta_1=0$, $\phi_1=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta$N,$\Delta$E, $\Delta$V). O objetivo é calcular $\theta_1$, $\phi_1$ e $\Delta$S.
+A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta=0$, $\phi=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta$N,$\Delta$E, $\Delta$V). O objetivo é calcular $\theta_1$, $\phi_1$ e $\Delta$S.
 
 É possível inverter a equação \ref{eq:deltaV} para obter uma expressão para $\theta_2$:
 \begin{equation} \label{eq:cos_theta2}
     \cos \theta_2 = 2 \frac{\Delta V}{\Delta S f(\alpha)} - \cos \theta_1 
 \end{equation}
 
-Dividindo a equação \ref{eq:deltaN} pela equação \ref{eq:deltaE} obtém-se uma série de expressões para $\phi_2$:
+Dividindo a equação \ref{eq:deltaN} pela equação \ref{eq:deltaE} obtém-se duas expressões para $\phi_2$:
+
 \begin{equation} \label{eq:sin_phi2}
-    \sin \phi_2 = \frac{-\Delta N \Delta \Psi \sin \theta_1 }{\Delta H^2 \sin \theta_2} + \Delta E \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}}
+    \sin \phi_2 = \frac{-\Delta N \Delta \Psi \sin \theta_1 }{\Delta H^2 \sin \theta_2} + \Delta E \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}} 
 \end{equation}
 \begin{equation} \label{eq:cos_phi2}
     \cos \phi_2 = \frac{\Delta E \Delta \Psi \sin \theta_1}{\Delta H^2 \sin \theta_2} + \Delta N \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}}
 \end{equation}
-, onde 
-\begin{equation} \label{eq:psi}
-    \Delta \Psi = \Delta N \sin \phi_1 - \Delta E \cos \phi_1
-\end{equation}
-\begin{equation} \label{eq:H2}
-    \Delta H^2 = \Delta N^2 + \Delta E^2
-\end{equation}
+\begin{align*}
+    \intertext{onde}
+    \Delta \Psi &= \Delta N \sin \phi_1 - \Delta E \cos \phi_1 \\
+    \Delta H^2 &= \Delta N^2 + \Delta E^2
+\end{align*}
 
 Fazendo a soma dos quadrados das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV} é possível obter uma expressão para $\Delta S f(\alpha)$:
 \begin{equation} \label{eq:DeltaSfa}
     \Delta S f(\alpha) = 2 \sqrt{\frac{\Delta N^2 + \Delta E^2 + \Delta V^2}{A^2+B^2+C^2}}
 \end{equation}
+\begin{align*}
+    \intertext{onde}
+    A &= \sin \theta_1 \cos \phi_1 + \sin \theta_2 \cos \phi_2 \\
+    B &= \sin \theta_1 \sin \phi_1 + \sin \theta_2 \sin \phi_2 \\
+    C &= \cos \theta_1 + \cos \theta_2
+\end{align*}
+Com as equações propostas é possível construir uma função do tipo $g(x)=x$:
 
+\begin{enumerate}
+    \item Assumir um valor inicial de $\Delta S f(\alpha)$.
+    \item Calcular $\cos \theta_2$ com a equação \ref{eq:cos_theta2}.
+    \item Calcular $\sin \phi_2$ com a equação \ref{eq:sin_phi2}.
+    \item Calcular $\cos \phi_2$ com a equação \ref{eq:cos_phi2}.
+    \item Calcular $\Delta S f(\alpha)$ com a equação \ref{eq:DeltaSfa}.
+\end{enumerate}
 
+Alguns cuidados precisam ser tomados ao utilizar este algoritmo:
 
-\section{Resultados}
+\begin{itemize}
+    \item O valor mínimo de $\Delta S f(\alpha)$ é uma linha reta entre os pontos:
+    \begin{align*}
+        \Delta S f(\alpha) \geq \sqrt{\Delta N^2 + \Delta E^2 + \Delta V^2}
+    \end{align*}
+    \item $\Delta S f(\alpha)$ tem um segundo limite inferior a ser atendido, definido pelos valores limite da equação \ref{eq:cos_theta2} quando $\Delta V \neq 0$:
+    \begin{align*}
+        \Delta S f(\alpha) \geq \begin{cases}
+            \Delta V \frac{2}{\cos \theta_1+1},&\text{se } \Delta V > 0 \\
+            \Delta V \frac{2}{\cos \theta_1-1},&\text{se } \Delta V < 0  
+        \end{cases}
+    \end{align*}
+    \item Se $\theta_2 = 0$, então $\phi_2$ fica indefinido. Neste caso a recomendação é fazer $\phi_2 = \phi_1$. 
+    \item Se $\Delta N = \Delta E = 0$ então $|\phi_1 - \phi_2| = \pi$.
+\end{itemize}
 
-\section{Conclusão}
-
-\label{}
-
+    \subsection{Método da Bissecção}
+    
+    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o método da bissecção para buscar o resultado do problema proposto.
+    
+    \section{Resultados}
+    
+    \section{Conclusão}
+    
+    \label{}
+    
 %% The Appendices part is started with the command \appendix;
 %% appendix sections are then done as normal sections
 %% \appendix
