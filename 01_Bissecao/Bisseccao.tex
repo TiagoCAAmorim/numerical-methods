@@ -30,6 +30,35 @@
 %% for the whole article with \linenumbers.
 %% \usepackage{lineno}
 
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
 % \journal{Nuclear Physics B}
 
 \begin{document}
@@ -186,10 +215,10 @@ A proposta de método para calcular os parâmetros de perfuração a partir das 
 Dividindo a equação \ref{eq:deltaN} pela equação \ref{eq:deltaE} obtém-se duas expressões para $\phi_2$:
 
 \begin{equation} \label{eq:sin_phi2}
-    \sin \phi_2 = \frac{-\Delta N \Delta \Psi \sin \theta_1 }{\Delta H^2 \sin \theta_2} + \Delta E \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}} 
+    \sin \phi_2 = \frac{-\Delta N \Delta \Psi}{\Delta H^2} \left( \frac{\sin \theta_1}{\sin \theta_2} \right) + \Delta E \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \left( \frac{\sin \theta_1}{\sin \theta_2} \right)^2} 
 \end{equation}
 \begin{equation} \label{eq:cos_phi2}
-    \cos \phi_2 = \frac{\Delta E \Delta \Psi \sin \theta_1}{\Delta H^2 \sin \theta_2} + \Delta N \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}}
+    \cos \phi_2 = \frac{\Delta E \Delta \Psi}{\Delta H^2} \left( \frac{\sin \theta_1}{\sin \theta_2} \right) + \Delta N \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \left( \frac{\sin \theta_1}{\sin \theta_2} \right)^2} 
 \end{equation}
 \begin{align*}
     \intertext{onde}
@@ -217,7 +246,7 @@ Com as equações propostas é possível construir uma função do tipo $g(x)=x$
     \item Calcular $\Delta S f(\alpha)$ com a equação \ref{eq:DeltaSfa}.
 \end{enumerate}
 
-Alguns cuidados precisam ser tomados ao utilizar este algoritmo:
+Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\alpha$ e $f(\alpha)$ durante o processo. O valor de $\phi_2$ só precisa ser calculado ao final, evitando usar $\arccos$ ou $\arcsin$ muitas vezes. Alguns cuidados adicionais precisam ser tomados ao utilizar este algoritmo:
 
 \begin{itemize}
     \item O valor mínimo de $\Delta S f(\alpha)$ é uma linha reta entre os pontos:
@@ -237,9 +266,38 @@ Alguns cuidados precisam ser tomados ao utilizar este algoritmo:
 
     \subsection{Método da Bissecção}
     
-    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o método da bissecção para buscar o resultado do problema proposto.
+    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o método da bissecção para buscar o resultado do problema proposto. O algoritmo foi baseado no pseudo-código descrito em \cite{burden2016analise}. O método da bissecção baseia-se no teorema do valor médio. O intervalo de busca pela raiz é sucessivamente divido em dois. O método tem garantia de que a raiz pertence ao intervalo ao manter os valores da função avaliada nos limites do intervalo com sinais opostos\footnote{Assumindo que o intervalo inicial fornecido também tem esta propriedade.}. 
+
+    De modo simplificado o método da bissecção pode ser descrito como:
+    
+    \begin{enumerate}
+        \item Definir $x_a$ e $x_b$ de modo que $sinal(f(x_a)) \neq sinal(f(x_b))$.
+        \item Calcular $f(x_a)$ e $f(x_b)$.
+        \item Calcular $x_{medio} = x_a + \frac{x_b - x_a}{2}$ e $f(x_{medio})$.
+        \item Se $sinal(f(x_{medio})) = sinal(f(x_a))$ então $x_a = x_{medio}$.
+        \item Se $sinal(f(x_{medio})) = sinal(f(x_b))$ então $x_b = x_{medio}$.
+        \item Se não atingiu critério de convergência, retornar para passo 2.
+        \item Retornar $x_{medio}$.
+    \end{enumerate}
+    
+    Foram adicionados critérios adicionais ao algoritmo para controlar o processo interativo:
+
+    \begin{itemize}
+        \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
+        \item Se $sinal(f(x_a)) = sinal(f(x_b))$ o código apresenta uma mensagem de alerta e não é feito o \emph{loop} do método. Optou-se por não gerar um erro, e mesmo neste caso é retornado um valor.
+        \item Foram implementados dois métodos de cálculo do critério de convergência:
+        \begin{itemize}
+            \item Critério \emph{Direto}: $|x_i - x_{i-1}|$.
+            \item Critério \emph{Relativo}\footnote{Caso $|x_i| < \epsilon$, é utilizado $|x_{i-1}|$ no denominador. E se também $|x_{i-1}| < \epsilon$ o valor da convergência é \emph{zero}!}: $\frac{|x_i - x_{i-1}|}{|x_i|}$.
+        \end{itemize}
+        \item É feito um término prematuro do processo interativo caso algum $|f(x)| < \epsilon$. O valor padrão de $\epsilon$ é $10^{-7}$ (variável \verb|epsilon| no código). Este teste também é feito antes de entrar no \emph{loop}.
+        \item Antes de sair da função, são comparados os três últimos resultados guardados ($f(x_a)$, $f(x_b)$, $f(x_{medio})$) e é retornado o valor de $x$ com $f(x)$ mais próximo de zero.
+    \end{itemize}
+
     
     \section{Resultados}
+    
+    Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções adicionais 
     
     \section{Conclusão}
     
@@ -270,6 +328,12 @@ Alguns cuidados precisam ser tomados ao utilizar este algoritmo:
 % \bibitem{}
 
 % \end{thebibliography}
+
+\appendix
+
+\section{Código em C}
+
+\lstinputlisting[language=C]{../01_bissection.c}
 
 \end{document}
 \endinput
