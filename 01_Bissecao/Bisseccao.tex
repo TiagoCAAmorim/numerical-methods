@@ -1,0 +1,241 @@
+\documentclass[final,3p,12pt]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Proposta de Cálculo de Parâmetros de Perfuração de Poços de Petróleo a partir de Coordenadas Espaciais com o Método da Bissecção\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório integrante dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28}, 
+city={Rio de Janeiro},
+postcode={20231-030}, 
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+    %% Text of abstract
+    Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!!
+    
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método da Mínima Curvatura \sep Método da Bissecção 
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+O desenvolvimento de técnicas para construção de poços direcionais na indústria do petróleo iniciou nos anos 1920 \cite{international2015iadc}. A construção de poços direcionais pode ter diferentes objetivos, desde acessar acumulações que seriam difíceis de serem alcançadas com poços verticais (áreas montanhosas, acumulações abaixo de leitos de rios etc.), para aumento da produtividade (maior exposição da formação portadora de hidrocarbonetos) ou até para interceptar outros poços (poços de alívio em situações de \emph{blowout}\footnote{Um \emph{blowout} é um evento indesejado, de produção descontrolada de um poço.}).
+
+O Método da Mínima Curvatura é largamente aceito como o método padrão para o cálculo de trajetória de poços \cite{10.2118/84246-MS}. Neste método a geometria do poço é descrita como uma série de arcos circulares e linhas retas. A transformação de parâmetros de perfuração ($\Delta$S, $\theta$, $\phi$) em coordenadas cartesianas ($\Delta$N, $\Delta$E, $\Delta$V) tem formulação explícita. A operação inversa, de coordenadas cartesianas em parâmetros de perfuração não tem formulação explícita.
+
+No planejamento de novos poços de petróleo as coordenadas espaciais são conhecidas, e é necessário calcular os futuros parâmetros de perfuração. Os parâmetros de perfuração são utilizados para diferentes análises, como o de máximo DLS (\emph{dogleg severity}), que é uma medida da curvatura de um poço entre dois pontos de medida, usualmente expressa em graus por metro.
+
+Este relatório apresenta uma proposta de metodologia para cálculo dos parâmetros de perfuração a partir das coordenadas cartesianas de pontos ao longo da geometria do poço. A formulação foi derivada das fórmulas utilizadas no Método da Mínima Curvatura, e é implícita. Para resolver o problema foi aplicado o Método da Bissecção.
+
+\section{Metodologia}
+
+Ao longo da perfuração de um poço de petróleo são realizadas medições do comprimento perfurado (comumente chamado de comprimento medido), inclinação (ângulo com relação à direção vertical) e azimute (ângulo entre a direção horizontal e o norte). A partir das coordenadas geográficas do ponto inicial do poço e deste conjunto de medições ao longo da trajetória, é possível calcular as coordenadas cartesianas (N, E, V) de qualquer posição do poço. A figura \ref{fig:parametros} apresenta um esquema dos parâmetros de perfuração de um poço direcional:
+\begin{itemize}
+    \item $\Delta$S: comprimento medido entre dois pontos ao longo da trajetória.
+    \item $\theta$: inclinação do poço no ponto atual.
+    \item $\phi$: azimute do poço no ponto atual.
+    \item $\alpha$: curvatura entre dois pontos ao longo da trajetória.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Parametros}
+    \caption{Parâmetros de perfuração entre dois pontos ao longo de um poço direcional.}
+    \label{fig:parametros}
+\end{figure}
+
+
+As fórmulas que associam os parâmetros de perfuração e as coordenadas cartesianas de dois pontos ao longo de um poço direcional segundo o Método da Mínima Curvatura são \cite{10.2118/84246-MS}:
+
+\begin{equation} \label{eq:deltaN}
+    \Delta N = \frac{\Delta S}{2} f(\alpha) (\sin \theta_1 \cos \phi_1 + \sin \theta_2 \cos \phi_2)
+\end{equation}
+\begin{equation} \label{eq:deltaE}
+    \Delta E = \frac{\Delta S}{2} f(\alpha) (\sin \theta_1 \sin \phi_1 + \sin \theta_2 \sin \phi_2)
+\end{equation}
+\begin{equation} \label{eq:deltaV}
+    \Delta V = \frac{\Delta S}{2} f(\alpha) (\cos \theta_1 + \cos \theta_2)
+\end{equation}
+
+\begin{equation} \label{eq:alpha}
+    \alpha = 2 \arcsin \sqrt{ \sin^2 \frac{\theta_2-\theta_1}{2} + \sin \theta_1 \sin \theta_2 \sin^2 \frac{\phi_2-\phi_1}{2} }
+\end{equation}
+\begin{equation} \label{eq:f_alpha}
+    f(\alpha)= \begin{cases}
+        1+\frac{\alpha^2}{12}\{1+\frac{\alpha^2}{10}[1+\frac{\alpha^2}{168}(1+\frac{31\alpha^2}{18})]\},&\text{se } \alpha<0,02 \\
+        \frac{2}{\alpha}\tan{\frac{\alpha}{2}},&\text{c.c. }  
+    \end{cases}
+\end{equation}
+
+A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta_1=0$, $\phi_1=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta$N,$\Delta$E, $\Delta$V). O objetivo é calcular $\theta_1$, $\phi_1$ e $\Delta$S.
+
+É possível inverter a equação \ref{eq:deltaV} para obter uma expressão para $\theta_2$:
+\begin{equation} \label{eq:cos_theta2}
+    \cos \theta_2 = 2 \frac{\Delta V}{\Delta S f(\alpha)} - \cos \theta_1 
+\end{equation}
+
+Dividindo a equação \ref{eq:deltaN} pela equação \ref{eq:deltaE} obtém-se uma série de expressões para $\phi_2$:
+\begin{equation} \label{eq:sin_phi2}
+    \sin \phi_2 = \frac{-\Delta N \Delta \Psi \sin \theta_1 }{\Delta H^2 \sin \theta_2} + \Delta E \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}}
+\end{equation}
+\begin{equation} \label{eq:cos_phi2}
+    \cos \phi_2 = \frac{\Delta E \Delta \Psi \sin \theta_1}{\Delta H^2 \sin \theta_2} + \Delta N \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \frac{\sin^2 \theta_1}{\sin^2 \theta_2}}
+\end{equation}
+, onde 
+\begin{equation} \label{eq:psi}
+    \Delta \Psi = \Delta N \sin \phi_1 - \Delta E \cos \phi_1
+\end{equation}
+\begin{equation} \label{eq:H2}
+    \Delta H^2 = \Delta N^2 + \Delta E^2
+\end{equation}
+
+Fazendo a soma dos quadrados das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV} é possível obter uma expressão para $\Delta S f(\alpha)$:
+\begin{equation} \label{eq:DeltaSfa}
+    \Delta S f(\alpha) = 2 \sqrt{\frac{\Delta N^2 + \Delta E^2 + \Delta V^2}{A^2+B^2+C^2}}
+\end{equation}
+
+
+
+\section{Resultados}
+
+\section{Conclusão}
+
+\label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+%% \appendix
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num} 
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+\end{document}
+\endinput
+%%
+%% End of file `elsarticle-template-num.tex'.
