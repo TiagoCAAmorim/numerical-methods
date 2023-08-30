@@ -302,7 +302,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \item Retornar $x_{medio}$.
     \end{enumerate}
     
-    Foram adicionados critérios adicionais ao algoritmo para controlar o processo interativo:
+    Foram adicionados critérios adicionais ao algoritmo para controlar o processo iterativo:
 
     \begin{itemize}
         \item Foram implementados dois métodos de cálculo do critério de convergência:
@@ -313,7 +313,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido\footnote{Definindo $c_{lim}$ o limite de convergência, se for utilizado o critério de convergência \emph{direto} então $\zeta = c_{lim}$. Se for utilizado o critério de convergência relativo então $\zeta = c_{lim} \min{|x_a|,|x_b|}$ (a avaliação do menor valor segue as mesmas regras do cálculo do critério de convergência, ignorando qualquer $|x| < \epsilon$ e retorna \emph{zero} caso ambos sejam valores pequenos).}. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
         \item Se $sinal(f(x_a)) = sinal(f(x_b))$ o código apresenta uma mensagem de alerta e não é feito o \emph{loop} do método. Optou-se por não gerar um erro, e mesmo neste caso é retornado um valor.
 
-        \item É feito um término prematuro do processo interativo caso algum $|f(x)| < \epsilon$. O valor padrão de $\epsilon$ é $10^{-7}$ (variável \verb|epsilon| no código). Este teste também é feito antes de entrar no \emph{loop}.
+        \item É feito um término prematuro do processo iterativo caso algum $|f(x)| < \epsilon$. O valor padrão de $\epsilon$ é $10^{-7}$ (variável \verb|epsilon| no código). Este teste também é feito antes de entrar no \emph{loop}.
         \item Antes de sair da função, são comparados os três últimos resultados guardados ($f(x_a)$, $f(x_b)$, $f(x_{medio})$) e é retornado o valor de $x$ com $f(x)$ mais próximo de zero.
     \end{itemize}
     
@@ -324,7 +324,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     \begin{description}
         \item[tests\textunderscore bissection()] Testa o Método da Bissecção em diferentes funções: linear, quadrática, exponencial e com sen/cos. Também foram apicados casos específicos para o algoritmo tratar: raiz em um dos limites, uso de critério de convergência relativo, saída do \emph{loop} sem atingir o critério de convergência, má definição do intervalo inicial ($sinal(f(x_a)) = sinal(f(x_b))$) e intervalo inicial muito pequeno ($|x_b - x_a| < \zeta$).
         
-        \item[tests\textunderscore minimum\textunderscore curvature()] Testa as funções implementadas para cálculo de coordenadas cartesianas em função de parâmetros de perfuração (cálculo direto), e de parâmetros de perfuração em função de coordenadas cartesianas (cálculo interativo).
+        \item[tests\textunderscore minimum\textunderscore curvature()] Testa as funções implementadas para cálculo de coordenadas cartesianas em função de parâmetros de perfuração (cálculo direto), e de parâmetros de perfuração em função de coordenadas cartesianas (cálculo iterativo).
     \end{description}
 
     Algumas definições que foram feitas no código que implementa o Método da Bissecção são resultado dos testes realizados.
@@ -341,7 +341,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     
     Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}.
 
-    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última interação. Um exemplo prático deste efeito é visto na Tabela \ref{table:fQuadratica}, onde o melhor resultado é alcançado na 8$^a$ interação, mas o critério de convergência\footnote{A coluna com os valores da convergência foi omitida por falta de espaço na página} só é alcançado na 11$^a$ interação.
+    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última iteração. Um exemplo prático deste efeito é visto na Tabela \ref{table:fQuadratica}, onde o melhor resultado é alcançado na 8$^a$ iteração, mas o critério de convergência\footnote{A coluna com os valores da convergência foi omitida por falta de espaço na página} só é alcançado na 11$^a$ iteração.
     
     \begin{table}[h!] \label{table:fQuadratica}
         \centering
@@ -374,7 +374,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \label{fig:pocoS}
     \end{figure}
     
-    Foi implementada uma função para estimar o número de interações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas boas aproximações (ver Tabela \ref{table:Interacoes}).
+    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas boas aproximações (ver Tabela \ref{table:Iteracoes}).
     
     \begin{equation} \label{eq:nint}
         n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
@@ -387,9 +387,9 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{cases}
     \end{align*}
 
-    \begin{table}[h!] \label{table:Interacoes}
+    \begin{table}[h!] \label{table:Iteracoes}
         \centering
-        \caption{Comparação entre o número de interações previsto e realizado para diferentes testes.}
+        \caption{Comparação entre o número de iterações previsto e realizado para diferentes testes.}
         \begin{tabular}{ l c c c c c c }
             \multirow{2}{*}{Função} & \multirow{2}{*}{$x_a$} & \multirow{2}{*}{$x_b$} & \multicolumn{2}{c}{Critério \emph{Direto}} & \multicolumn{2}{c}{Critério \emph{Relativo}} \\
             &  &  & Previsão & Feitas & Previsão & Feitas \\
@@ -420,13 +420,21 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
                 legend style={at={(0.98,0.30)}, anchor=east},
                 ]
                 \addplot table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
-                \addplot table [x=Convergence, y = theta2] {ConvergenceErrors.txt};
-                \addplot table [x=Convergence, y = phi2] {ConvergenceErrors.txt};
-                \addplot table [x=Convergence, y = DeltaS] {ConvergenceErrors.txt};
-
                 \legend{$\Delta S f(\alpha)$, $\theta_2$, $\phi_2$, $\Delta S$}
-                    
             \end{axis}
+            
+            \begin{axis}[
+                height = 7cm, % standard 10cm
+                width = 0.8\textwidth, %15cm,  % standard 10cm
+                axis y line=right,
+                ylabel={I},
+                ymin=0,
+                ymax=200,
+                yticklabel style={red},
+                ]
+                \addplot[red] coordinates {(0.1, 100) (1, 150) (2, 180) (3, 190)};
+            \end{axis}
+
         \end{tikzpicture}
         \caption{Erro das variáveis de interesse em função do limite de convergência.}
     \end{figure}

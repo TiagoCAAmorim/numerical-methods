@@ -10,7 +10,7 @@
 const double epsilon = 1E-7;
 const double pi = 3.14159265358979323846;
 
-const int default_interations = 100;
+const int default_iterations = 100;
 const double default_convergence = 1E-4;
 
 const bool stop_on_error = true;
@@ -36,7 +36,7 @@ double max(double a, double b){
 bool is_root(double fx, double x, int i, bool debug){
     if( fabs(fx) < epsilon){
         if( debug){
-            printf("Early exit after %i interations: f(%g) = %g.\n", i, x, fx);
+            printf("Early exit after %i iterations: f(%g) = %g.\n", i, x, fx);
         }
         return true;
     }
@@ -89,7 +89,7 @@ double return_closest_to_root_3pt(double x_a, double fx_a, double x_b, double fx
     }
 }
 
-double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_interations, bool debug) {
+double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_iterations, bool debug) {
     double fx_a, fx_b, fx_mean;
     double x_mean, x_mean_previous;
     double convergence;
@@ -141,7 +141,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
             printf("%3s   %-28s\t%-28s\t%-28s\t%-11s\n","#", "Lower bound", "Upper bound", "Mean point", "Convergence");
         }
 
-        for(i=1 ; i<=max_interations ; i++){
+        for(i=1 ; i<=max_iterations ; i++){
             x_mean = x_a + (x_b - x_a)/2;
             fx_mean = func(x_mean);
             convergence = calculate_convergence(x_mean, x_mean_previous, relative_convergence);
@@ -171,19 +171,19 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
     }
     if( debug){
         if( exit_function || convergence < convergence_tol){
-            printf("Reached convergence after %i interation(s): %g.\n", i, convergence);  
+            printf("Reached convergence after %i iteration(s): %g.\n", i, convergence);  
         } else {
-            printf("Convergence was not reached after %i interation(s): %g.\n", i, convergence);
+            printf("Convergence was not reached after %i iteration(s): %g.\n", i, convergence);
         }
     }
     return return_closest_to_root_3pt(x_a, fx_a, x_b, fx_b, x_mean, fx_mean);
 }
 
 double find_root_bissection(double (*func)(double), double x_a, double x_b){
-    return find_root_bissection_debug(func, x_a, x_b, default_convergence, true, default_interations, false);
+    return find_root_bissection_debug(func, x_a, x_b, default_convergence, true, default_iterations, false);
 }
 
-int estimate_bissection_interations(double x_a, double x_b, double x_root, double convergence_tol, bool relative_convergence){
+int estimate_bissection_iterations(double x_a, double x_b, double x_root, double convergence_tol, bool relative_convergence){
     double x_reference = 1;
     double n;
 
@@ -202,11 +202,11 @@ int estimate_bissection_interations(double x_a, double x_b, double x_root, doubl
     return max(0, round(n+0.5));
 }
 
-void test_bissection(double (*func)(double), double x_root, double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_interations, bool debug, char *message){
+void test_bissection(double (*func)(double), double x_root, double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_iterations, bool debug, char *message){
     printf("\nTest Bissection Method: %s\n", message);
-    int interations = estimate_bissection_interations(x_a, x_b, x_root, convergence_tol, false);
-    printf("Estimated number of interations: %i\n", interations);
-    double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_interations, debug);
+    int iterations = estimate_bissection_iterations(x_a, x_b, x_root, convergence_tol, false);
+    printf("Estimated number of iterations: %i\n", iterations);
+    double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_iterations, debug);
     print_error(" => Root", x_root, x_root_bissection, convergence_tol, relative_convergence);
 }
 
@@ -255,27 +255,27 @@ double f_trigonometric(double x){
 
 int tests_bissection(){
     bool relative_convergence = false;
-    int max_interations = 50;
+    int max_iterations = 50;
     bool debug = true;
 
-    test_bissection(f_linear, 0.3, 0, 2, 0.001, relative_convergence, max_interations, debug, "Linear function");
-    test_bissection(f_linear, 0.3, 2, 0, 0.001, relative_convergence, max_interations, debug, "Linear function with inverted limits");
-    test_bissection(f_linear, 0.3, 0, 2, 0.001, true, max_interations, debug, "Linear function with relative convergence");
-    test_bissection(f_linear, 0.3, 0, 1, 0.001, relative_convergence, 5, debug, "Linear function with insufficient interations");
-    test_bissection(f_linear, 0.3, 0., 0.4, 0.001, relative_convergence, max_interations, debug, "Linear function with early exit");
-    test_bissection(f_linear, 0.3, 0.3, 1, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_a");
-    test_bissection(f_linear, 0.3, 0, 0.3, 0.001, relative_convergence, max_interations, debug, "Linear function with root in x_b");
-    test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b] #1");
-    test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_interations, debug, "Linear function with error in [x_a,x_b] #2");
+    test_bissection(f_linear, 0.3, 0, 2, 0.001, relative_convergence, max_iterations, debug, "Linear function");
+    test_bissection(f_linear, 0.3, 2, 0, 0.001, relative_convergence, max_iterations, debug, "Linear function with inverted limits");
+    test_bissection(f_linear, 0.3, 0, 2, 0.001, true, max_iterations, debug, "Linear function with relative convergence");
+    test_bissection(f_linear, 0.3, 0, 1, 0.001, relative_convergence, 5, debug, "Linear function with insufficient iterations");
+    test_bissection(f_linear, 0.3, 0., 0.4, 0.001, relative_convergence, max_iterations, debug, "Linear function with early exit");
+    test_bissection(f_linear, 0.3, 0.3, 1, 0.001, relative_convergence, max_iterations, debug, "Linear function with root in x_a");
+    test_bissection(f_linear, 0.3, 0, 0.3, 0.001, relative_convergence, max_iterations, debug, "Linear function with root in x_b");
+    test_bissection(f_linear, 0.3, 1, 2.3, 0.001, relative_convergence, max_iterations, debug, "Linear function with error in [x_a,x_b] #1");
+    test_bissection(f_linear, 0.3, -2, 0., 0.001, relative_convergence, max_iterations, debug, "Linear function with error in [x_a,x_b] #2");
     
-    test_bissection(f_linear, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function with domain very close to root");
-    test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_interations, debug, "Linear function #2 with 'small' domain");
+    test_bissection(f_linear, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_iterations, debug, "Linear function with domain very close to root");
+    test_bissection(f_linear2, 0.3, 0.3-epsilon/3, 0.3+epsilon/3, 0.001, relative_convergence, max_iterations, debug, "Linear function #2 with 'small' domain");
     
-    test_bissection(f_quadratic, -0.1, -0.25,  1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#1");
-    test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, relative_convergence, max_interations, debug, "Quadratic function, root#2");
-    test_bissection(f_exponential, 2., 0, 10, 0.001, relative_convergence, max_interations, debug, "Exponential function");
-    test_bissection(f_cos, pi/2, 0, 2, 0.001, relative_convergence, max_interations, debug, "Cossine function");
-    test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, relative_convergence, max_interations, debug, "Trigonometric function");
+    test_bissection(f_quadratic, -0.1, -0.25,  1, 0.001, relative_convergence, max_iterations, debug, "Quadratic function, root#1");
+    test_bissection(f_quadratic, -0.5, -0.25, -1, 0.001, relative_convergence, max_iterations, debug, "Quadratic function, root#2");
+    test_bissection(f_exponential, 2., 0, 10, 0.001, relative_convergence, max_iterations, debug, "Exponential function");
+    test_bissection(f_cos, pi/2, 0, 2, 0.001, relative_convergence, max_iterations, debug, "Cossine function");
+    test_bissection(f_trigonometric, 3./4*pi, 0, 5, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function");
 }
 
 
@@ -543,8 +543,8 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
-    int estimated_interations = estimate_bissection_interations(deltaSfa_min, deltaSfa_max, -9999, convergence_limit, relative_convergence);
-    printf("Estimated number of interations: %i\n", estimated_interations);
+    int estimated_iterations = estimate_bissection_iterations(deltaSfa_min, deltaSfa_max, -9999, convergence_limit, relative_convergence);
+    printf("Estimated number of iterations: %i\n", estimated_iterations);
     deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true);
         
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, convergence_limit, relative_convergence);
