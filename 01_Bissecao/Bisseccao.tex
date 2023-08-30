@@ -26,7 +26,7 @@
 \usepackage{multirow}
 
 \usepackage{pgfplots}
-\usepackage[verbose]{placeins}
+\usepackage{placeins}
 
 %=========== Gloabal Tikz settings
 % \pgfplotsset{compat=newest}
@@ -316,7 +316,6 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{itemize}
         \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido\footnote{Definindo $c_{lim}$ o limite de convergência, se for utilizado o critério de convergência \emph{direto} então $\zeta = c_{lim}$. Se for utilizado o critério de convergência relativo então $\zeta = c_{lim} \min{|x_a|,|x_b|}$ (a avaliação do menor valor segue as mesmas regras do cálculo do critério de convergência, ignorando qualquer $|x| < \epsilon$ e retorna \emph{zero} caso ambos sejam valores pequenos).}. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
         \item Se $sinal(f(x_a)) = sinal(f(x_b))$ o código apresenta uma mensagem de alerta e não é feito o \emph{loop} do método. Optou-se por não gerar um erro, e mesmo neste caso é retornado um valor.
-
         \item É feito um término prematuro do processo iterativo caso algum $|f(x)| < \epsilon$. O valor padrão de $\epsilon$ é $10^{-7}$ (variável \verb|epsilon| no código). Este teste também é feito antes de entrar no \emph{loop}.
         \item Antes de sair da função, são comparados os três últimos resultados guardados ($f(x_a)$, $f(x_b)$, $f(x_{medio})$) e é retornado o valor de $x$ com $f(x)$ mais próximo de zero.
     \end{itemize}
@@ -333,7 +332,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
     Algumas definições que foram feitas no código que implementa o Método da Bissecção são resultado dos testes realizados.
 
-    A definição de um critério de parada prematura se mostrou importante para evitar que o método continue buscando uma raiz quando já encontrou uma solução \emph{aceitável}. A definição deste limite $|f(x)| < \epsilon = 10^{-7}$ foi empírica e deve ser revista para problemas com valores usuais de $f(x)$ com ordem de grandeza diferente da que foi utilizada nos testes ($\approx 10^1$). Um exemplo é o da função $f(x) = -3x+0.9$, que tem raiz em $0.3$. A função implementada retorna $f(0.3) \approx 1.11022 \cdot 10^{-16}$, de modo que é preciso levar em conta erros de aritmética de máquina na definição do critério de parada prematura.
+    A definição de um critério de parada prematura se mostrou importante para evitar que o método continue buscando uma raiz quando já encontrou uma solução \emph{aceitável}. A definição deste limite $|f(x)| < \epsilon = 10^{-7}$ foi empírica e deve ser revista em função do problema a ser resolvido.
     
     Todas as funções foram definidas para trabalhar com números do tipo \verb|double|. Inicialmente as funções estavam definidas para trabalhar com \verb|float|, mas estes mostraram não conseguirem trabalhar com valores de convergência muito baixos. A avaliação da função $f(x) = -3x+0.9$ na sua raiz foi testada usando diferentes tipos de números de ponto flutante:
 
@@ -343,13 +342,12 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \item \verb|long double|: $f(0.3) \approx 5.35872 \cdot 10^{-312}$ 
     \end{itemize}
     
-    Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}.
+    Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}. Foi feita uma sensibilidade do critério de convergência ($c_{lim}$) e foi possível trabalhar com limites de valores baixos sem aparente perda da qualidade da resposta por problemas com aritmética de máquina (\ref{fig:convergencia}).
 
-    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última iteração. Um exemplo prático deste efeito é visto na Tabela \ref{table:fQuadratica}, onde o melhor resultado é alcançado na 8$^a$ iteração, mas o critério de convergência\footnote{A coluna com os valores da convergência foi omitida por falta de espaço na página} só é alcançado na 11$^a$ iteração.
+    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última iteração. Um exemplo prático deste efeito é visto na Tabela \ref{tab:fquad}, onde o melhor resultado é alcançado na 8$^a$ iteração, mas o critério de convergência\footnote{A coluna com os valores da convergência foi omitida por falta de espaço na página} só é alcançado na 11$^a$ iteração.
     
-    \begin{table}[h!] \label{table:fQuadratica}
+    \begin{table}[h!] 
         \centering
-        \caption{Busca pela raiz de $5x^2+3x-0.25$ no intervalo $[-0.25; 1]$ pelo Método da Bissecção.}
         \begin{tabular}{ c c c c c c c }
             Int. & $x_a$   & $f(x_a)$    & $x_b$      & $f(x_b)$    & $x_{medio}$ & $f(x_{medio})$  \\
             \hline
@@ -365,13 +363,15 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             10 & -0.101074 & -0.00214267 & -0.0986328 &  0.00274372 & -0.0998535 & 0.000293076   \\
             11 & -0.101074 & -0.00214267 & -0.0998535 & 0.000293076 &  -0.100464 & -0.000926659 
         \end{tabular}
+        \caption{Busca pela raiz de $5x^2+3x-0.25$ no intervalo $[-0.25; 1]$ pelo Método da Bissecção.}
+        \label{tab:fquad}
     \end{table}
     
     A metodologia proposta para o cálculo de parâmetros de perfuração com o Método da Mínima Curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. A definição do intervalo de busca é direta, mas, devido a erros de aritmética de máquina, não é possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta está muito próxima de um dos limites. Desta forma, ao invés de gerar uma mensagem de erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
     
-    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()| (Figura \ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
+    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()| (\ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
 
-    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (ver Figura \ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:Iteracoes}).
+    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (\ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:Iteracoes}).
     
     \begin{equation} \label{eq:nint}
         n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
@@ -434,12 +434,49 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
 % \end{thebibliography}
 
+\newpage
+
 \appendix
 
 \FloatBarrier
 \section{Gráficos Diagnóstico}
 
-\begin{figure}[h!]
+\subsection{Erro ao Longo da Iterações}
+
+\begin{figure}[hbt!] 
+    \label{fig:Erro}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            height = 7cm, % standard 10cm
+            width = 0.8\textwidth, %15cm,  % standard 10cm
+            % xmode=log,
+            ymode=log,
+            grid=both,
+            % ymin=1e-12,
+            % ymax=1e0,
+            xlabel = {Iterações},
+            ylabel = {$\varepsilon_i = |P_i - P|$},
+            legend style={at={(0.99,0.85)}, anchor=east},
+            ]
+            \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
+            \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
+            \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
+            \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
+            \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
+            \addplot[color=black, dashed] table [x=Iteration, y =TX05A] {IterationError.txt};
+            \addplot[color=black, dashed] table [x=Iteration, y =TX05B] {IterationError.txt};
+            \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
+        \end{axis}
+        
+    \end{tikzpicture}
+    \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
+\end{figure}
+
+\FloatBarrier
+\subsection{Erro em Função do Limite de Convergência}
+
+\begin{figure}[hbt!]
     \label{fig:convergencia}
     \centering
     \begin{tikzpicture}
@@ -478,40 +515,10 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{axis}
 
     \end{tikzpicture}
-    \caption{Erro das variáveis de interesse em função do limite de convergência.}
+    \caption{Erro das variáveis de interesse em função do limite de convergência utilizado.}
 \end{figure}
 
-\begin{figure}[h!] 
-    \label{fig:Erro}
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-            height = 7cm, % standard 10cm
-            width = 0.8\textwidth, %15cm,  % standard 10cm
-            % xmode=log,
-            ymode=log,
-            grid=both,
-            % ymin=1e-12,
-            % ymax=1e0,
-            xlabel = {Iterações},
-            ylabel = {$\varepsilon_i = |P_i - P|$},
-            legend style={at={(0.99,0.85)}, anchor=east},
-            ]
-            \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
-            \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
-            \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
-            \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
-            \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
-            \addplot[color=black, dashed] table [x=Iteration, y =TX05A] {IterationError.txt};
-            \addplot[color=black, dashed] table [x=Iteration, y =TX05B] {IterationError.txt};
-            \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
-        \end{axis}
-        
-    \end{tikzpicture}
-    \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
-\end{figure}
-\FloatBarrier
-
+\newpage
 \FloatBarrier
 \section{Esquema do Poço em S}
 
@@ -521,11 +528,16 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     \includegraphics[width=0.4\textwidth]{EsquemaPoco}
     \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
 \end{figure}
-\FloatBarrier
 
+\newpage
+\FloatBarrier
 \section{Código em C}
 
-\lstinputlisting[language=C]{../01_bissection.c}
+\subsection{Método da Bissecção}
+\lstinputlisting[language=C, linerange={1-289}]{./01_bissection.c}
+
+\subsection{Método da Mínima Curvatura}
+\lstinputlisting[language=C, linerange={292-689}]{./01_bissection.c}
 
 \end{document}
 \endinput
