@@ -1,4 +1,4 @@
-Convergence    Interations    DeltaSfa              theta2                  phi2                     DeltaS    
+Convergence    Iterations     DeltaSfa              theta2                  phi2                     DeltaS    
 1e-1           10             0.0315823             0.0112721               0.012395                0.242968 
 1e-2           13             0.00447744            0.00158042              0.0016981               0.00343691 
 1e-3           17             4.00283e-05           1.41032e-05             1.50965e-05             3.07148e-05 

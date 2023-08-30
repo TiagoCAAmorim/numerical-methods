@@ -26,6 +26,7 @@
 \usepackage{multirow}
 
 \usepackage{pgfplots}
+\usepackage[verbose]{placeins}
 
 %=========== Gloabal Tikz settings
 % \pgfplotsset{compat=newest}
@@ -142,9 +143,12 @@ state={RJ},
 country={Brasil}}
 
 \begin{abstract}
-    %% Text of abstract
-    Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!! Escrever abstrato por último é mais legal!!!
-    
+    O Método de Mínima Curvatura é reconhecido como o mais aceito no cálculo de trajetória de poços de petróleo. A formulação para cálculo de coordenadas cartesianas a partir de parâmetros de perfuração é direta, e o cálculo inverso não tem formulação direta.
+
+    Neste trabalho é proposto um algoritmo para calcular parâmetros de perfuração a partir de coordenadas cartesianas. O algoritmo proposto tem a forma $g(x)=x$, e encontrar uma solução passa por um problema de encontrar a raiz de uma função. 
+
+    Foi aplicado o Método da Bissecção para resolver o problema proposto. O testes realizados mostraram boa coerência entre os valores estimados com o processo iterativo e as respectivas respostas exatas.
+
 \end{abstract}
 
 
@@ -365,16 +369,9 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     
     A metodologia proposta para o cálculo de parâmetros de perfuração com o Método da Mínima Curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. A definição do intervalo de busca é direta, mas, devido a erros de aritmética de máquina, não é possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta está muito próxima de um dos limites. Desta forma, ao invés de gerar uma mensagem de erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
     
-    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()|. O valor exato de $\theta_2$ e zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
+    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()| (Figura \ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
 
-    \begin{figure}[h]
-        \centering
-        \includegraphics[width=0.3\textwidth]{EsquemaPoco}
-        \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
-        \label{fig:pocoS}
-    \end{figure}
-    
-    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas boas aproximações (ver Tabela \ref{table:Iteracoes}).
+    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (ver Figura \ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:Iteracoes}).
     
     \begin{equation} \label{eq:nint}
         n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
@@ -387,12 +384,12 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{cases}
     \end{align*}
 
-    \begin{table}[h!] \label{table:Iteracoes}
+    \begin{table}[h] \label{table:Iteracoes}
         \centering
         \caption{Comparação entre o número de iterações previsto e realizado para diferentes testes.}
         \begin{tabular}{ l c c c c c c }
             \multirow{2}{*}{Função} & \multirow{2}{*}{$x_a$} & \multirow{2}{*}{$x_b$} & \multicolumn{2}{c}{Critério \emph{Direto}} & \multicolumn{2}{c}{Critério \emph{Relativo}} \\
-            &  &  & Previsão & Feitas & Previsão & Feitas \\
+            &  &  & Previsão & Realizado & Previsão & Realizado \\
             \hline
             Linear & 0. & 2. & 11 & 11 & 11 & 13 \\
             Quadrática & -0.25 & 1. & 11 & 11 & 11 & 14 \\
@@ -403,44 +400,12 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             Poço 3D & 9.84918 & 83.8634 & 17 & 17 & 13 & 13 \\
         \end{tabular}
     \end{table}
-    
-    
-    \begin{figure} 
-        \label{fig:convergencia}
-        \centering
-        \begin{tikzpicture}
-            \begin{axis}[
-                height = 7cm, % standard 10cm
-                width = 0.8\textwidth, %15cm,  % standard 10cm
-                xmode=log,
-                ymode=log,
-                grid=both,
-                xlabel = {$c_{lim}$},
-                ylabel = {Erro},
-                legend style={at={(0.98,0.30)}, anchor=east},
-                ]
-                \addplot table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
-                \legend{$\Delta S f(\alpha)$, $\theta_2$, $\phi_2$, $\Delta S$}
-            \end{axis}
-            
-            \begin{axis}[
-                height = 7cm, % standard 10cm
-                width = 0.8\textwidth, %15cm,  % standard 10cm
-                axis y line=right,
-                ylabel={I},
-                ymin=0,
-                ymax=200,
-                yticklabel style={red},
-                ]
-                \addplot[red] coordinates {(0.1, 100) (1, 150) (2, 180) (3, 190)};
-            \end{axis}
-
-        \end{tikzpicture}
-        \caption{Erro das variáveis de interesse em função do limite de convergência.}
-    \end{figure}
-
+        
     \section{Conclusão}
     
+    O algoritmo proposto para o cálculo de parâmetros de perfuração em função das coordenadas cartesianas de pontos ao longo do se mostrou eficaz. Foram feitos ajustes ao código implementado de forma a evitar o uso de funções trigonométricas ao longo do processo iterativo.
+    O Método da Bisseção se mostrou adequado para uso com o algoritmo proposto. As funções propostas não são válidas para quaisquer valores de entrada, e a delimitação de uma região de busca foi importante para garantir a convergência do problema.
+
     % \label{}
     
 %% The Appendices part is started with the command \appendix;
@@ -471,11 +436,96 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
 \appendix
 
+\FloatBarrier
+\section{Gráficos Diagnóstico}
+
+\begin{figure}[h!]
+    \label{fig:convergencia}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            height = 7cm, % standard 10cm
+            width = 0.8\textwidth, %15cm,  % standard 10cm
+            xmode=log,
+            ymode=log,
+            grid=both,
+            ymin=1e-12,
+            ymax=1e0,
+            xlabel = {$c_{lim}$},
+            ylabel = {Erro},
+            legend style={at={(0.25,0.55)}, anchor=east},
+            ]
+            \addplot[color=black, solid, mark=*] table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
+            \addplot[color=purple, solid, mark=*] table [x=Convergence, y = DeltaS] {ConvergenceErrors.txt};
+            \addplot[color=blue, solid, mark=*] table [x=Convergence, y = theta2] {ConvergenceErrors.txt};
+            \addplot[color=green, solid, mark=*] table [x=Convergence, y = phi2] {ConvergenceErrors.txt};
+            \legend{$\Delta S f(\alpha)$, $\Delta S$, $\theta_2$, $\phi_2$};
+        \end{axis}
+        
+        \begin{axis}[
+            height = 7cm, % standard 10cm
+            xmode=log,
+            width = 0.8\textwidth, %15cm,  % standard 10cm
+            axis y line=right,
+            ylabel={Iterações até Convergência},
+            ymin=0,
+            ymax=40,
+            % yticklabel style={red},
+            legend style={at={(0.98,0.10)}, anchor=east},
+            ]
+            \addplot[color=red, solid, mark=*] table [x=Convergence, y = Iterations] {ConvergenceErrors.txt};
+            \legend{Iterações}
+        \end{axis}
+
+    \end{tikzpicture}
+    \caption{Erro das variáveis de interesse em função do limite de convergência.}
+\end{figure}
+
+\begin{figure}[h!] 
+    \label{fig:Erro}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            height = 7cm, % standard 10cm
+            width = 0.8\textwidth, %15cm,  % standard 10cm
+            % xmode=log,
+            ymode=log,
+            grid=both,
+            % ymin=1e-12,
+            % ymax=1e0,
+            xlabel = {Iterações},
+            ylabel = {$\varepsilon_i = |P_i - P|$},
+            legend style={at={(0.99,0.85)}, anchor=east},
+            ]
+            \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
+            \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
+            \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
+            \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
+            \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
+            \addplot[color=black, dashed] table [x=Iteration, y =TX05A] {IterationError.txt};
+            \addplot[color=black, dashed] table [x=Iteration, y =TX05B] {IterationError.txt};
+            \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
+        \end{axis}
+        
+    \end{tikzpicture}
+    \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
+\end{figure}
+\FloatBarrier
+
+\FloatBarrier
+\section{Esquema do Poço em S}
+
+\begin{figure}[hbt!]
+    \label{fig:pocoS}
+    \centering
+    \includegraphics[width=0.4\textwidth]{EsquemaPoco}
+    \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
+\end{figure}
+\FloatBarrier
+
 \section{Código em C}
 
-% \lstinputlisting[language=C]{../01_bissection.c}
+\lstinputlisting[language=C]{../01_bissection.c}
 
 \end{document}
 \endinput
-%%
-%% End of file `elsarticle-template-num.tex'.

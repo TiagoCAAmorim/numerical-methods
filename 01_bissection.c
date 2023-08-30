@@ -7,7 +7,7 @@
 #include <math.h>
 #include <assert.h>
 
-const double epsilon = 1E-7;
+const double epsilon = 1E-17;
 const double pi = 3.14159265358979323846;
 
 const int default_iterations = 100;
@@ -89,11 +89,12 @@ double return_closest_to_root_3pt(double x_a, double fx_a, double x_b, double fx
     }
 }
 
-double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_iterations, bool debug) {
+double find_root_bissection_debug(double (*func)(double), double x_a, double x_b, double convergence_tol, bool relative_convergence, int max_iterations, bool debug, double x_root) {
     double fx_a, fx_b, fx_mean;
     double x_mean, x_mean_previous;
     double convergence;
     double exit_function = false;
+    bool print_true_error;
     int i=0;
 
     if( x_b < x_a){
@@ -136,9 +137,14 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
     }
 
     if( !exit_function){
+        print_true_error = (x_root >= x_a) && (x_root <= x_b);
         x_mean_previous = x_a;
         if( debug){
-            printf("%3s   %-28s\t%-28s\t%-28s\t%-11s\n","#", "Lower bound", "Upper bound", "Mean point", "Convergence");
+            if( print_true_error){
+                printf("%3s   %-28s\t%-28s\t%-28s\t%-11s\t%-11s\n","#", "Lower bound", "Upper bound", "Mean point", "Convergence","|x - root|");
+            } else{    
+                printf("%3s   %-28s\t%-28s\t%-28s\t%-11s\n","#", "Lower bound", "Upper bound", "Mean point", "Convergence");
+            }
         }
 
         for(i=1 ; i<=max_iterations ; i++){
@@ -148,7 +154,11 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
             x_mean_previous = x_mean;
             
             if( debug){
-                printf("%3i.  f(%11g) = %11g\tf(%11g) = %11g\tf(%11g) = %11g\t%11g\n",i, x_a, fx_a, x_b, fx_b, x_mean, fx_mean, convergence);
+                if( print_true_error){
+                    printf("%3i.  f(%11g) = %11g\tf(%11g) = %11g\tf(%11g) = %11g\t%11g\t%11g\n",i, x_a, fx_a, x_b, fx_b, x_mean, fx_mean, convergence, fabs(x_mean - x_root));
+                } else{
+                    printf("%3i.  f(%11g) = %11g\tf(%11g) = %11g\tf(%11g) = %11g\t%11g\n",i, x_a, fx_a, x_b, fx_b, x_mean, fx_mean, convergence);
+                }
             }
 
             if( convergence < convergence_tol){
@@ -180,7 +190,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
 }
 
 double find_root_bissection(double (*func)(double), double x_a, double x_b){
-    return find_root_bissection_debug(func, x_a, x_b, default_convergence, true, default_iterations, false);
+    return find_root_bissection_debug(func, x_a, x_b, default_convergence, true, default_iterations, false, -1e99);
 }
 
 int estimate_bissection_iterations(double x_a, double x_b, double x_root, double convergence_tol, bool relative_convergence){
@@ -206,7 +216,7 @@ void test_bissection(double (*func)(double), double x_root, double x_a, double x
     printf("\nTest Bissection Method: %s\n", message);
     int iterations = estimate_bissection_iterations(x_a, x_b, x_root, convergence_tol, false);
     printf("Estimated number of iterations: %i\n", iterations);
-    double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_iterations, debug);
+    double x_root_bissection = find_root_bissection_debug(func, x_a, x_b, convergence_tol, relative_convergence, max_iterations, debug, x_root);
     print_error(" => Root", x_root, x_root_bissection, convergence_tol, relative_convergence);
 }
 
@@ -545,7 +555,7 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
 
     int estimated_iterations = estimate_bissection_iterations(deltaSfa_min, deltaSfa_max, -9999, convergence_limit, relative_convergence);
     printf("Estimated number of iterations: %i\n", estimated_iterations);
-    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true);
+    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa);
         
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, convergence_limit, relative_convergence);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
@@ -673,7 +683,7 @@ void tests_minimum_curvature(){
 }
 
 int main(){
-    // tests_bissection();
+    tests_bissection();
     tests_minimum_curvature();
     return 0;
 }
