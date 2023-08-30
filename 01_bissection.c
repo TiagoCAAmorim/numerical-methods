@@ -502,8 +502,8 @@ double calculate_defined_deltaSfa_error(double deltaSfa){
     return calculate_deltaSfa_error(dE, dN, dV, cos_theta1, sin_theta1, cos_phi1, sin_phi1, deltaSfa);
 }
 
-void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1, double theta2, double phi2, double true_alfa, double true_deltaE, double true_deltaN, double true_deltaV, bool report_alfa_dEdNdV){
-
+void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1, double theta2, double phi2, double true_alfa, double true_deltaE, double true_deltaN, double true_deltaV, bool report_alfa_dEdNdV, bool relative_convergence, double convergence_limit){
+    
     printf("\n%s\n", message);
 
     double a = alfa(theta1, phi1, theta2, phi2);
@@ -512,10 +512,10 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
     double dV = deltaV(deltaS, theta1, phi1, theta2, phi2);
 
     if( report_alfa_dEdNdV){
-        print_error("  Alfa",true_alfa,a, 0.001, false);
-        print_error("  Delta E", true_deltaE,dE, 0.001, false);
-        print_error("  Delta N", true_deltaN,dN, 0.001, false);
-        print_error("  Delta V", true_deltaV,dV, 0.001, false);
+        print_error("  Alfa",true_alfa,a, convergence_limit, relative_convergence);
+        print_error("  Delta E", true_deltaE,dE, convergence_limit, relative_convergence);
+        print_error("  Delta N", true_deltaN,dN, convergence_limit, relative_convergence);
+        print_error("  Delta V", true_deltaV,dV, convergence_limit, relative_convergence);
     } else{
         printf("  Calculated displacement: dE=%g dN=%g dV=%g\n", dE, dN, dV);
         printf("  Calculated alfa=%g\n",a);
@@ -524,14 +524,14 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
 
     double deltaSfa = deltaS * f_alfa(a);
     struct tangle theta2_ = calculate_theta2(dV, deltaSfa, cos(theta1));
-    print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.001, false);
+    print_error("  theta2", theta2, calculate_rad(theta2_, false), convergence_limit, relative_convergence);
 
     struct tangle phi2_ = calculate_phi2(dE, dN, sin(theta1), cos(phi1), sin(phi1), sin(theta2));
-    print_error("  phi2", phi2, calculate_rad(phi2_, false), 0.001, false);
+    print_error("  phi2", phi2, calculate_rad(phi2_, false), convergence_limit, relative_convergence);
 
     double deltaSfa_calc = calculate_deltaSfa(dE, dN, dV, cos(theta1), sin(theta1), cos(phi1), sin(phi1), cos(theta2), sin(theta2), cos(phi2), sin(phi2));
     double dS = deltaSfa_calc / f_alfa(a);
-    print_error("  Delta S", deltaS, dS, 0.001, false);
+    print_error("  Delta S", deltaS, dS, convergence_limit, relative_convergence);
 
     printf("Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.\n");
     define_well_path_data( dE, dN, dV, theta1, phi1);
@@ -543,18 +543,18 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
-    int estimated_interations = estimate_bissection_interations(deltaSfa_min, deltaSfa_max, -9999, 0.0001, false);
+    int estimated_interations = estimate_bissection_interations(deltaSfa_min, deltaSfa_max, -9999, convergence_limit, relative_convergence);
     printf("Estimated number of interations: %i\n", estimated_interations);
-    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, 0.001, false, 100, true);
+    deltaSfa_calc = find_root_bissection_debug(calculate_defined_deltaSfa_error, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true);
         
-    print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, 0.001, false);
+    print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, convergence_limit, relative_convergence);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
-    print_error("  theta2", theta2, calculate_rad(theta2_, false), 0.001, false);
+    print_error("  theta2", theta2, calculate_rad(theta2_, false), convergence_limit, relative_convergence);
     phi2_ = calculate_phi2(dE, dN, sin(theta1), cos(phi1), sin(phi1), theta2_.sin);
-    print_error("  phi2", phi2, calculate_rad(phi2_, false), 0.001, false);
+    print_error("  phi2", phi2, calculate_rad(phi2_, false), convergence_limit, relative_convergence);
     a = alfa(theta1, phi1, calculate_rad(theta2_, false), calculate_rad(phi2_, false));
     dS = deltaSfa_calc / f_alfa(a);
-    print_error("  Delta S", deltaS, dS, 0.001, false);
+    print_error("  Delta S", deltaS, dS, convergence_limit, relative_convergence);
 }
 
 void tests_minimum_curvature(){
@@ -565,6 +565,9 @@ void tests_minimum_curvature(){
     double theta2_calc, phi2_calc;
     double dSfa, dS_calc;
     char message[100];
+
+    bool relative_convergence = false;
+    bool convergence_limit = 0.001;
 
     printf("\n#### Minimum Curvatura Method Tests ####\n");
 
@@ -582,7 +585,7 @@ void tests_minimum_curvature(){
     theta2=0;    phi2=0.88*pi;
     a=0.;
     dE=0., dN=0., dV=dS;
-    test_MCM_formulas("Vertical well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("Vertical well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
 
     dS=10;
     theta1=pi/4;    phi1=pi/6;
@@ -591,56 +594,56 @@ void tests_minimum_curvature(){
     dE=dS*sin(pi/4)*sin(pi/6);
     dN=dS*sin(pi/4)*cos(pi/6);
     dV=dS*cos(pi/4);
-    test_MCM_formulas("Slant straight well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("Slant straight well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
     
     dS=10*pi/2;
     theta1=pi/2;    phi1=3*pi/2;
     theta2=pi/2;    phi2=0.;
     a=pi/2;
     dE=-10;    dN=10;    dV=0.;
-    test_MCM_formulas("1/4 circle horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
 
     dS=10*pi/2;
     theta1=pi/2;    phi1=pi/4;
     theta2=pi/2;    phi2=7*pi/4.;
     a=pi/2;
     dE=0.;    dN=10*sqrt(2);    dV=0.;
-    test_MCM_formulas("1/4 circle deltaE=0 horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle deltaE=0 horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
     
     dS=10*pi/2;
     theta1=0;        phi1=0.1871*pi;
     theta2=pi/2;     phi2=0.;
     a=pi/2;
     dE=0.;    dN=10.;    dV=10.;
-    test_MCM_formulas("1/4 circle alligned north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle alligned north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
     
     dS=10*pi/2;
     theta1=pi/6;         phi1=0.;
     theta2=theta1+pi/2;  phi2=0.;
     a=pi/2;
     dE=0.;    dN=10.*(cos(pi/6)+sin(pi/6));    dV=10.*(cos(pi/6)-sin(pi/6));
-    test_MCM_formulas("1/4 circle alligned north well 'going up'", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle alligned north well 'going up'", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
     
     dS=10*pi/2;
     theta1=pi/4;         phi1=0.;
     theta2=theta1+pi/2;  phi2=0.;
     a=pi/2;
     dE=0.;    dN=10.*(cos(theta1)+sin(theta1));    dV=10.*(cos(theta1)-sin(theta1));
-    test_MCM_formulas("1/4 circle alligned north well 'going up' #2", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle alligned north well 'going up' #2", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
     
     dS=10*pi/2;
     theta1=pi/3;         phi1=0.;
     theta2=theta1+pi/2;  phi2=0.;
     a=pi/2;
     dE=0.;    dN=10.*(cos(theta1)+sin(theta1));    dV=10.*(cos(theta1)-sin(theta1));
-    test_MCM_formulas("1/4 circle alligned north well 'going up' #3", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle alligned north well 'going up' #3", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
 
     dS=10*pi/2;
     theta1=0;        phi1=0.1871*pi;
     theta2=pi/2;     phi2=pi/6;
     a=pi/2;
     dE=10.*sin(pi/6);    dN=10.*cos(pi/6);    dV=10.;
-    test_MCM_formulas("1/4 circle 30o north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true);
+    test_MCM_formulas("1/4 circle 30o north vertical to horizontal well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, true, relative_convergence, convergence_limit);
     
     double array_dS[5]={1000., 500*pi/12, 1500., 1000*pi/12, 500.};
     double array_theta[6]={0., 0., pi/12, pi/12, 0., 0.};
@@ -652,7 +655,7 @@ void tests_minimum_curvature(){
     printf("\n'S-shaped' well\n");
     for( int i=0; i<5; i++){
         sprintf(message, "Section #%i",i+1);
-        test_MCM_formulas(message, array_dS[i], array_theta[i], array_phi[i], array_theta[i+1], array_phi[i+1], array_a[i], array_dE[i], array_dN[i], array_dV[i], true);   
+        test_MCM_formulas(message, array_dS[i], array_theta[i], array_phi[i], array_theta[i+1], array_phi[i+1], array_a[i], array_dE[i], array_dN[i], array_dV[i], true, relative_convergence, convergence_limit);   
     }
 
     dS=10.;
@@ -660,8 +663,13 @@ void tests_minimum_curvature(){
     theta2=pi/6;       phi2=7*pi/4;
     a=0.;
     dE=0.;    dN=0.;    dV=0.;
-    test_MCM_formulas("'3D' well", dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false);   
-        
+
+    double c;
+    for( int i = 1; i<= 10; i++){
+        c = pow(10, -i);
+        sprintf(message, "'3D' well with convergence = %g", c);
+        test_MCM_formulas(message, dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false, relative_convergence, c);   
+    }    
 }
 
 int main(){

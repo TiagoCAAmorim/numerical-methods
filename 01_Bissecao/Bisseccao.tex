@@ -22,6 +22,28 @@
 %% The amssymb package provides various useful mathematical symbols
 \usepackage{amssymb}
 \usepackage{amsmath}
+
+\usepackage{multirow}
+
+\usepackage{pgfplots}
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,     
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
 
@@ -352,23 +374,63 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \label{fig:pocoS}
     \end{figure}
     
-    Foi implementada uma função para estimar o número de interações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência é \emph{direto}, a estimativa se mostrou correta (exceto nos casos em que há parada prematura). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, mas neste caso as estimativas são apenas boas aproximações, pois o numerador da equação não fica bem definido.
-
+    Foi implementada uma função para estimar o número de interações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas boas aproximações (ver Tabela \ref{table:Interacoes}).
+    
     \begin{equation} \label{eq:nint}
         n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
     \end{equation}
     \begin{align*}
-    \intertext{onde}
-    x_{referencia} = \begin{cases}
-        1,&\text{se Convergência Direta} \\
-        \min(|x_a|,|x_b|),&\text{c.c. }  
-    \end{cases}
+        \intertext{onde}
+        x_{referencia} = \begin{cases}
+            1,&\text{se Critério de convergência direto} \\
+            \min(|x_a|,|x_b|),&\text{c.c. }  
+        \end{cases}
     \end{align*}
 
-    Um terceiro conjunto de testes foi construído para representar um cenário de aplicação da metodologia proposta a um caso real.
-        
+    \begin{table}[h!] \label{table:Interacoes}
+        \centering
+        \caption{Comparação entre o número de interações previsto e realizado para diferentes testes.}
+        \begin{tabular}{ l c c c c c c }
+            \multirow{2}{*}{Função} & \multirow{2}{*}{$x_a$} & \multirow{2}{*}{$x_b$} & \multicolumn{2}{c}{Critério \emph{Direto}} & \multicolumn{2}{c}{Critério \emph{Relativo}} \\
+            &  &  & Previsão & Feitas & Previsão & Feitas \\
+            \hline
+            Linear & 0. & 2. & 11 & 11 & 11 & 13 \\
+            Quadrática & -0.25 & 1. & 11 & 11 & 11 & 14 \\
+            Exponencial & 0. & 10. & 14 & 14 & 14 & 13 \\
+            Trigonométrica & 0. & 5. & 13 & 13 & 13 & 12 \\
+            1/4 círculo horizontal & 14.1421 & 120.417 & 17 & 17 & 13 & 13 \\
+            Seção 2 do poço em S & 130.526 & 1111.4 & 20 & 20 & 13 & 13 \\
+            Poço 3D & 9.84918 & 83.8634 & 17 & 17 & 13 & 13 \\
+        \end{tabular}
+    \end{table}
     
     
+    \begin{figure} 
+        \label{fig:convergencia}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                height = 7cm, % standard 10cm
+                width = 0.8\textwidth, %15cm,  % standard 10cm
+                xmode=log,
+                ymode=log,
+                grid=both,
+                xlabel = {$c_{lim}$},
+                ylabel = {Erro},
+                legend style={at={(0.98,0.30)}, anchor=east},
+                ]
+                \addplot table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
+                \addplot table [x=Convergence, y = theta2] {ConvergenceErrors.txt};
+                \addplot table [x=Convergence, y = phi2] {ConvergenceErrors.txt};
+                \addplot table [x=Convergence, y = DeltaS] {ConvergenceErrors.txt};
+
+                \legend{$\Delta S f(\alpha)$, $\theta_2$, $\phi_2$, $\Delta S$}
+                    
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Erro das variáveis de interesse em função do limite de convergência.}
+    \end{figure}
+
     \section{Conclusão}
     
     % \label{}
