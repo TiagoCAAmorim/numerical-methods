@@ -1,153 +1,20 @@
-Test                Iterations  DeltaSfa    theta2  phi2    DeltaS
-'Vertical well'
-Found |f(x)| < 1e-07 after 0 iterations.
-  Delta S x f(alfa): True=10 Calculated=10 Error=0
-  theta2: True=0 Calculated=0 Error=0
-  phi2: True=2.7646 Calculated=2.7646 Error=0
-  Delta S: True=10 Calculated=10 Error=0
-
-Slant straight well
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Found |f(x)| < 1e-07 after 0 iterations.
-  Delta S x f(alfa): True=10 Calculated=10 Error=0
-  theta2: True=0.785398 Calculated=0.785398 Error=0
-  phi2: True=0.523599 Calculated=0.523599 Error=1.11022e-16
-  Delta S: True=10 Calculated=10 Error=0
-
-1/4 circle horizontal well
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000810812 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000251896
-  theta2: True=1.5708 Calculated=1.5708 Error=0
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=15.708 Calculated=15.7082 Error=0.000197838
-
-1/4 circle deltaE=0 horizontal well
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000810812 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000251896
-  theta2: True=1.5708 Calculated=1.5708 Error=0
-  phi2: True=5.49779 Calculated=5.49779 Error=0
-  Delta S: True=15.708 Calculated=15.7082 Error=0.000197838
-
-1/4 circle alligned north vertical to horizontal well
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000810812 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000251896
-  theta2: True=1.5708 Calculated=1.57081 Error=1.25946e-05
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=15.708 Calculated=15.7081 Error=0.000125947
-
-1/4 circle alligned north well 'going up'
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000810812 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000251896
-  theta2: True=2.0944 Calculated=2.0944 Error=5.32312e-06
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=15.708 Calculated=15.7081 Error=0.000167454
-
-1/4 circle alligned north well 'going up' #2
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000810812 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000251896
-  theta2: True=2.35619 Calculated=2.35619 Error=0
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=15.708 Calculated=15.7082 Error=0.000197838
-
-1/4 circle alligned north well 'going up' #3
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000807006 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000341565
-  theta2: True=2.61799 Calculated=2.61798 Error=1.25018e-05
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=15.708 Calculated=15.7083 Error=0.000339626
-
-1/4 circle 30o north vertical to horizontal well
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000810812 < 0.001.
-  Delta S x f(alfa): True=20 Calculated=20.0003 Error=0.000251896
-  theta2: True=1.5708 Calculated=1.57081 Error=1.25946e-05
-  phi2: True=0.523599 Calculated=0.523599 Error=0
-  Delta S: True=15.708 Calculated=15.7081 Error=0.000125947
-
-'S-shaped' well
-
-Section #1
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Found |f(x)| < 1e-07 after 0 iterations.
-  Delta S x f(alfa): True=1000 Calculated=1000 Error=0
-  theta2: True=0 Calculated=0 Error=0
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=1000 Calculated=1000 Error=0
-
-Section #2
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 20 iteration(s): 0.000935433 < 0.001.
-  Delta S x f(alfa): True=131.652 Calculated=131.652 Error=4.36905e-05
-  theta2: True=0.261799 Calculated=0.261797 Error=2.52075e-06
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=130.9 Calculated=130.9 Error=2.89273e-05
-
-Section #3
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Found |f(x)| < 1e-07 after 0 iterations.
-  Delta S x f(alfa): True=1500 Calculated=1500 Error=2.27374e-13
-  theta2: True=0.261799 Calculated=0.261799 Error=7.77156e-16
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=1500 Calculated=1500 Error=2.27374e-13
-
-Section #4
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Cannot continue. Returning result closest to zero among f(x_a) and f(x_b).
-  Delta S x f(alfa): True=263.305 Calculated=263.305 Error=0
-  theta2: True=0 Calculated=1.49012e-08 Error=1.49012e-08
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=261.799 Calculated=261.799 Error=1.71589e-07
-
-Section #5
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Found |f(x)| < 1e-07 after 0 iterations.
-  Delta S x f(alfa): True=500 Calculated=500 Error=0
-  theta2: True=0 Calculated=0 Error=0
-  phi2: True=0 Calculated=0 Error=0
-  Delta S: True=500 Calculated=500 Error=0
-
-'3D' well with convergence = 0.1
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 10 iteration(s): 0.0722795 < 0.1.
-  Delta S x f(alfa): True=10.3144 Calculated=10.2829 Error=0.0315823
-  theta2: True=0.523599 Calculated=0.512327 Error=0.0112721
-  phi2: True=5.49779 Calculated=5.48539 Error=0.012395
-  Delta S: True=10 Calculated=9.9757 Error=0.0242968
-
-'3D' well with convergence = 0.01
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 13 iteration(s): 0.00903494 < 0.01.
-  Delta S x f(alfa): True=10.3144 Calculated=10.31 Error=0.00447744
-  theta2: True=0.523599 Calculated=0.522018 Error=0.00158042
-  phi2: True=5.49779 Calculated=5.49609 Error=0.0016981
-  Delta S: True=10 Calculated=9.99656 Error=0.00343691
-
-'3D' well with convergence = 0.001
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 17 iteration(s): 0.000564684 < 0.001.
-  Delta S x f(alfa): True=10.3144 Calculated=10.3145 Error=4.00283e-05
-  theta2: True=0.523599 Calculated=0.523613 Error=1.41032e-05
-  phi2: True=5.49779 Calculated=5.4978 Error=1.50965e-05
-  Delta S: True=10 Calculated=10 Error=3.07148e-05
-
-'3D' well with convergence = 0.0001
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 20 iteration(s): 7.05855e-05 < 0.0001.
-  Delta S x f(alfa): True=10.3144 Calculated=10.3144 Error=3.05572e-05
-  theta2: True=0.523599 Calculated=0.523588 Error=1.07666e-05
-  phi2: True=5.49779 Calculated=5.49778 Error=1.15255e-05
-  Delta S: True=10 Calculated=9.99998 Error=2.34475e-05
-
-'3D' well with convergence = 1e-05
-Calculate theta2, phi2 and dS from dE, dN, dV, theta1 and phi1.
-Reached convergence after 23 iteration(s): 8.82319e-06 < 1e-05.
-  Delta S x f(alfa): True=10.3144 Calculated=10.3144 Error=4.08763e-06
-  theta2: True=0.523599 Calculated=0.523597 Error=1.44023e-06
-  phi2: True=5.49779 Calculated=5.49779 Error=1.54172e-06
-  Delta S: True=10 Calculated=10 Error=3.13657e-06
+Test                                                    Iterations  DeltaSfa    theta2          phi2        DeltaS      Observation
+'Vertical well'                                         0           0           0               0           0           Root
+'Slant straight well'  	                                0	        0	        0	            1.11022e-16	0           Root
+'1/4 circle horizontal well'	                        7	        0.000251896	0	            0	        0.000197838
+'1/4 circle deltaE=0 horizontal well'	                7	        0.000251896	0	            0	        0.000197838
+'1/4 circle alligned north vertical to horizontal well'	7	        0.000251896	1.25946e-05	    0	        0.000125947
+'1/4 circle alligned north well going up'	            7	        0.000251896	5.32312e-06	    0	        0.000167454
+'1/4 circle alligned north well going up #2'	        7	        0.000251896	0	            0	        0.000197838
+'1/4 circle alligned north well going up #3'	        7	        0.000341565	1.25018e-05	    0	        0.000339626
+'1/4 circle 30o north vertical to horizontal well'	    7	        0.000251896	1.25946e-05	    0	        0.000125947
+'S-shaped' well: Section #1'	                        0	        0	        0	            0	        0           Root
+'S-shaped' well: Section #2'	                        20	        4.36905e-05	2.52075e-06	    0	        2.89273e-05
+'S-shaped' well: Section #3'	                        0	        2.27374e-13	7.77156e-16	    0	        2.27374e-13 Root
+'S-shaped' well: Section #4'                            0           0	        1.49012e-08	    0	        1.71589e-07     Halted
+'S-shaped' well: Section #5'	                        0	        0	        0	            0	        0           Root
+'3D well with convergence = 0.1'	                    10	        0.0315823	0.0112721	    0.012395	0.0242968
+'3D well with convergence = 0.01'	                    13	        0.00447744	0.00158042	    0.0016981	0.00343691
+'3D well with convergence = 0.001'	                    17	        4.00283e-05	1.41032e-05	    1.50965e-05	3.07148e-05
+'3D well with convergence = 0.0001'	                    20	        3.05572e-05	1.07666e-05	    1.15255e-05	2.34475e-05
+'3D well with convergence = 1e-05'	                    23	        4.08763e-06	1.44023e-06	    1.54172e-06	3.13657e-06
