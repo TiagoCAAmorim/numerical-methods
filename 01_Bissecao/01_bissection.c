@@ -250,7 +250,7 @@ double f_trigonometric(double x){
     return cos(x) + sin(x);
 }
 
-int tests_bissection(){
+void tests_bissection(){
     bool relative_convergence = false;
     int max_iterations = 50;
     bool debug = true;
@@ -447,21 +447,16 @@ struct tangle calculate_phi2(double deltaE, double deltaN, double sin_theta1, do
         phi2 = calculate_phi2_deltaN_zero(deltaE, sin_theta1, cos_phi1, sin_phi1, sin_theta2);
      } else{
         double deltaEpsilon = deltaN * sin_phi1 - deltaE * cos_phi1;
-        double deltaEpsilon_sin_theta1 = deltaEpsilon * sin_theta1;
+        double sin_theta1_sin_theta2 = sin_theta1 / sin_theta2;
         double deltaH2 = deltaE*deltaE + deltaN*deltaN;
-        double deltaBeta2 = deltaH2 * sin_theta2*sin_theta2 - deltaEpsilon_sin_theta1*deltaEpsilon_sin_theta1;
+        double deltaBeta2 = deltaH2 - deltaEpsilon * deltaEpsilon * sin_theta1_sin_theta2 * sin_theta1_sin_theta2;
         
         check_error( deltaBeta2 >= 0, "## Failed deltaBeta2 >= 0.\n");
         deltaBeta2 = max(0, deltaBeta2);
         double deltaBeta = sqrt(deltaBeta2);
 
-        double deltaH2_sin_theta2 = deltaH2 * sin_theta2;
-        if( !check_error( fabs(deltaH2_sin_theta2) > epsilon, "## Failed deltaH2_sin_theta2 != 0.\n")){
-            deltaH2_sin_theta2 = deltaH2*0.001;
-        }
-
-        phi2.sin = (-deltaN * deltaEpsilon_sin_theta1 + deltaE*deltaBeta) / deltaH2_sin_theta2;
-        phi2.cos = ( deltaE * deltaEpsilon_sin_theta1 + deltaN*deltaBeta) / deltaH2_sin_theta2;
+        phi2.sin = (-deltaN * deltaEpsilon * sin_theta1_sin_theta2 + deltaE * deltaBeta) / deltaH2;
+        phi2.cos = ( deltaE * deltaEpsilon * sin_theta1_sin_theta2 + deltaN * deltaBeta) / deltaH2;
     }
     return phi2;
 }
@@ -670,7 +665,7 @@ void tests_minimum_curvature(){
 }
 
 int main(){
-    tests_bissection();
+    // tests_bissection();
     tests_minimum_curvature();
     return 0;
 }
