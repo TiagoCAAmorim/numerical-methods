@@ -62,5 +62,7 @@ tempCodeRunnerFile.*
 *.bbl
 *.log
 *.spl
+*.blg
+*.out
 *.gz
 texput.pdf

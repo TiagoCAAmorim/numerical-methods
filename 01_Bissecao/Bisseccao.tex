@@ -27,6 +27,7 @@
 
 \usepackage{pgfplots}
 \usepackage{placeins}
+\usepackage{hyperref}
 
 %=========== Gloabal Tikz settings
 % \pgfplotsset{compat=newest}
@@ -443,12 +444,14 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
 \subsection{Erro ao Longo da Iterações}
 
+A figura abaixo apresenta a evolução do erro, com relação à resposta exata, ao longo do processo iterativo de diferentes funções, utilizando o Método da Bissecção. São apresentadas duas retas tracejadas onde a razão entre os erros de iterações sucessivas é 0.5, que é o que se espera do Método da Bissecção após um número considerável de iterações. Observa-se que os resultados numéricos não seguem exatamente uma linha reta, mas têm aproximadamente a mesma inclinação das retas tracejadas.
+
 \begin{figure}[hbt!] 
     \label{fig:Erro}
     \centering
     \begin{tikzpicture}
         \begin{axis}[
-            height = 7cm, % standard 10cm
+            height = 10cm, % standard 10cm
             width = 0.8\textwidth, %15cm,  % standard 10cm
             % xmode=log,
             ymode=log,
@@ -457,7 +460,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             % ymax=1e0,
             xlabel = {Iterações},
             ylabel = {$\varepsilon_i = |P_i - P|$},
-            legend style={at={(0.99,0.85)}, anchor=east},
+            legend style={at={(0.99,0.80)}, anchor=east},
             ]
             \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
             \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
@@ -473,15 +476,18 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
 \end{figure}
 
+\newpage
 \FloatBarrier
 \subsection{Erro em Função do Limite de Convergência}
+
+A figura a seguir mostra os erros (com relação ao valor exato) nas estimativas de diferentes parâmetros de perfuração. O algoritmo proposto foi aplicado a um trecho de poço com mudança em inclinação e direção, utilizando diferentes valores de limite de convergência ($c_{lim}$).
 
 \begin{figure}[hbt!]
     \label{fig:convergencia}
     \centering
     \begin{tikzpicture}
         \begin{axis}[
-            height = 7cm, % standard 10cm
+            height = 10cm, % standard 10cm
             width = 0.8\textwidth, %15cm,  % standard 10cm
             xmode=log,
             ymode=log,
@@ -500,13 +506,13 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{axis}
         
         \begin{axis}[
-            height = 7cm, % standard 10cm
+            height = 10cm, % standard 10cm
             xmode=log,
             width = 0.8\textwidth, %15cm,  % standard 10cm
             axis y line=right,
             ylabel={Iterações até Convergência},
             ymin=0,
-            ymax=40,
+            ymax=50,
             % yticklabel style={red},
             legend style={at={(0.98,0.10)}, anchor=east},
             ]
@@ -522,6 +528,8 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 \FloatBarrier
 \section{Esquema do Poço em S}
 
+Um dos exemplos testados com o algoritmo proposto para calcular parâmetros de perfuração em função de coordenadas cartesianas é um poço em S. Uma representação esquemática da trajetória do poço (sem escala) é apresentada abaixo.
+
 \begin{figure}[hbt!]
     \label{fig:pocoS}
     \centering
@@ -533,11 +541,13 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 \FloatBarrier
 \section{Código em C}
 
+O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
 \subsection{Método da Bissecção}
-\lstinputlisting[language=C, linerange={1-289}]{./01_bissection.c}
+\lstinputlisting[language=C, linerange={1-276}]{./01_bissection.c}
 
 \subsection{Método da Mínima Curvatura}
-\lstinputlisting[language=C, linerange={292-689}]{./01_bissection.c}
+\lstinputlisting[language=C, linerange={279-676}]{./01_bissection.c}
 
 \end{document}
 \endinput
