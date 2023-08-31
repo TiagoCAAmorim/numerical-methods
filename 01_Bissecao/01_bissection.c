@@ -181,7 +181,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
         {
             case root: printf("Found |f(x)| < %g after %i iterations.\n", epsilon, i); break;
             case converged: printf("Reached convergence after %i iteration(s): %g < %g.\n", i, convergence, convergence_tol); break;
-            case sign_error: printf("Cannot continue. Returning result closest to zero amongst f(x_a) and f(x_b).\n"); break;
+            case sign_error: printf("Cannot continue. Returning result closest to zero among f(x_a) and f(x_b).\n"); break;
             case no_exit: printf("Convergence was not reached after %i iteration(s): %g.\n", i-1, convergence); break;
             default: printf("Unkown exit criteria.\n");
         }
@@ -425,7 +425,8 @@ struct tangle calculate_phi2_deltaN_zero(double deltaE, double sin_theta1, doubl
         check_error( fabs(sin_theta2) > epsilon, "## Failed sin(theta2) != 0.\n");
         phi2.cos = - sin_theta1 / sin_theta2 * cos_phi1;
     }
-    phi2.sin = sqrt(1 - phi2.sin*phi2.sin);
+    check_error( fabs(phi2.cos) <= 1, "## Failed |cos(phi2)| <= 1.\n");
+    phi2.sin = sqrt(1 - phi2.cos*phi2.cos);
     if( sin_phi1 > 0){
         phi2.sin = -phi2.sin;
     }
@@ -561,16 +562,7 @@ void tests_minimum_curvature(){
     bool relative_convergence = false;
     double convergence_limit = 0.001;
 
-    printf("\n#### Minimum Curvatura Method Tests ####\n");
-
-    printf("\nAngle calculation\n");
-    for(int i=0; i<=10; i++){
-        a = 0.2*i*pi;
-        theta2_.cos = cos(a);
-        theta2_.sin = sin(a);
-        theta2_.rad = calculate_rad(theta2_, true);
-        print_error(" Angle calculation",a,theta2_.rad, 0.001, false);
-    }
+    printf("\n#### Minimum Curvature Method Tests ####\n");
 
     dS=10;
     theta1=0;    phi1=0.88*pi;
@@ -665,7 +657,7 @@ void tests_minimum_curvature(){
 }
 
 int main(){
-    // tests_bissection();
+    tests_bissection();
     tests_minimum_curvature();
     return 0;
 }
