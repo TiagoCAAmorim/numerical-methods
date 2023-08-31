@@ -13,7 +13,7 @@ const double pi = 3.14159265358979323846;
 const int default_iterations = 100;
 const double default_convergence = 1E-4;
 
-const bool stop_on_error = false;
+const bool stop_on_error = true;
 
 bool check_error(bool ok_condition, char *error_message){
     if( !ok_condition){
@@ -819,7 +819,7 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
-    deltaSfa_calc = find_root_newton_raphson_debug(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, deltaSfa_min, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa, true);
+    deltaSfa_calc = find_root_newton_raphson_debug(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, deltaSfa_min*f_alfa(pi/6), deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa, true);
         
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, convergence_limit, relative_convergence);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
