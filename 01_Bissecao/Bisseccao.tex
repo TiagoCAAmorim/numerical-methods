@@ -115,7 +115,7 @@
 %% \fntext[label3]{}
 
 \title{Proposta de Cálculo de Parâmetros de Perfuração de Poços de Petróleo a partir de Coordenadas Espaciais com o Método da Bissecção\tnoteref{label_title}}
-\tnotetext[label_title]{Relatório integrante dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+\tnotetext[label_title]{Relatório número 1 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
@@ -186,13 +186,13 @@ O desenvolvimento de técnicas para construção de poços direcionais na indús
 
 O Método da Mínima Curvatura é largamente aceito como o método padrão para o cálculo de trajetória de poços \cite{10.2118/84246-MS}. Neste método a geometria do poço é descrita como uma série de arcos circulares e linhas retas. A transformação de parâmetros de perfuração ($\Delta$S, $\theta$, $\phi$) em coordenadas cartesianas ($\Delta$N, $\Delta$E, $\Delta$V) tem formulação explícita. A operação inversa, de coordenadas cartesianas em parâmetros de perfuração não tem formulação explícita.
 
-No planejamento de novos poços de petróleo as coordenadas espaciais são conhecidas, e é necessário calcular os futuros parâmetros de perfuração. Os parâmetros de perfuração são utilizados para diferentes análises, como o de máximo DLS (\emph{dogleg severity}), que é uma medida da curvatura de um poço entre dois pontos de medida, usualmente expressa em graus por metro.
+No planejamento de novos poços de petróleo as coordenadas espaciais são conhecidas, e é necessário calcular os futuros parâmetros de perfuração. Os parâmetros de perfuração são utilizados para diferentes análises, como o de máximo DLS (\emph{dogleg severity}), que é uma medida da curvatura de um poço entre dois pontos de medida, usualmente expressa em graus por 30 metros\footnote{$DLS[^o/30 m] = \alpha / \Delta S \cdot 30$, com $\alpha$ em graus e $\Delta S$ em metros.}.
 
 Este relatório apresenta uma proposta de metodologia para cálculo dos parâmetros de perfuração a partir das coordenadas cartesianas de pontos ao longo da geometria do poço. A formulação foi derivada das fórmulas utilizadas no Método da Mínima Curvatura, e é implícita. Para resolver o problema foi aplicado o Método da Bissecção.
 
 \section{Metodologia}
 
-\subsection{Método da Mínima Curvatura}
+\subsection{Método da Mínima Curvatura}  \label{subsec:metodominimacurvatura}
 
 Ao longo da perfuração de um poço de petróleo são realizadas medições do comprimento perfurado (comumente chamado de comprimento medido), inclinação (ângulo com relação à direção vertical) e azimute (ângulo entre a direção horizontal e o norte). A partir das coordenadas geográficas do ponto inicial do poço e deste conjunto de medições ao longo da trajetória, é possível calcular as coordenadas cartesianas (N, E, V) de qualquer posição do poço. A figura \ref{fig:parametros} apresenta um esquema dos parâmetros de perfuração de um poço direcional:
 \begin{itemize}
@@ -232,7 +232,7 @@ As fórmulas que associam os parâmetros de perfuração e as coordenadas cartes
     \end{cases}
 \end{equation}
 
-A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta=0$, $\phi=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta$N,$\Delta$E, $\Delta$V). O objetivo é calcular $\theta_1$, $\phi_1$ e $\Delta$S.
+A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta=0$, $\phi=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta$N,$\Delta$E, $\Delta$V). O objetivo é calcular a direção do poço no 2$^o$ ponto ($\theta_2$ e $\phi_2$) e a distância medida entre os pontos ($\Delta S$).
 
 É possível inverter a equação \ref{eq:deltaV} para obter uma expressão para $\theta_2$:
 \begin{equation} \label{eq:cos_theta2}
@@ -291,7 +291,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     \item Se $\Delta N = \Delta E = 0$ então $|\phi_1 - \phi_2| = \pi$.
 \end{itemize}
 
-    \subsection{Método da Bissecção}
+    \subsection{Método da Bissecção} \label{sec:mcm}
     
     Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o Método da Bissecção para buscar o resultado do problema proposto. O algoritmo foi baseado no pseudo-código descrito em \cite{burden2016analise}. O Método da Bissecção baseia-se no teorema do valor médio. O intervalo de busca pela raiz é sucessivamente divido em dois. O método tem garantia de que a raiz pertence ao intervalo ao manter os valores da função avaliada nos limites do intervalo com sinais opostos\footnote{Assumindo que o intervalo inicial fornecido também tem esta propriedade.}. 
 
@@ -345,32 +345,13 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     
     Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}. Foi feita uma sensibilidade do critério de convergência ($c_{lim}$) e foi possível trabalhar com limites de valores baixos sem aparente perda da qualidade da resposta por problemas com aritmética de máquina (\ref{fig:convergencia}).
 
-    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última iteração. Um exemplo prático deste efeito é visto na Tabela \ref{tab:fquad}, onde o melhor resultado é alcançado na 8$^a$ iteração, mas o critério de convergência\footnote{A coluna com os valores da convergência foi omitida por falta de espaço na página} só é alcançado na 11$^a$ iteração.
+    É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última iteração.
     
-    \begin{table}[h!] 
-        \centering
-        \caption{Busca pela raiz de $5x^2+3x-0.25$ no intervalo $[-0.25; 1]$ pelo Método da Bissecção.}
-        \begin{tabular}{ c c c c c c c }
-            Int. & $x_a$   & $f(x_a)$    & $x_b$      & $f(x_b)$    & $x_{medio}$ & $f(x_{medio})$  \\
-            \hline
-             1 &     -0.25 &     -0.1875 &          1 &        8.25 &      0.375 &     2.07812   \\
-             2 &     -0.25 &     -0.1875 &      0.375 &     2.07812 &     0.0625 &    0.457031   \\
-             3 &     -0.25 &     -0.1875 &     0.0625 &    0.457031 &   -0.09375 &   0.0126953   \\
-             4 &     -0.25 &     -0.1875 &   -0.09375 &   0.0126953 &  -0.171875 &    -0.11792   \\
-             5 & -0.171875 &    -0.11792 &   -0.09375 &   0.0126953 &  -0.132812 &  -0.0602417   \\
-             6 & -0.132812 &  -0.0602417 &   -0.09375 &   0.0126953 &  -0.113281 &  -0.0256805   \\
-             7 & -0.113281 &  -0.0256805 &   -0.09375 &   0.0126953 &  -0.103516 & -0.00696945   \\
-             8 & -0.103516 & -0.00696945 &   -0.09375 &   0.0126953 & -0.0986328 &  0.00274372   \\
-             9 & -0.103516 & -0.00696945 & -0.0986328 &  0.00274372 &  -0.101074 & -0.00214267   \\
-            10 & -0.101074 & -0.00214267 & -0.0986328 &  0.00274372 & -0.0998535 & 0.000293076   \\
-            11 & -0.101074 & -0.00214267 & -0.0998535 & 0.000293076 &  -0.100464 & -0.000926659 
-        \end{tabular}
-        \label{tab:fquad}
-    \end{table}
-    
-    A metodologia proposta para o cálculo de parâmetros de perfuração com o Método da Mínima Curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. A definição do intervalo de busca é direta, mas, devido a erros de aritmética de máquina, não é possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta está muito próxima de um dos limites. Desta forma, ao invés de gerar uma mensagem de erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
+    A metodologia proposta para o cálculo de parâmetros de perfuração com o Método da Mínima Curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. O Método da Bissecção se encaixa bem na resolução do problema proposto por trabalhar em uma faixa de valores pré-determinada. Devido a erros de aritmética de máquina, não é sempre possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta está muito próxima do limite inferior. Desta forma, ao invés de gerar um erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem de alerta ao usuário e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
     
     Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()| (\ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
+
+    Os limites da região em que o problema proposto deve ser avaliado são definidos por um lado pelo menor valor possível de $\Delta S f(\alpha)$ discutido em \ref{sec:mcm}. O valor máximo foi definido como $[\Delta S f(\alpha)]_{min} \cdot f(\alpha = 0.95\pi)$. O limite superior é equivalente a aproximadamente um arco de 180$^o$, o que não é algo factível em uma aplicação real, e que serve como um limite superior na região de busca.
 
     Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (\ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:iteracoes}).
     
@@ -402,7 +383,24 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{tabular}
         \label{table:iteracoes}
     \end{table}
-        
+    
+    O Método da Bissecção gerou bons resultados na aplicação proposta. Em um dos testes proposto o método não conseguiu ser aplicado porque a resposta correto é igual ao limite inferior e, por erro de aritmética de máquina, o valor da função não é zero neste ponto. Para diversos testes a solução foi trivial, pois a resposta exata é igual ao limite inferior de $\Delta S f(\alpha)$. Na Tabela \ref{table:resultados} todos os testes reportados foram feitos utilizando como critério de parada $|x_{i+1} - x_i| < c_{lim} = 1E-3$.
+    
+    \begin{table}[h] 
+        \centering
+        \caption{Erro das respostas de interesse com relação ao valor exato para testes realizados com algoritmo proposto e o Método da Bissecção.}
+        \begin{tabular}{ l c c c c c c }
+            Teste & Iter. & $\Delta S f(\alpha)$ & $\theta_2$ & $\phi_2$ & $\Delta S$ \\
+            % Teste & Iter. & $\Epsilon \Delta S f(\alpha)$ & $\Epsilon \theta_2$ & $\Epsilon \phi_2$ & $\Epsilon \Delta S$ \\
+            \hline
+            Linha reta inclinada     & 0  & 0       & 0       & 1.11e-16 & 0  \\
+            $1/4$ de círculo         & 7  & 2.52e-4 & 1.26e-5 & 0        & 1.26e-4 \\
+            Seção 2 do poço em S & 20 & 4.37e-5 & 2.52e-6 & 0        & 2.89e-05 \\
+            Poço 3D                  & 17 & 4.00e-5 & 1.41e-5 & 1.51e-5  & 3.07e-05 
+        \end{tabular}
+        \label{table:resultados}
+    \end{table}
+    
     \section{Conclusão}
     
     O algoritmo proposto para o cálculo de parâmetros de perfuração em função das coordenadas cartesianas de pontos ao longo do se mostrou eficaz. Foram feitos ajustes ao código implementado de forma a evitar o uso de funções trigonométricas ao longo do processo iterativo.
