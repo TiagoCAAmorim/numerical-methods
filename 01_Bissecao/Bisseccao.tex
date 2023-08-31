@@ -349,6 +349,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     
     \begin{table}[h!] 
         \centering
+        \caption{Busca pela raiz de $5x^2+3x-0.25$ no intervalo $[-0.25; 1]$ pelo Método da Bissecção.}
         \begin{tabular}{ c c c c c c c }
             Int. & $x_a$   & $f(x_a)$    & $x_b$      & $f(x_b)$    & $x_{medio}$ & $f(x_{medio})$  \\
             \hline
@@ -364,7 +365,6 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             10 & -0.101074 & -0.00214267 & -0.0986328 &  0.00274372 & -0.0998535 & 0.000293076   \\
             11 & -0.101074 & -0.00214267 & -0.0998535 & 0.000293076 &  -0.100464 & -0.000926659 
         \end{tabular}
-        \caption{Busca pela raiz de $5x^2+3x-0.25$ no intervalo $[-0.25; 1]$ pelo Método da Bissecção.}
         \label{tab:fquad}
     \end{table}
     
@@ -372,7 +372,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     
     Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()| (\ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
 
-    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (\ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:Iteracoes}).
+    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (\ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:iteracoes}).
     
     \begin{equation} \label{eq:nint}
         n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
@@ -385,7 +385,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{cases}
     \end{align*}
 
-    \begin{table}[h] \label{table:Iteracoes}
+    \begin{table}[h] 
         \centering
         \caption{Comparação entre o número de iterações previsto e realizado para diferentes testes.}
         \begin{tabular}{ l c c c c c c }
@@ -400,6 +400,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             Seção 2 do poço em S & 130.526 & 1111.4 & 20 & 20 & 13 & 13 \\
             Poço 3D & 9.84918 & 83.8634 & 17 & 17 & 13 & 13 \\
         \end{tabular}
+        \label{table:iteracoes}
     \end{table}
         
     \section{Conclusão}
@@ -547,7 +548,7 @@ O código de ambos métodos foi implementado em um único arquivo. O código é 
 \lstinputlisting[language=C, linerange={1-276}]{./01_bissection.c}
 
 \subsection{Método da Mínima Curvatura}
-\lstinputlisting[language=C, linerange={279-676}]{./01_bissection.c}
+\lstinputlisting[language=C, linerange={279-999}]{./01_bissection.c}
 
 \end{document}
 \endinput
