@@ -7,7 +7,7 @@
 #include <math.h>
 #include <assert.h>
 
-const double epsilon = 1E-17;
+const double epsilon = 1E-7;
 const double pi = 3.14159265358979323846;
 
 const int default_iterations = 100;
@@ -33,14 +33,8 @@ double max(double a, double b){
     return a>b? a: b;
 }
 
-bool is_root(double fx, double x, int i, bool debug){
-    if( fabs(fx) < epsilon){
-        if( debug){
-            printf("Early exit after %i iterations: f(%g) = %g.\n", i, x, fx);
-        }
-        return true;
-    }
-    return false;
+bool is_root(double fx, double x){
+    return fabs(fx) < epsilon;
 }
 
 double calculate_convergence(double x_current, double x_previous, bool relative_convergence){
@@ -61,7 +55,7 @@ void print_error(char *message, double true_value, double calculated_value, doub
     relative_error = calculate_convergence(true_value, calculated_value, relative_convergence);
     printf("%s: True=%g Calculated=%g Error=%g", message, true_value, calculated_value, relative_error);
     if( relative_error > error_limit){
-        printf("  <= ######### Atention ###########");
+        printf("  <= ######### Attention ###########");
     }
     printf("\n");
 }
@@ -93,7 +87,8 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
     double fx_a, fx_b, fx_mean;
     double x_mean, x_mean_previous;
     double convergence;
-    double exit_function = false;
+    enum type_exit_function {no_exit, root, converged, sign_error};
+    enum type_exit_function exit_function = no_exit;
     bool print_true_error;
     int i=0;
 
@@ -109,21 +104,22 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
     fx_mean = 1e20;
     
     convergence = calculate_convergence(min(x_a, x_b), max(x_a, x_b), relative_convergence);
-    exit_function = is_root(fx_a, x_a, 0, debug) || is_root(fx_b, x_b, 0, debug);
+    if( is_root(fx_a, x_a) || is_root(fx_b, x_b)){
+        exit_function = root;
+    };
 
-    if( !exit_function){
+    if( exit_function == no_exit){
         if( convergence < convergence_tol ){
             if( debug){
-                printf("Initial limits are closer than convergence criteria: |%g - %g| = %g.\n",x_b,x_a,fabs(x_a - x_b));
+                printf("Initial limits are closer than convergence criteria: |%g - %g| = %g < %g.\n",x_b,x_a,fabs(x_a - x_b), convergence_tol);
             }
-            exit_function = true;
+            exit_function = converged;
         }
     }
 
-    if( !exit_function){
+    if( exit_function == no_exit){
         if( signbit(fx_a) == signbit(fx_b) ){
             printf("Function has same sign in limits: f(%g) = %g f(%g) = %g.\n",x_a,fx_a,x_b,fx_b);
-            printf("Returning result closest to zero amongst f(x_a) and f(x_b).\n");
             if( debug){
                 double x_trial;
                 printf("Sample of function results in the provided domain:\n");
@@ -132,7 +128,7 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
                     printf("  f(%g) = %g\n", x_trial, func(x_trial));
                 }
             }
-            exit_function = true;
+            exit_function = sign_error;
         }
     }
 
@@ -162,11 +158,12 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
             }
 
             if( convergence < convergence_tol){
+                exit_function = converged;
                 break;
             }
             
-            if( is_root(fx_mean, x_mean, i, debug)){
-                exit_function = true;
+            if( is_root(fx_mean, x_mean)){
+                exit_function = root;
                 break;
             }
 
@@ -180,10 +177,13 @@ double find_root_bissection_debug(double (*func)(double), double x_a, double x_b
         }
     }
     if( debug){
-        if( exit_function || convergence < convergence_tol){
-            printf("Reached convergence after %i iteration(s): %g.\n", i, convergence);  
-        } else {
-            printf("Convergence was not reached after %i iteration(s): %g.\n", i, convergence);
+        switch(exit_function)
+        {
+            case root: printf("Found |f(x)| < %g after %i iterations.\n", epsilon, i); break;
+            case converged: printf("Reached convergence after %i iteration(s): %g < %g.\n", i, convergence, convergence_tol); break;
+            case sign_error: printf("Cannot continue. Returning result closest to zero amongst f(x_a) and f(x_b).\n"); break;
+            case no_exit: printf("Convergence was not reached after %i iteration(s): %g.\n", i-1, convergence); break;
+            default: printf("Unkown exit criteria.\n");
         }
     }
     return return_closest_to_root_3pt(x_a, fx_a, x_b, fx_b, x_mean, fx_mean);
@@ -225,14 +225,6 @@ double f_linear(double x){
     return -x*3 + 0.9;
 }
 
-float f_linear_float(float x){
-    return -x*3 + 0.9;
-}
-
-long double f_linear_long_double(long double x){
-    return -x*3 + 0.9;
-}
-
 // Root at x=0.3
 double f_linear2(double x){
     return -x*3E5 + 0.9E5;
@@ -241,11 +233,6 @@ double f_linear2(double x){
 // Roots at x=-0.5 and -0.1
 double f_quadratic(double x){
     return (5*x + 3)*x + 0.25; // = 5*x*x + 3*x + 0.25;
-}
-
-// Roots at x=-0.5 and -0.1
-double f_quadratic2(double x){
-    return 5*x*x + 3*x + 0.25;
 }
 
 // Root at x= +-2
@@ -577,7 +564,7 @@ void tests_minimum_curvature(){
     char message[100];
 
     bool relative_convergence = false;
-    bool convergence_limit = 0.001;
+    double convergence_limit = 0.001;
 
     printf("\n#### Minimum Curvatura Method Tests ####\n");
 
@@ -675,7 +662,7 @@ void tests_minimum_curvature(){
     dE=0.;    dN=0.;    dV=0.;
 
     double c;
-    for( int i = 1; i<= 10; i++){
+    for( int i = 1; i<= 5; i++){
         c = pow(10, -i);
         sprintf(message, "'3D' well with convergence = %g", c);
         test_MCM_formulas(message, dS, theta1, phi1, theta2, phi2, a, dE, dN, dV, false, relative_convergence, c);   
