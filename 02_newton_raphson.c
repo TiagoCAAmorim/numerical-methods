@@ -428,7 +428,7 @@ void tests_newton_raphson(){
     test_newton_raphson(f_cos, fp_cos, pi/2, 10*epsilon, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Cossine function, x_init close to maximum");
     test_newton_raphson(f_cos, fp_cos, pi/2, 0, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Cossine function, x_init = maximum");
 
-    test_newton_raphson(f_trigonometric, fp_trigonometric, 3./4*pi, 0, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple roots");
+    test_newton_raphson(f_trigonometric, fp_trigonometric, 3./4*pi, 3., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple roots");
     
     test_newton_raphson(f_trigonometric2, fp_trigonometric2, 0, 10., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima and 'very good' x_init");
     test_newton_raphson(f_trigonometric2, fp_trigonometric2, 0, 12, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima and 'bad' x_init");
