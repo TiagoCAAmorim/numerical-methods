@@ -1,4 +1,4 @@
-\documentclass[final,3p,12pt]{elsarticle}
+\documentclass[final,5p]{elsarticle}
 
 % \documentclass[preprint,12pt]{elsarticle}
 
@@ -26,8 +26,14 @@
 \usepackage{multirow}
 
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{placeins}
 \usepackage{hyperref}
+\numberwithin{equation}{section}
+
+% \usepackage[fleqn]{nccmath}
+
+% \usepackage{multicol}
 
 %=========== Gloabal Tikz settings
 % \pgfplotsset{compat=newest}
@@ -202,9 +208,9 @@ Ao longo da perfuração de um poço de petróleo são realizadas medições do 
     \item $\alpha$: curvatura entre dois pontos ao longo da trajetória.
 \end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
-    \includegraphics[width=0.5\textwidth]{Parametros}
+    \includegraphics[width=0.4\textwidth]{Parametros}
     \caption{Parâmetros de perfuração entre dois pontos ao longo de um poço direcional.}
     \label{fig:parametros}
 \end{figure}
@@ -366,10 +372,11 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{cases}
     \end{align*}
 
-    \begin{table}[h] 
-        \centering
+    \begin{table*} 
+        % \centering
         \caption{Comparação entre o número de iterações previsto e realizado para diferentes testes.}
         \begin{tabular}{ l c c c c c c }
+            \hline
             \multirow{2}{*}{Função} & \multirow{2}{*}{$x_a$} & \multirow{2}{*}{$x_b$} & \multicolumn{2}{c}{Critério \emph{Direto}} & \multicolumn{2}{c}{Critério \emph{Relativo}} \\
             &  &  & Previsão & Realizado & Previsão & Realizado \\
             \hline
@@ -380,26 +387,28 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             1/4 círculo horizontal & 14.1421 & 120.417 & 17 & 17 & 13 & 13 \\
             Seção 2 do poço em S & 130.526 & 1111.4 & 20 & 20 & 13 & 13 \\
             Poço 3D & 9.84918 & 83.8634 & 17 & 17 & 13 & 13 \\
+            \hline
         \end{tabular}
         \label{table:iteracoes}
-    \end{table}
+    \end{table*}
     
     O Método da Bissecção gerou bons resultados na aplicação proposta. Em um dos testes proposto o método não conseguiu ser aplicado porque a resposta correto é igual ao limite inferior e, por erro de aritmética de máquina, o valor da função não é zero neste ponto. Para diversos testes a solução foi trivial, pois a resposta exata é igual ao limite inferior de $\Delta S f(\alpha)$. Na Tabela \ref{table:resultados} todos os testes reportados foram feitos utilizando como critério de parada $|x_{i+1} - x_i| < c_{lim} = 1E-3$.
     
-    \begin{table}[h] 
-        \centering
+    \begin{table*} 
+        % \centering
         \caption{Erro das respostas de interesse com relação ao valor exato para testes realizados com algoritmo proposto e o Método da Bissecção.}
         \begin{tabular}{ l c c c c c c }
+            \hline
             Teste & Iter. & $\Delta S f(\alpha)$ & $\theta_2$ & $\phi_2$ & $\Delta S$ \\
-            % Teste & Iter. & $\Epsilon \Delta S f(\alpha)$ & $\Epsilon \theta_2$ & $\Epsilon \phi_2$ & $\Epsilon \Delta S$ \\
             \hline
             Linha reta inclinada     & 0  & 0       & 0       & 1.11e-16 & 0  \\
             $1/4$ de círculo         & 7  & 2.52e-4 & 1.26e-5 & 0        & 1.26e-4 \\
             Seção 2 do poço em S & 20 & 4.37e-5 & 2.52e-6 & 0        & 2.89e-05 \\
-            Poço 3D                  & 17 & 4.00e-5 & 1.41e-5 & 1.51e-5  & 3.07e-05 
+            Poço 3D                  & 17 & 4.00e-5 & 1.41e-5 & 1.51e-5  & 3.07e-05 \\
+            \hline
         \end{tabular}
         \label{table:resultados}
-    \end{table}
+    \end{table*}
     
     \section{Conclusão}
     
@@ -434,18 +443,18 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
 % \end{thebibliography}
 
-\newpage
+% \newpage
 
 \appendix
 
-\FloatBarrier
+% \FloatBarrier
 \section{Gráficos Diagnóstico}
 
 \subsection{Erro ao Longo da Iterações}
 
 A figura abaixo apresenta a evolução do erro, com relação à resposta exata, ao longo do processo iterativo de diferentes funções, utilizando o Método da Bissecção. São apresentadas duas retas tracejadas onde a razão entre os erros de iterações sucessivas é 0.5, que é o que se espera do Método da Bissecção após um número considerável de iterações. Observa-se que os resultados numéricos não seguem exatamente uma linha reta, mas têm aproximadamente a mesma inclinação das retas tracejadas.
 
-\begin{figure}[hbt!] 
+\begin{figure*} 
     \label{fig:Erro}
     \centering
     \begin{tikzpicture}
@@ -473,15 +482,15 @@ A figura abaixo apresenta a evolução do erro, com relação à resposta exata,
         
     \end{tikzpicture}
     \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
-\end{figure}
+\end{figure*}
 
-\newpage
-\FloatBarrier
+% \newpage
+% \FloatBarrier
 \subsection{Erro em Função do Limite de Convergência}
 
 A figura a seguir mostra os erros (com relação ao valor exato) nas estimativas de diferentes parâmetros de perfuração. O algoritmo proposto foi aplicado a um trecho de poço com mudança em inclinação e direção, utilizando diferentes valores de limite de convergência ($c_{lim}$).
 
-\begin{figure}[hbt!]
+\begin{figure*}
     \label{fig:convergencia}
     \centering
     \begin{tikzpicture}
@@ -521,10 +530,10 @@ A figura a seguir mostra os erros (com relação ao valor exato) nas estimativas
 
     \end{tikzpicture}
     \caption{Erro das variáveis de interesse em função do limite de convergência utilizado.}
-\end{figure}
+\end{figure*}
 
-\newpage
-\FloatBarrier
+% \newpage
+% \FloatBarrier
 \section{Esquema do Poço em S}
 
 Um dos exemplos testados com o algoritmo proposto para calcular parâmetros de perfuração em função de coordenadas cartesianas é um poço em S. Uma representação esquemática da trajetória do poço (sem escala) é apresentada abaixo.
@@ -536,8 +545,8 @@ Um dos exemplos testados com o algoritmo proposto para calcular parâmetros de p
     \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
 \end{figure}
 
-\newpage
-\FloatBarrier
+% \newpage
+% \FloatBarrier
 \section{Código em C}
 
 O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
@@ -547,6 +556,6 @@ O código de ambos métodos foi implementado em um único arquivo. O código é 
 
 \subsection{Método da Mínima Curvatura}
 \lstinputlisting[language=C, linerange={279-999}]{./01_bissection.c}
-
+    
 \end{document}
 \endinput
