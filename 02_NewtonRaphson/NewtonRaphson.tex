@@ -145,6 +145,8 @@ country={Brasil}}
 
 \begin{abstract}
 
+    A partir da formulação do Método da Mínima Curvatura, foi desenvolvido um algoritmo para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Este algoritmo tem formulação implícita, e pode ser resolvido utilizando métodos de busca de raiz de funções de uma variável. Neste relatório foi aplicado o Método de Newton-Raphson para resolver este problema. Com um ajuste ao método foi possível encontrar soluções para este problema com uma taxa de convergência duas vezes maior que aquela consguida com o Método da Bissecção.
+
 \end{abstract}
 
 
@@ -308,7 +310,9 @@ A definição de $\sin \theta_2(x)^{\prime}$ pode ser desenvolvida a partir de $
 
     A implementação do Método de Newton-Raphson teve uma alteração adicional em função dos resultados dos testes realizados. Nas fórmulas do problema proposto fica evidente que a variável principal ($\Delta S f(\alpha)$) não pode ter um valor qualquer. Para evitar simplesmente parar o processo iterativo quando o próximo ponto é menor que o limite inferior, foi implementada uma verificação adicional no método: caso o novo valor de $x$ estiver fora dos limites pré-estabelecidos, usará o valor do limite que foi violado. Desta forma é dada uma \emph{chance} para o processo iterativo conseguir convergir para uma resposta melhor. Para os cálculos de parâmetros de perfuração foi utilizado um limite inferior de $\Delta S f(\alpha)$ igual ao discutido em \cite{relatoriobisseccao}.
 
-    Como esperado, o Método de Newton-Raphson se mostrou mais rápido que o Método da Bissecção (Tabela \ref{table:iteracoes}). O único teste em que o Método da Bissecção teve uma convergência melhor foi na função exponencial: $\exp^{x^2-4}-1$. Enquanto o Método da Bisseção tem convergência linear, o Método de Newton-Raphson teve convergência aproximadamente quadrática (). 
+    As funções polinomiais testadas convergiram muito rapidamente, mesmo as que tinham a derivada nula na raiz. O único teste em que o Método da Bissecção teve uma convergência mais rápida foi na função exponencial: $e^{x^2-4}-1$ (Tabela \ref{table:iteracoes}). Esta função é especialmente difícil para o Método de Newton-Raphson porque tem uma mudança brusca da derivada à esquerda e à direita de cada raiz, tornando o método instável na região de derivada muito próxima de zero ($-2<x<2$) e com baixa taxa de convergência nas regiões de derivada muito alta ($x>2$) ou muito baixa ($x<-2$). 
+    
+    Enquanto o Método da Bisseção para as diferentes funções testadas o erro reduziu em uma razão de aproximadamente 2 (\cite{relatoriobisseccao}), o Método de Newton-Raphson teve comportamentos variados: convergência muito rápida para funções quadráticas e trigonométricas, convergência muito lenta para a função exponencial. Para o problema proposto a o erro caiu em uma razão de aproximadamente 4, ou seja, duas vezes mais rápido que com o Método da Bissecção (Ver \ref{fig:Erro}). 
 
     \begin{table}[h] 
         \centering
@@ -328,16 +332,15 @@ A definição de $\sin \theta_2(x)^{\prime}$ pode ser desenvolvida a partir de $
         \label{table:iteracoes}
     \end{table}
     
-    Na aplicação do Método de Newton com o algoritmo desenvolvido para cálculo de parâmetros de perfuração os resultados foram muito bons. Nenhum dos testes teve problemas de convergência, e convergiram com um número de iterações menor que o do Método da Bissecção ().
+    Para algumas funções o Método de Newton-Raphson se mostrou instável, ficando muito dependente do ponto inicial para conseguir convergir. A função $\cos x + \sin x$ tem muitas raízes, e o resultado do Método de Newton-Raphson se mostrou muito dependente do ponto inicial. Para conseguir encontrar a raiz de uma determinada região foi preciso definir um ponto inicial \emph{bem próximo} da raiz. Já a função $3x + x^2 \sin^2 \frac{x\pi}{10}$ mostrou muita instabilidade, em muitos casos não conseguiu convergir ao fazer pequenas mudanças no valor do ponto inicial.
 
-    Para algumas funções o Método de Newton-Raphson se mostrou instável, ficando muito dependente do ponto inicial para conseguir convergir. A função $\cos x + \sin x$ tem muitas raízes, e o resultado do Método de Newton-Raphson se mostrou muito dependente do ponto inicial. Para conseguir encontrar a raiz de uma determinada região foi preciso definir um ponto inicial \emph{bem próximo} da raiz. Já a função $3x + x^2 \sin^2 \frac{x\pi}{10}$ mostrou muita instabilidade, em muitos casos não conseguindo convergir.
+    Na aplicação do Método de Newton com o algoritmo desenvolvido para cálculo de parâmetros de perfuração os resultados foram muito bons. Nenhum dos testes teve problemas de convergência, e convergiram com um número de iterações menor que o do Método da Bissecção. O formato da função de construída favorece o uso do Método de Newton-Raphson, pois tem a forma próxima de uma reta (ver \ref{fig:fpoco3d}).
 
-    Para o problema proposto foram testados alguns valores distintos de ponto inicial (Tabela ).
-    
+    Para o problema proposto foram testados alguns valores distintos de ponto inicial, mas o impacto no resultado não é expressivo. Um valor inicial \emph{melhor} irá resultar em uma ou duas iterações a menos. Inicializar no valor mínimo de $\Delta S f(\alpha)$ não teve um resultado muito bom em alguns dos testes realizados, pois nesta região a derivada tem maior variação. No código foi utilizado por padrão um valor 10\% maior que o mínimo. 
+        
     \section{Conclusão}
     
-    O algoritmo proposto para o cálculo de parâmetros de perfuração em função das coordenadas cartesianas de pontos ao longo do se mostrou eficaz. Foram feitos ajustes ao código implementado de forma a evitar o uso de funções trigonométricas ao longo do processo iterativo.
-    O Método da Bisseção se mostrou adequado para uso com o algoritmo proposto. As funções propostas não são válidas para quaisquer valores de entrada, e a delimitação de uma região de busca foi importante para garantir a convergência do problema.
+    O Método de Newton-Raphson se mostrou adequado para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Foi necessário adaptar o Método de Newton-Raphson para conseguir continuar o processo iterativo caso o novo valor de teste não esteja na região de validade da função. Com este ajuste todos os testes realizados alcançaram o critério de convergência com um número de iterações menor do que o que foi alcançado com o Método da Bissecção.
 
     % \label{}
     
@@ -371,103 +374,145 @@ A definição de $\sin \theta_2(x)^{\prime}$ pode ser desenvolvida a partir de $
 
 \appendix
 
-% \FloatBarrier
-% \section{Gráficos Diagnóstico}
+\FloatBarrier
+\section{Funções de Teste}
 
-% \subsection{Erro ao Longo da Iterações}
+Nos gráficos a seguir as curvas contínuas são as funções de teste e as tracejadas são as respectivas derivadas. A raiz (ou raízes) está denotada pelo quadrado azul. São apresentadas apenas algumas das funções de teste.
 
-% A figura abaixo apresenta a evolução do erro, com relação à resposta exata, ao longo do processo iterativo de diferentes funções, utilizando o Método da Bissecção. São apresentadas duas retas tracejadas onde a razão entre os erros de iterações sucessivas é 0.5, que é o que se espera do Método da Bissecção após um número considerável de iterações. Observa-se que os resultados numéricos não seguem exatamente uma linha reta, mas têm aproximadamente a mesma inclinação das retas tracejadas.
+\begin{figure}[hbt!] 
+    \label{fig:polinomial}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis} [axis lines=center]
+            \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
+            \addplot [dashed, domain=-3:3, smooth, thick] { 3*x*(3*x + 4) };
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(0,0)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Polinômio de 3$^o$ grau: $3x^3 + 2x^2$.}
+\end{figure}
 
-% \begin{figure}[hbt!] 
-%     \label{fig:Erro}
-%     \centering
-%     \begin{tikzpicture}
-%         \begin{axis}[
-%             height = 10cm, % standard 10cm
-%             width = 0.8\textwidth, %15cm,  % standard 10cm
-%             % xmode=log,
-%             ymode=log,
-%             grid=both,
-%             % ymin=1e-12,
-%             % ymax=1e0,
-%             xlabel = {Iterações},
-%             ylabel = {$\varepsilon_i = |P_i - P|$},
-%             legend style={at={(0.99,0.80)}, anchor=east},
-%             ]
-%             \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
-%             \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
-%             \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
-%             \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
-%             \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
-%             \addplot[color=black, dashed] table [x=Iteration, y =TX05A] {IterationError.txt};
-%             \addplot[color=black, dashed] table [x=Iteration, y =TX05B] {IterationError.txt};
-%             \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
-%         \end{axis}
+\begin{figure}[hbt!] 
+    \label{fig:fexponencial}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis} [axis lines=center]
+            \addplot [domain=-3:3, smooth, thick] { exp(x^2 - 5) -1 };
+            \addplot [dashed, domain=-2.5:2.5, smooth, thick] { 2*x*exp(x^2-4) };
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(2,0)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Função exponencial: $e^{x^2-4}-1$.}
+\end{figure}
+
+\begin{figure}[hbt!] 
+    \label{fig:ftrigonometrica}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis} [axis lines=center]
+            \addplot[smooth, thick] table [x=x, y = fx] {f_trig.txt};
+            \addplot[smooth, thick, dashed] table [x=x, y = fpx] {f_trig.txt};
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(0.,0)(-28.9569,0)(-21.2268,0)(-18.6878,0)(-11.6909,0)(-7.88405,0)(-3.63114,0)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Função trigonométrica: $3x + x^2 \sin^2 \frac{x\pi}{10}$.}
+\end{figure}
+
+\begin{figure}[hbt!] 
+    \label{fig:fpoco3d}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis} [axis lines=center]
+            \addplot[smooth, thick] table [x=x, y = fx] {f_3Dwell.txt};
+            \addplot[smooth, thick, dashed] table [x=x, y = fpx] {f_3Dwell.txt};
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(10.3144,0)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Função de erro de $\Delta S f(\alpha)$ para o caso Poço 3D.}
+\end{figure}
+
+\FloatBarrier
+\newpage
+\section{Gráficos de Diagnóstico}
+
+\subsection{Erro ao Longo da Iterações}
+
+A figura abaixo apresenta a evolução do erro, com relação à resposta exata, ao longo do processo iterativo de diferentes funções, utilizando o Método da Newton-Raphson. São apresentadas duas retas tracejadas onde a razão entre os erros de iterações sucessivas é 1/2 e 1/4.
+
+\begin{figure}[hbt!] 
+    \label{fig:Erro}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            height = 10cm, % standard 10cm
+            width = 0.8\textwidth, %15cm,  % standard 10cm
+            % xmode=log,
+            ymode=log,
+            grid=both,
+            ymin=1e-6,
+            ymax=1e3,
+            xlabel = {Iterações},
+            ylabel = {$\varepsilon_i = |P_i - P|$},
+            legend style={at={(0.99,0.85)}, anchor=east},
+            ]
+
+            % \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
+            \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
+            \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
+            \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
+            \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
+            \addplot[color=black, dashed] table [x=Iteration, y =Ratio2] {IterationError.txt};
+            \addplot[color=black, dashed] table [x=Iteration, y =Ratio4] {IterationError.txt};
+            \legend{Quadrática, Exponencial, Trigonométrica, Poço 3D};
+        \end{axis}
         
-%     \end{tikzpicture}
-%     \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
-% \end{figure}
+    \end{tikzpicture}
+    \caption{Evolução do erro do Método de Newton-Raphson com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i = 0.25$).}
+\end{figure}
 
-% \newpage
-% \FloatBarrier
-% \subsection{Erro em Função do Limite de Convergência}
+\newpage
+\FloatBarrier
+\subsection{Efeito do Ponto Inicial no Número de Iterações}
 
-% A figura a seguir mostra os erros (com relação ao valor exato) nas estimativas de diferentes parâmetros de perfuração. O algoritmo proposto foi aplicado a um trecho de poço com mudança em inclinação e direção, utilizando diferentes valores de limite de convergência ($c_{lim}$).
+A figura a seguir mostra o impacto da definição do ponto inicial em um dos testes realizados com o algoritmo de cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Neste caso específico a resposta exata é aproximadamente 4.7\% maior que $\Delta S f(\alpha)_{min}$, e os pontos iniciais mais próximos convergem mais rápido. O principal resultado deste gráfico é mostrar que a definição do ponto inicial tem pouco impacto no número de iterações que o Método de Newton-Raphson precisará para alcançar o critério de convergência definido. 
 
-% \begin{figure}[hbt!]
-%     \label{fig:convergencia}
-%     \centering
-%     \begin{tikzpicture}
-%         \begin{axis}[
-%             height = 10cm, % standard 10cm
-%             width = 0.8\textwidth, %15cm,  % standard 10cm
-%             xmode=log,
-%             ymode=log,
-%             grid=both,
-%             ymin=1e-12,
-%             ymax=1e0,
-%             xlabel = {$c_{lim}$},
-%             ylabel = {Erro},
-%             legend style={at={(0.25,0.55)}, anchor=east},
-%             ]
-%             \addplot[color=black, solid, mark=*] table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
-%             \addplot[color=purple, solid, mark=*] table [x=Convergence, y = DeltaS] {ConvergenceErrors.txt};
-%             \addplot[color=blue, solid, mark=*] table [x=Convergence, y = theta2] {ConvergenceErrors.txt};
-%             \addplot[color=green, solid, mark=*] table [x=Convergence, y = phi2] {ConvergenceErrors.txt};
-%             \legend{$\Delta S f(\alpha)$, $\Delta S$, $\theta_2$, $\phi_2$};
-%         \end{axis}
+\begin{figure}[hbt!]
+    \label{fig:pontoinicial}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            height = 10cm, % standard 10cm
+            width = 0.8\textwidth, %15cm,  % standard 10cm
+            % xmode=log,
+            % ymode=log,
+            grid=both,
+            % ymin=1e-12,
+            % ymax=1e0,
+            xlabel = {$\frac{\Delta S f(\alpha)_{inicial}}{\Delta S f(\alpha)_{min}}$},
+            ylabel = {Número de Iterações},
+            legend style={at={(0.25,0.55)}, anchor=east},
+            ]
+            \addplot[color=black, solid, mark=*, mark size=3.pt] coordinates {
+                (1.000,8)
+                (1.188,9)
+                (1.376,10)
+                (1.564,10)
+                (1.751,10)
+                (2.503,11)
+                (3.254,11)
+                (4.006,11)
+                (4.757,11)
+                (5.509,12)
+                (6.260,12)
+                (7.012,12)
+                (7.763,12)
+                (8.515,12)
+            };
+        \end{axis}
         
-%         \begin{axis}[
-%             height = 10cm, % standard 10cm
-%             xmode=log,
-%             width = 0.8\textwidth, %15cm,  % standard 10cm
-%             axis y line=right,
-%             ylabel={Iterações até Convergência},
-%             ymin=0,
-%             ymax=50,
-%             % yticklabel style={red},
-%             legend style={at={(0.98,0.10)}, anchor=east},
-%             ]
-%             \addplot[color=red, solid, mark=*] table [x=Convergence, y = Iterations] {ConvergenceErrors.txt};
-%             \legend{Iterações}
-%         \end{axis}
-
-%     \end{tikzpicture}
-%     \caption{Erro das variáveis de interesse em função do limite de convergência utilizado.}
-% \end{figure}
-
-% \newpage
-% \FloatBarrier
-% \section{Esquema do Poço em S}
-
-% Um dos exemplos testados com o algoritmo proposto para calcular parâmetros de perfuração em função de coordenadas cartesianas é um poço em S. Uma representação esquemática da trajetória do poço (sem escala) é apresentada abaixo.
-
-% \begin{figure}[hbt!]
-%     \label{fig:pocoS}
-%     \centering
-%     \includegraphics[width=0.4\textwidth]{EsquemaPoco}
-%     \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
-% \end{figure}
+    \end{tikzpicture}
+    \caption{Número de iterações em função do valor inicial da variável do problema.}
+\end{figure}
 
 \newpage
 \FloatBarrier
@@ -475,11 +520,14 @@ A definição de $\sin \theta_2(x)^{\prime}$ pode ser desenvolvida a partir de $
 
 O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
 
+\subsection{Método da Bissecção}
+\lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
 \subsection{Método de Newton-Raphson}
-% \lstinputlisting[language=C, linerange={1-276}]{./01_bissection.c}
+\lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
 
 \subsection{Método da Mínima Curvatura}
-% \lstinputlisting[language=C, linerange={279-999}]{./01_bissection.c}
+\lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
 
 \end{document}
 \endinput
