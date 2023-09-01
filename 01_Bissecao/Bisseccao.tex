@@ -22,7 +22,6 @@
 %% The amssymb package provides various useful mathematical symbols
 \usepackage{amssymb}
 \usepackage{amsmath}
-
 \usepackage{multirow}
 
 \usepackage{pgfplots}
@@ -31,8 +30,21 @@
 \usepackage{hyperref}
 \numberwithin{equation}{section}
 
-% \usepackage[fleqn]{nccmath}
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
 
+% \usepackage[fleqn]{nccmath}
 % \usepackage{multicol}
 
 %=========== Gloabal Tikz settings
@@ -158,7 +170,6 @@ country={Brasil}}
 
 \end{abstract}
 
-
 %%Graphical abstract
 % \begin{graphicalabstract}
 %\includegraphics{grabs}
@@ -200,7 +211,8 @@ Este relatório apresenta uma proposta de metodologia para cálculo dos parâmet
 
 \subsection{Método da Mínima Curvatura}  \label{subsec:metodominimacurvatura}
 
-Ao longo da perfuração de um poço de petróleo são realizadas medições do comprimento perfurado (comumente chamado de comprimento medido), inclinação (ângulo com relação à direção vertical) e azimute (ângulo entre a direção horizontal e o norte). A partir das coordenadas geográficas do ponto inicial do poço e deste conjunto de medições ao longo da trajetória, é possível calcular as coordenadas cartesianas (N, E, V) de qualquer posição do poço. A figura \ref{fig:parametros} apresenta um esquema dos parâmetros de perfuração de um poço direcional:
+Ao longo da perfuração de um poço de petróleo são realizadas medições do comprimento perfurado (comumente chamado de comprimento medido), inclinação (ângulo com relação à direção vertical) e azimute (ângulo entre a direção horizontal e o norte). A partir das coordenadas geográficas do ponto inicial do poço e deste conjunto de medições ao longo da trajetória, é possível calcular as coordenadas cartesianas (N, E, V) de qualquer posição do poço. A Figura \ref{fig:parametros} apresenta um esquema dos parâmetros de perfuração de um poço direcional:
+
 \begin{itemize}
     \item $\Delta$S: comprimento medido entre dois pontos ao longo da trajetória.
     \item $\theta$: inclinação do poço no ponto atual.
@@ -216,29 +228,29 @@ Ao longo da perfuração de um poço de petróleo são realizadas medições do 
 \end{figure}
 
 
-As fórmulas que associam os parâmetros de perfuração e as coordenadas cartesianas de dois pontos ao longo de um poço direcional segundo o Método da Mínima Curvatura são \cite{10.2118/84246-MS}:
+As fórmulas que associam os parâmetros de perfuração e as coordenadas cartesianas de dois pontos ao longo de um poço direcional segundo o Método da Mínima Curvatura (equações \ref{eq:mcm}) são discutidas em detalhe em \cite{10.2118/84246-MS}.
 
-\begin{equation} \label{eq:deltaN}
-    \Delta N = \frac{\Delta S}{2} f(\alpha) (\sin \theta_1 \cos \phi_1 + \sin \theta_2 \cos \phi_2)
-\end{equation}
-\begin{equation} \label{eq:deltaE}
-    \Delta E = \frac{\Delta S}{2} f(\alpha) (\sin \theta_1 \sin \phi_1 + \sin \theta_2 \sin \phi_2)
-\end{equation}
-\begin{equation} \label{eq:deltaV}
-    \Delta V = \frac{\Delta S}{2} f(\alpha) (\cos \theta_1 + \cos \theta_2)
-\end{equation}
+\begin{subequations}\label{eq:mcm}
+    \begin{align} 
+        \Delta N &= \frac{\Delta S}{2} f(\alpha) (\sin \theta_1 \cos \phi_1 + \sin \theta_2 \cos \phi_2)\label{eq:deltaN}\\
+        \Delta E &= \frac{\Delta S}{2} f(\alpha) (\sin \theta_1 \sin \phi_1 + \sin \theta_2 \sin \phi_2)\label{eq:deltaE}\\
+        \Delta V &= \frac{\Delta S}{2} f(\alpha) (\cos \theta_1 + \cos \theta_2)\label{eq:deltaV}\\
+    \end{align}
+\end{subequations}
 
-\begin{equation} \label{eq:alpha}
-    \alpha = 2 \arcsin \sqrt{ \sin^2 \frac{\theta_2-\theta_1}{2} + \sin \theta_1 \sin \theta_2 \sin^2 \frac{\phi_2-\phi_1}{2} }
-\end{equation}
-\begin{equation} \label{eq:f_alpha}
-    f(\alpha)= \begin{cases}
-        1+\frac{\alpha^2}{12}\{1+\frac{\alpha^2}{10}[1+\frac{\alpha^2}{168}(1+\frac{31\alpha^2}{18})]\},&\text{se } \alpha<0,02 \\
-        \frac{2}{\alpha}\tan{\frac{\alpha}{2}},&\text{c.c. }  
-    \end{cases}
-\end{equation}
+O termo $f(\alpha)$ é definido com:
 
-A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta=0$, $\phi=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta$N,$\Delta$E, $\Delta$V). O objetivo é calcular a direção do poço no 2$^o$ ponto ($\theta_2$ e $\phi_2$) e a distância medida entre os pontos ($\Delta S$).
+\begin{subequations}\label{eq:falfa}
+    \begin{align} 
+        \alpha &= 2 \arcsin \sqrt{ \sin^2 \frac{\theta_2-\theta_1}{2} + \sin \theta_1 \sin \theta_2 \sin^2 \frac{\phi_2-\phi_1}{2}}\label{eq:alpha}\\
+        f(\alpha) &= \begin{cases}
+                1+\frac{\alpha^2}{12}\{1+\frac{\alpha^2}{10}[1+\frac{\alpha^2}{168}(1+\frac{31\alpha^2}{18})]\},&\text{se } \alpha<0.02 \\
+                \frac{2}{\alpha}\tan{\frac{\alpha}{2}},&\text{c.c. }  
+            \end{cases}\label{eq:f_alpha}
+    \end{align}
+\end{subequations}
+
+A proposta de método para calcular os parâmetros de perfuração a partir das coordenadas cartesianas parte de manipulações das equações \ref{eq:mcm}. É assumido que para calcular os parâmtros de perfuração entre dois pontos quaisquer são conhecidos os parâmetros de perfuração do ponto inicial\footnote{Para o primeiro ponto da trajetória é assumido um poço na vertical: $\theta=0$, $\phi=0$.} ($\theta_1$, $\phi_1$) e as distâncias cartesianas entre os pontos ($\Delta N$,$\Delta E$, $\Delta V$). O objetivo é calcular a direção do poço no ponto seguinte ($\theta_2$ e $\phi_2$) e a distância ao longo da trajetória entre os pontos ($\Delta S$)\footnote{Este termo é usualmente conhecido por distância medida, ou MD.}. Por simplicidade, ao longo deste relatório este problema será chamado de \textbf{Inverso da Mínima Curvatura}.
 
 É possível inverter a equação \ref{eq:deltaV} para obter uma expressão para $\theta_2$:
 \begin{equation} \label{eq:cos_theta2}
@@ -247,42 +259,61 @@ A proposta de método para calcular os parâmetros de perfuração a partir das 
 
 Dividindo a equação \ref{eq:deltaN} pela equação \ref{eq:deltaE} obtém-se duas expressões para $\phi_2$:
 
-\begin{equation} \label{eq:sin_phi2}
-    \sin \phi_2 = \frac{-\Delta N \Delta \Psi}{\Delta H^2} \left( \frac{\sin \theta_1}{\sin \theta_2} \right) + \frac{\Delta E}{\Delta H^2} \sqrt{\Delta H^2 - \Delta \Psi^2 \left( \frac{\sin \theta_1}{\sin \theta_2} \right)^2} 
-\end{equation}
-\begin{equation} \label{eq:cos_phi2}
-    \cos \phi_2 = \frac{\Delta E \Delta \Psi}{\Delta H^2} \left( \frac{\sin \theta_1}{\sin \theta_2} \right) + \frac{\Delta N}{\Delta H^2} \sqrt{\frac{1}{\Delta H^2} - \Delta \Psi^2 \left( \frac{\sin \theta_1}{\sin \theta_2} \right)^2} 
-\end{equation}
+\begin{subequations}\label{eq:phi2}
+    \begin{align}  
+    \sin \phi_2 &= \frac{-\Delta N}{\Delta H^2} \left( \frac{\Delta \Psi \sin \theta_1}{\sin \theta_2} \right) + \frac{\Delta E}{\Delta H^2} \sqrt{\Delta H^2 - \left( \frac{\Delta \Psi \sin \theta_1}{\sin \theta_2} \right)^2} \label{eq:sin_phi2} \\
+    \cos \phi_2 &= \frac{\Delta E}{\Delta H^2} \left( \frac{\Delta \Psi \sin \theta_1}{\sin \theta_2} \right) + \frac{\Delta N}{\Delta H^2} \sqrt{\frac{1}{\Delta H^2} - \left( \frac{\Delta \Psi \sin \theta_1}{\sin \theta_2} \right)^2} \label{eq:cos_phi2}
+    \end{align}
+\end{subequations}
+onde
 \begin{align*}
-    \intertext{onde}
     \Delta \Psi &= \Delta N \sin \phi_1 - \Delta E \cos \phi_1 \\
     \Delta H^2 &= \Delta N^2 + \Delta E^2
 \end{align*}
 
-Fazendo a soma dos quadrados das equações \ref{eq:deltaN}, \ref{eq:deltaE} e \ref{eq:deltaV} é possível obter uma expressão para $\Delta S f(\alpha)$:
+Fazendo a soma dos quadrados das equações \ref{eq:mcm} é possível obter uma expressão para $\Delta S f(\alpha)$:
 \begin{equation} \label{eq:DeltaSfa}
     \Delta S f(\alpha) = 2 \sqrt{\frac{\Delta N^2 + \Delta E^2 + \Delta V^2}{A^2+B^2+C^2}}
 \end{equation}
+onde
 \begin{align*}
-    \intertext{onde}
     A &= \sin \theta_1 \cos \phi_1 + \sin \theta_2 \cos \phi_2 \\
     B &= \sin \theta_1 \sin \phi_1 + \sin \theta_2 \sin \phi_2 \\
     C &= \cos \theta_1 + \cos \theta_2
 \end{align*}
-Com as equações propostas é possível construir uma função do tipo $g(x)=x$:
+Com as equações propostas é possível construir um algoritmo para cálculo de $\Delta S f(\alpha)$ como uma função do tipo $g(x)=x$ (Algoritmo \ref{alg:mcm}).
 
-\begin{enumerate}
-    \item Assumir um valor inicial de $\Delta S f(\alpha)$.
-    \item Calcular $\cos \theta_2$ com a equação \ref{eq:cos_theta2}.
-    \item Calcular $\sin \phi_2$ com a equação \ref{eq:sin_phi2}.
-    \item Calcular $\cos \phi_2$ com a equação \ref{eq:cos_phi2}.
-    \item Calcular $\Delta S f(\alpha)$ com a equação \ref{eq:DeltaSfa}.
-\end{enumerate}
+\begin{algorithm}
+    \caption{Algoritmo do Inverso da Mínima Curvatura}\label{alg:mcm}
+    \begin{algorithmic}
+        \Require $\Delta N, \Delta E, \Delta V, \theta_1, \phi_1, \Delta S f(\alpha)_{in}$
+        \Repeat
+            \State $cos \theta_2 \gets f(\Delta S f(\alpha)_{in})$ \Comment{\ref{eq:cos_theta2}}
+            \State $sin \theta_2 \gets \sqrt{1 - \cos^2 \theta_2}$
+            \State $sin \phi_2 \gets f(\cos \theta_2, \sin \theta_2)$ \Comment{\ref{eq:sin_phi2}}
+            \State $cos \phi_2 \gets f(\cos \theta_2, \sin \theta_2)$ \Comment{\ref{eq:cos_phi2}}
+            \State $\Delta S f(\alpha)_{out} \gets f(\cos \theta_2, \sin \theta_2, \cos \phi_2, \sin \phi_2)$ \Comment{\ref{eq:DeltaSfa}}
+            \If{$|\Delta S f(\alpha)_{out} - \Delta S f(\alpha)_{in}| > \epsilon$}
+                \LineComment{Função para melhorar a estimativa de $\Delta S f(\alpha)$}
+                \State $\Delta S f(\alpha)_{in} = f(\Delta S f(\alpha)_{in}, \Delta S f(\alpha)_{out})$
+            \EndIf
+        \Until{$|\Delta S f(\alpha)_{out} - \Delta S f(\alpha)_{in}| < \epsilon$}
+        \State $cos \theta_2 \gets f(\Delta S f(\alpha)_{out})$ \Comment{\ref{eq:cos_theta2}}
+        \State $sin \theta_2 \gets \sqrt{1 - \cos^2 \theta_2}$
+        \State $\theta_2 \gets \arccos{(\cos {\theta_2})}$\Comment{$0 \leq \theta_2 \le \pi$}
+        \State $sin \phi_2 \gets f(\cos \theta_2, \sin \theta_2)$ \Comment{\ref{eq:sin_phi2}}
+        \State $cos \phi_2 \gets f(\cos \theta_2, \sin \theta_2)$ \Comment{\ref{eq:cos_phi2}}
+        \State $\phi_2 \gets f(\cos \phi_2, \sin \phi_2)$ \Comment{$0 \leq \theta_2 < 2 \pi \rightarrow \arcsin e \arccos$}
+        \State $f(\alpha) \gets f(\cos \theta_2, \sin \theta_2, \cos \phi_2, \sin \phi_2)$ \Comment{\ref{eq:falfa}}
+        \State $\Delta S \gets \Delta S f(\alpha)_{out} / f(\alpha)$
+        \State \Return $\Delta S, \theta_2, \phi_2$
+    \end{algorithmic}
+\end{algorithm}
 
-Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\alpha$ e $f(\alpha)$ durante o processo. O valor de $\phi_2$ só precisa ser calculado ao final, evitando usar $\arccos$ ou $\arcsin$ muitas vezes. Alguns cuidados adicionais precisam ser tomados ao utilizar este algoritmo:
+Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\alpha$ e $f(\alpha)$ durante o processo iterativo (Equações \ref{eq:f_alpha}). Os valores de $\theta_2$ e $\phi_2$ só precisam ser calculados ao final, evitando usar $\arccos$ e $\arcsin$ muitas vezes. Alguns cuidados adicionais precisam ser tomados ao utilizar este algoritmo:
 
 \begin{itemize}
-    \item O valor mínimo de $\Delta S f(\alpha)$ é uma linha reta entre os pontos:
+    \item Por construção, o valor mínimo de $\Delta S f(\alpha)$ é uma linha reta entre os pontos:
     \begin{align*}
         \Delta S f(\alpha) \geq \sqrt{\Delta N^2 + \Delta E^2 + \Delta V^2}
     \end{align*}
@@ -297,21 +328,28 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     \item Se $\Delta N = \Delta E = 0$ então $|\phi_1 - \phi_2| = \pi$.
 \end{itemize}
 
-    \subsection{Método da Bissecção} \label{sec:mcm}
+    \subsection{Método da Bissecção} \label{sec:bissecao}
     
-    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o Método da Bissecção para buscar o resultado do problema proposto. O algoritmo foi baseado no pseudo-código descrito em \cite{burden2016analise}. O Método da Bissecção baseia-se no teorema do valor médio. O intervalo de busca pela raiz é sucessivamente divido em dois. O método tem garantia de que a raiz pertence ao intervalo ao manter os valores da função avaliada nos limites do intervalo com sinais opostos\footnote{Assumindo que o intervalo inicial fornecido também tem esta propriedade.}. 
+    Uma equação do tipo $g(x)=x$ pode ser resolvida buscando a raiz de $f(x) = x - g(x)$. Nesta primeira tentativa foi implementado o Método da Bissecção para resolver o Inverso da Mínima Curvatura. O algoritmo implementado foi baseado no pseudo-código descrito em \cite{burden2016analise}. Uma forma simplificada é apresentada no Algoritmo \ref{alg:biseccao}. O Método da Bissecção baseia-se no teorema do valor médio. O intervalo de busca pela raiz é sucessivamente divido em dois. O método tem garantia de que a raiz pertence ao intervalo ao manter os valores da função avaliada nos limites do intervalo com sinais opostos\footnote{Assumindo que o intervalo inicial fornecido também tem esta propriedade.}. 
 
-    De modo simplificado o Método da Bissecção pode ser descrito como:
-    
-    \begin{enumerate}
-        \item Definir $x_a$ e $x_b$ de modo que $sinal(f(x_a)) \neq sinal(f(x_b))$.
-        \item Calcular $f(x_a)$ e $f(x_b)$.
-        \item Calcular $x_{medio} = x_a + \frac{x_b - x_a}{2}$ e $f(x_{medio})$.
-        \item Se $sinal(f(x_{medio})) = sinal(f(x_a))$ então $x_a = x_{medio}$.
-        \item Se $sinal(f(x_{medio})) = sinal(f(x_b))$ então $x_b = x_{medio}$.
-        \item Se não atingiu critério de convergência, retornar para passo 2.
-        \item Retornar $x_{medio}$.
-    \end{enumerate}
+    \begin{algorithm}
+        \caption{Método da Bissecção}\label{alg:biseccao}
+        \begin{algorithmic}
+            \Require $x_a, x_b$
+            \If{$sinal(f(x_a)) = sinal(f(x_b))$}
+                \State Erro de Definição dos Limites!
+            \EndIf
+            \While{$|x_b-x_a|>\epsilon$}
+            \State $x_{medio} \gets \frac{x_a+x_b}{2}$
+                \If{$sinal(f(x_a)) = sinal(f(x_{medio}))$}
+                    \State $x_a \gets x_{medio}$
+                \Else
+                    \State $x_b \gets x_{medio}$
+                \EndIf
+            \EndWhile
+            \State \Return $x_{medio}$
+        \end{algorithmic}
+    \end{algorithm}
     
     Foram adicionados critérios adicionais ao algoritmo para controlar o processo iterativo:
 
@@ -321,7 +359,7 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
             \item Critério \emph{Direto}: $|x_i - x_{i-1}|$.
             \item Critério \emph{Relativo}\footnote{Caso $|x_i| < \epsilon$, é utilizado $|x_{i-1}|$ no denominador. E se também $|x_{i-1}| < \epsilon$ o valor da convergência é considerado \emph{zero}!}: $\frac{|x_i - x_{i-1}|}{|x_i|}$.
         \end{itemize}
-        \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido\footnote{Definindo $c_{lim}$ o limite de convergência, se for utilizado o critério de convergência \emph{direto} então $\zeta = c_{lim}$. Se for utilizado o critério de convergência relativo então $\zeta = c_{lim} \min{|x_a|,|x_b|}$ (a avaliação do menor valor segue as mesmas regras do cálculo do critério de convergência, ignorando qualquer $|x| < \epsilon$ e retorna \emph{zero} caso ambos sejam valores pequenos).}. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
+        \item No início do código é verificado se $|x_b - x_a| < \zeta$, onde $\zeta$ é calculado em função do critério de convergência estabelecido\footnote{Dado que $c_{lim}$ é o limite de convergência, se for utilizado o critério de convergência \emph{direto} então $\zeta = c_{lim}$. Se for utilizado o critério de convergência relativo então $\zeta = c_{lim} \min{|x_a|,|x_b|}$ (a avaliação do menor valor segue as mesmas regras do cálculo do critério de convergência, ignorando qualquer $|x| < \epsilon$ e retorna \emph{zero} caso ambos valores são pequenos).}. Se for \emph{verdadeiro}, não é feito o \emph{loop} do método. 
         \item Se $sinal(f(x_a)) = sinal(f(x_b))$ o código apresenta uma mensagem de alerta e não é feito o \emph{loop} do método. Optou-se por não gerar um erro, e mesmo neste caso é retornado um valor.
         \item É feito um término prematuro do processo iterativo caso algum $|f(x)| < \epsilon$. O valor padrão de $\epsilon$ é $10^{-7}$ (variável \verb|epsilon| no código). Este teste também é feito antes de entrar no \emph{loop}.
         \item Antes de sair da função, são comparados os três últimos resultados guardados ($f(x_a)$, $f(x_b)$, $f(x_{medio})$) e é retornado o valor de $x$ com $f(x)$ mais próximo de zero.
@@ -332,12 +370,12 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
 
     \begin{description}
-        \item[tests\textunderscore bissection()] Testa o Método da Bissecção em diferentes funções: linear, quadrática, exponencial e com sen/cos. Também foram apicados casos específicos para o algoritmo tratar: raiz em um dos limites, uso de critério de convergência relativo, saída do \emph{loop} sem atingir o critério de convergência, má definição do intervalo inicial ($sinal(f(x_a)) = sinal(f(x_b))$) e intervalo inicial muito pequeno ($|x_b - x_a| < \zeta$).
+        \item[tests\textunderscore bissection()] Testa o Método da Bissecção em diferentes funções: linear, quadrática, exponencial e trigonométrica. Também foram aplicados casos específicos para o algoritmo tratar: raiz em um dos limites, uso de critério de convergência relativo, saída do \emph{loop} sem atingir o critério de convergência, má definição do intervalo inicial (função com mesmo sinal nos limites) e intervalo inicial muito pequeno ($|x_b - x_a| < \zeta$).
         
-        \item[tests\textunderscore minimum\textunderscore curvature()] Testa as funções implementadas para cálculo de coordenadas cartesianas em função de parâmetros de perfuração (cálculo direto), e de parâmetros de perfuração em função de coordenadas cartesianas (cálculo iterativo).
+        \item[tests\textunderscore minimum\textunderscore curvature()] Testa o algotimo proposto para resolver o inversa da mínima curvatura para diferentes geometrias de trecho de poço: poço vertical, horizontal, inclinado, em curva.
     \end{description}
 
-    Algumas definições que foram feitas no código que implementa o Método da Bissecção são resultado dos testes realizados.
+    Algumas das definições que foram feitas no código que implementa o Método da Bissecção são resultado dos testes realizados.
 
     A definição de um critério de parada prematura se mostrou importante para evitar que o método continue buscando uma raiz quando já encontrou uma solução \emph{aceitável}. A definição deste limite $|f(x)| < \epsilon = 10^{-7}$ foi empírica e deve ser revista em função do problema a ser resolvido.
     
@@ -349,17 +387,61 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \item \verb|long double|: $f(0.3) \approx 5.35872 \cdot 10^{-312}$ 
     \end{itemize}
     
-    Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}. Foi feita uma sensibilidade do critério de convergência ($c_{lim}$) e foi possível trabalhar com limites de valores baixos sem aparente perda da qualidade da resposta por problemas com aritmética de máquina (\ref{fig:convergencia}).
+    Mesmo que o \verb|long double| consiga o melhor resultado, considerou-se que trabalhar com \verb|double| já é \emph{suficiente}. Foi feita uma sensibilidade do critério de convergência ($c_{lim}$) a um dos testes do problema do inverso da mínima curvatura (trecho
+    de poço com mudança em inclinação e direção). Nesta sensibilidade foi possível trabalhar com valores de $c_{lim}$ baixos sem aparente perda da qualidade da resposta por problemas com aritmética de máquina (Figura \ref{fig:convergencia}).
+    
+    \begin{figure*}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                height = 8cm, width = 0.8\textwidth, 
+                xmode=log, ymode=log,
+                grid=both,
+                ymin=1e-12, ymax=1e0,
+                xlabel = {$c_{lim}$},
+                ylabel = {Erro},
+                legend style={at={(0.25,0.55)}, anchor=east},
+                ]
+                \addplot[color=black, solid, mark=*] table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
+                \addplot[color=purple, solid, mark=*] table [x=Convergence, y = DeltaS] {ConvergenceErrors.txt};
+                \addplot[color=blue, solid, mark=*] table [x=Convergence, y = theta2] {ConvergenceErrors.txt};
+                \addplot[color=green, solid, mark=*] table [x=Convergence, y = phi2] {ConvergenceErrors.txt};
+                \legend{$\Delta S f(\alpha)$, $\Delta S$, $\theta_2$, $\phi_2$};
+            \end{axis}
+            
+            \begin{axis}[
+                height = 8cm, width = 0.8\textwidth, 
+                xmode=log,
+                axis y line=right,
+                ylabel={Iterações até Convergência},
+                ymin=0, ymax=50,
+                % yticklabel style={red},
+                legend style={at={(0.98,0.10)}, anchor=east},
+                ]
+                \addplot[color=red, solid, mark=*] table [x=Convergence, y = Iterations] {ConvergenceErrors.txt};
+                \legend{Iterações}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Erro das variáveis de interesse em função do limite de convergência utilizado.}
+        \label{fig:convergencia}
+    \end{figure*}
 
     É sempre feita uma verificação ao final do código para avaliar qual é o valor entre $x_a$, $x_b$ e $x_{medio}$ que minimiza $|f(x)|$. O método da bisecção tem garantia de convergência, mas não é garantido que o melhor resultado será o $x_{medio}$ da última iteração.
     
-    A metodologia proposta para o cálculo de parâmetros de perfuração com o Método da Mínima Curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. O Método da Bissecção se encaixa bem na resolução do problema proposto por trabalhar em uma faixa de valores pré-determinada. Devido a erros de aritmética de máquina, não é sempre possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta está muito próxima do limite inferior. Desta forma, ao invés de gerar um erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem de alerta ao usuário e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
+    A metodologia proposta para resolver o inverso do método da mínima curvatura tem algumas particularidades, como a sua indefinição quando é testado com um valor muito baixo de $\Delta S f(\alpha)$. O Método da Bissecção se encaixa bem na resolução do problema proposto por trabalhar em uma faixa de valores pré-determinada. Devido a erros de aritmética de máquina, não é sempre possível garantir que $sinal(f(x_a)) \neq sinal(f(x_b))$ quando a resposta exata está muito próxima do limite inferior. Desta forma, ao invés de gerar um erro quando $sinal(f(x_a)) = sinal(f(x_b))$, é gerada uma mensagem de alerta ao usuário e o código retorna o valor de $x$ (igual a $x_a$ ou $x_b$) que minimizar $|f(x)|$.
     
-    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes de \verb|tests_minimum_curvature()| (\ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e é igual à resposta exata. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
+    Este problema ficou evidente no cálculo do 4$^o$ trecho do poço em 'S' descrito nos testes propostos (Figura \ref{fig:pocoS}). O valor exato de $\theta_2$ é zero (o 5$^0$ trecho é reto e vertical). Neste caso, o valor mínimo de $\Delta S f(\alpha)$ é limitado pela equação \ref{eq:cos_theta2}, e a resposta exata é igual a este limite. Neste ponto o algoritmo calcula $f(263.305) \approx -2.58273 \cdot 10^{-7}$, que não atinge o critério de parada prematura, mas tem o mesmo sinal de $f(\Delta S f(\alpha)_{max})$.
 
-    Os limites da região em que o problema proposto deve ser avaliado são definidos por um lado pelo menor valor possível de $\Delta S f(\alpha)$ discutido em \ref{sec:mcm}. O valor máximo foi definido como $[\Delta S f(\alpha)]_{min} \cdot f(\alpha = 0.95\pi)$. O limite superior é equivalente a aproximadamente um arco de 180$^o$, o que não é algo factível em uma aplicação real, e que serve como um limite superior na região de busca.
+    \begin{figure}[hbt!]
+        \label{fig:pocoS}
+        \centering
+        \includegraphics[width=0.2\textwidth]{EsquemaPoco}
+        \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
+    \end{figure}
 
-    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada (\ref{fig:Erro}). Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (ver Tabela \ref{table:iteracoes}).
+    Os limites da região em que o problema do inverso da mínima curvatura deve ser avaliado são definidos por um lado pelo menor valor possível de $\Delta S f(\alpha)$ discutido em \ref{subsec:metodominimacurvatura}. O valor máximo foi definido como $[\Delta S f(\alpha)]_{min} \cdot f(\alpha = 0.95\pi)$. O limite superior é equivalente a aproximadamente um arco de 180$^o$, o que não é algo factível em uma aplicação real, e que serve como um limite superior na região de busca.
+
+    Foi implementada uma função para estimar o número de iterações necessárias para alcançar o critério de convergência definido (equação \ref{eq:nint}). Quando o critério de convergência ($c_{lim}$) é \emph{direto}, a estimativa se mostrou exata (exceto nos casos em que há parada prematura), o que indica que o algoritmo implantado converge com a taxa que era esperada. Buscou-se realizar a mesma estimativa para o caso de uso do critério de convergência \emph{relativo}, e neste caso as estimativas não exatas, mas tem boa previsão (Tabela \ref{table:iteracoes}).
     
     \begin{equation} \label{eq:nint}
         n_{int} = \left \lceil \frac{\log{\frac{|x_b-x_a|}{|x_{referencia}|}\frac{1}{c_{lim}}}}{\log{2}} \right \rceil
@@ -367,11 +449,11 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
     \begin{align*}
         \intertext{onde}
         x_{referencia} = \begin{cases}
-            1,&\text{se Critério de convergência direto} \\
+            1,&\text{se Critério de conv. Direto} \\
             \min(|x_a|,|x_b|),&\text{c.c. }  
         \end{cases}
     \end{align*}
-
+    
     \begin{table*} 
         % \centering
         \caption{Comparação entre o número de iterações previsto e realizado para diferentes testes.}
@@ -391,7 +473,39 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{tabular}
         \label{table:iteracoes}
     \end{table*}
-    
+
+    A Figura \ref{fig:Erro} apresenta a evolução do erro, com relação à resposta exata, ao longo do processo iterativo de diferentes funções, utilizando o Método da Bissecção. São apresentadas duas retas tracejadas onde a razão entre os erros de iterações sucessivas é $\frac{1}{2}$, que é o que se espera do Método da Bissecção após um número considerável de iterações. Observa-se que os resultados numéricos não seguem exatamente uma linha reta, mas têm aproximadamente a mesma inclinação das retas tracejadas.
+
+    \begin{figure*} 
+        \label{fig:Erro}
+        % \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                height = 8cm, % standard 10cm
+                width = 0.8\textwidth, %15cm,  % standard 10cm
+                % xmode=log,
+                ymode=log,
+                grid=both,
+                % ymin=1e-12,
+                % ymax=1e0,
+                xlabel = {Iterações},
+                ylabel = {$\varepsilon_i = |P_i - P|$},
+                legend style={at={(0.99,0.80)}, anchor=east},
+                ]
+                \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
+                \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
+                \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
+                \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
+                \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
+                \addplot[color=black, dashed] table [x=Iteration, y =TX05A] {IterationError.txt};
+                \addplot[color=black, dashed] table [x=Iteration, y =TX05B] {IterationError.txt};
+                \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
+            \end{axis}
+            
+        \end{tikzpicture}
+        \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
+    \end{figure*}
+        
     O Método da Bissecção gerou bons resultados na aplicação proposta. Em um dos testes proposto o método não conseguiu ser aplicado porque a resposta correto é igual ao limite inferior e, por erro de aritmética de máquina, o valor da função não é zero neste ponto. Para diversos testes a solução foi trivial, pois a resposta exata é igual ao limite inferior de $\Delta S f(\alpha)$. Na Tabela \ref{table:resultados} todos os testes reportados foram feitos utilizando como critério de parada $|x_{i+1} - x_i| < c_{lim} = 1E-3$.
     
     \begin{table*} 
@@ -409,14 +523,14 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
         \end{tabular}
         \label{table:resultados}
     \end{table*}
+
+    O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/01_Bissecao/01_bissection.c}{https://github.com/TiagoCAAmorim/ numerical-methods}.
     
     \section{Conclusão}
     
-    O algoritmo proposto para o cálculo de parâmetros de perfuração em função das coordenadas cartesianas de pontos ao longo do se mostrou eficaz. Foram feitos ajustes ao código implementado de forma a evitar o uso de funções trigonométricas ao longo do processo iterativo.
+    O algoritmo proposto para o cálculo de parâmetros de perfuração em função das coordenadas cartesianas de pontos ao longo de um poço se mostrou eficaz. Foram feitos ajustes ao código implementado de forma a evitar o uso de funções trigonométricas ao longo do processo iterativo.
     O Método da Bisseção se mostrou adequado para uso com o algoritmo proposto. As funções propostas não são válidas para quaisquer valores de entrada, e a delimitação de uma região de busca foi importante para garantir a convergência do problema.
 
-    % \label{}
-    
 %% The Appendices part is started with the command \appendix;
 %% appendix sections are then done as normal sections
 %% \appendix
@@ -443,119 +557,15 @@ Ao utilizar $\Delta S f(\alpha)$ como parâmetro principal, evita-se calcular $\
 
 % \end{thebibliography}
 
-% \newpage
+% \section{Código em C}
 
-\appendix
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
 
-% \FloatBarrier
-\section{Gráficos Diagnóstico}
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-276}]{./01_bissection.c}
 
-\subsection{Erro ao Longo da Iterações}
-
-A figura abaixo apresenta a evolução do erro, com relação à resposta exata, ao longo do processo iterativo de diferentes funções, utilizando o Método da Bissecção. São apresentadas duas retas tracejadas onde a razão entre os erros de iterações sucessivas é 0.5, que é o que se espera do Método da Bissecção após um número considerável de iterações. Observa-se que os resultados numéricos não seguem exatamente uma linha reta, mas têm aproximadamente a mesma inclinação das retas tracejadas.
-
-\begin{figure*} 
-    \label{fig:Erro}
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-            height = 10cm, % standard 10cm
-            width = 0.8\textwidth, %15cm,  % standard 10cm
-            % xmode=log,
-            ymode=log,
-            grid=both,
-            % ymin=1e-12,
-            % ymax=1e0,
-            xlabel = {Iterações},
-            ylabel = {$\varepsilon_i = |P_i - P|$},
-            legend style={at={(0.99,0.80)}, anchor=east},
-            ]
-            \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
-            \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
-            \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
-            \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
-            \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
-            \addplot[color=black, dashed] table [x=Iteration, y =TX05A] {IterationError.txt};
-            \addplot[color=black, dashed] table [x=Iteration, y =TX05B] {IterationError.txt};
-            \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
-        \end{axis}
-        
-    \end{tikzpicture}
-    \caption{Evolução do erro do Método da Bissecção com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$).}
-\end{figure*}
-
-% \newpage
-% \FloatBarrier
-\subsection{Erro em Função do Limite de Convergência}
-
-A figura a seguir mostra os erros (com relação ao valor exato) nas estimativas de diferentes parâmetros de perfuração. O algoritmo proposto foi aplicado a um trecho de poço com mudança em inclinação e direção, utilizando diferentes valores de limite de convergência ($c_{lim}$).
-
-\begin{figure*}
-    \label{fig:convergencia}
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-            height = 10cm, % standard 10cm
-            width = 0.8\textwidth, %15cm,  % standard 10cm
-            xmode=log,
-            ymode=log,
-            grid=both,
-            ymin=1e-12,
-            ymax=1e0,
-            xlabel = {$c_{lim}$},
-            ylabel = {Erro},
-            legend style={at={(0.25,0.55)}, anchor=east},
-            ]
-            \addplot[color=black, solid, mark=*] table [x=Convergence, y = DeltaSfa] {ConvergenceErrors.txt};
-            \addplot[color=purple, solid, mark=*] table [x=Convergence, y = DeltaS] {ConvergenceErrors.txt};
-            \addplot[color=blue, solid, mark=*] table [x=Convergence, y = theta2] {ConvergenceErrors.txt};
-            \addplot[color=green, solid, mark=*] table [x=Convergence, y = phi2] {ConvergenceErrors.txt};
-            \legend{$\Delta S f(\alpha)$, $\Delta S$, $\theta_2$, $\phi_2$};
-        \end{axis}
-        
-        \begin{axis}[
-            height = 10cm, % standard 10cm
-            xmode=log,
-            width = 0.8\textwidth, %15cm,  % standard 10cm
-            axis y line=right,
-            ylabel={Iterações até Convergência},
-            ymin=0,
-            ymax=50,
-            % yticklabel style={red},
-            legend style={at={(0.98,0.10)}, anchor=east},
-            ]
-            \addplot[color=red, solid, mark=*] table [x=Convergence, y = Iterations] {ConvergenceErrors.txt};
-            \legend{Iterações}
-        \end{axis}
-
-    \end{tikzpicture}
-    \caption{Erro das variáveis de interesse em função do limite de convergência utilizado.}
-\end{figure*}
-
-% \newpage
-% \FloatBarrier
-\section{Esquema do Poço em S}
-
-Um dos exemplos testados com o algoritmo proposto para calcular parâmetros de perfuração em função de coordenadas cartesianas é um poço em S. Uma representação esquemática da trajetória do poço (sem escala) é apresentada abaixo.
-
-\begin{figure}[hbt!]
-    \label{fig:pocoS}
-    \centering
-    \includegraphics[width=0.4\textwidth]{EsquemaPoco}
-    \caption{Esquema do poço em 'S' descrito nos testes de tests\textunderscore minimum\textunderscore curvature().}
-\end{figure}
-
-% \newpage
-% \FloatBarrier
-\section{Código em C}
-
-O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
-
-\subsection{Método da Bissecção}
-\lstinputlisting[language=C, linerange={1-276}]{./01_bissection.c}
-
-\subsection{Método da Mínima Curvatura}
-\lstinputlisting[language=C, linerange={279-999}]{./01_bissection.c}
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={279-999}]{./01_bissection.c}
     
 \end{document}
 \endinput
