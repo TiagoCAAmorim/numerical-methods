@@ -66,3 +66,4 @@ tempCodeRunnerFile.*
 *.out
 *.gz
 texput.pdf
+*.*(busy)
