@@ -285,7 +285,6 @@ double find_root_newton_raphson_debug(double (*func)(double), double (*func_prim
                 }
                 x_current = x_max;
             }
-            x_current = min(x_current, x_max);
 
             fx_current = func(x_current);
             fpx_current = func_prime(x_current);
