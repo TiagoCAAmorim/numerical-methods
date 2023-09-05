@@ -829,7 +829,7 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
-    deltaSfa_calc = find_root_newton_raphson_debug(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, deltaSfa_min*5., deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa, true);
+    deltaSfa_calc = find_root_newton_raphson_debug(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, deltaSfa_min*1.1, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa, true);
         
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, convergence_limit, relative_convergence);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
@@ -953,21 +953,7 @@ void print_fx_fpx(double (*func)(double), double (*func_prime)(double), int poin
 }
 
 int main(){
-    // tests_newton_raphson();
-    // tests_minimum_curvature();
-
-    double dS=10.;
-    double theta1=pi/10;      
-    double phi1=pi/4;
-    double theta2=pi/6;       
-    double phi2=7*pi/4;
-    
-    double dE = deltaE(dS, theta1, phi1, theta2, phi2);
-    double dN = deltaN(dS, theta1, phi1, theta2, phi2);
-    double dV = deltaV(dS, theta1, phi1, theta2, phi2);
-    define_well_path_data(dE, dN, dV, theta1, phi1);
-    print_fx_fpx(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, 300, 9.7826, 15.);
-
-
+    tests_newton_raphson();
+    tests_minimum_curvature();
     return 0;
 }

@@ -266,7 +266,7 @@ double find_root_newton_raphson_debug(double (*func)(double), double (*func_prim
 
             if( fabs(fpx_previous) < epsilon){
                 if( debug){
-                    printf("1st derivate is too small. Halted iterative process.");
+                    printf("1st derivate is too small. Halted iterative process.\n");
                 }
                 exit_function = small_derivative;
                 break;
@@ -285,7 +285,6 @@ double find_root_newton_raphson_debug(double (*func)(double), double (*func_prim
                 }
                 x_current = x_max;
             }
-            x_current = min(x_current, x_max);
 
             fx_current = func(x_current);
             fpx_current = func_prime(x_current);
@@ -716,10 +715,10 @@ struct tangle calculate_phi2_prime(double deltaE, double deltaN, double sin_thet
         deltaBeta2 = max(0, deltaBeta2);
         double deltaBeta = sqrt(deltaBeta2);
 
-        double sin_theta1_sin_theta2_prime = - sin_theta1_sin_theta2 / sin_theta2 * sin_theta2_prime;
+        double sin_theta1_sin_theta2_prime = sin_theta1_sin_theta2 / sin_theta2 * sin_theta2_prime;
 
-        phi2.sin = -(deltaN + deltaE * deltaEpsilon * sin_theta1_sin_theta2 / deltaBeta) * deltaEpsilon / deltaH2 * sin_theta1_sin_theta2_prime;
-        phi2.cos = -(deltaE - deltaN * deltaEpsilon * sin_theta1_sin_theta2 / deltaBeta) * deltaEpsilon / deltaH2 * sin_theta1_sin_theta2_prime;
+        phi2.sin = ( deltaN + deltaE * deltaEpsilon * sin_theta1_sin_theta2 / deltaBeta) * deltaEpsilon / deltaH2 * sin_theta1_sin_theta2_prime;
+        phi2.cos = (-deltaE + deltaN * deltaEpsilon * sin_theta1_sin_theta2 / deltaBeta) * deltaEpsilon / deltaH2 * sin_theta1_sin_theta2_prime;
     }
     return phi2;
 }
@@ -742,7 +741,9 @@ double calculate_deltaSfa_prime(double deltaE, double deltaN, double deltaV, dou
 
     double dS2 = deltaE*deltaE + deltaN*deltaN + deltaV*deltaV;
     double dA2 = aE*aE + aN*aN + aV*aV;
-    return - 2 * pow(dS2/dA2, 3/2) / dS2 * (aE*aE_prime + aN*aN_prime + aV*aV_prime);
+    double ddSfa = - 2 * pow(dS2/dA2, 3/2.) / dS2 * (aE*aE_prime + aN*aN_prime + aV*aV_prime);
+
+    return ddSfa;
 }
 
 double calculate_deltaSfa_aproximate(double deltaE, double deltaN, double deltaV, double cos_theta1, double sin_theta1, double cos_phi1, double sin_phi1, double deltaSfa){
