@@ -285,6 +285,7 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
 
     \begin{table*} 
         \caption{Comparação entre o número de iterações necessários para um mesmo critério de convergência usando os Métodos da Bissecção, Newton-Raphson e Secante.}
+        \label{table:iteracoes}
         \begin{tabular}{ l c c c c c c c c c}
             \hline
             \multirow{2}{*}{Função} & \multirow{2}{*}{Raiz} & \multicolumn{3}{c}{Bissecção} & \multicolumn{2}{c}{Newton-Raphson} & \multicolumn{3}{c}{Secante}\\
@@ -299,12 +300,9 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
             Poço 3D & 10.3144 & 9.84918 & 83.8634 & 17 & 10.0805 & 4 & 14.7738 & 10.8341 & 3 \\
             \hline
         \end{tabular}
-        \label{table:iteracoes}
     \end{table*}
     
     \begin{figure*} 
-        \label{fig:erro}
-        \centering
         \begin{tikzpicture}
             \begin{axis}[
                 height = 8cm, % standard 10cm
@@ -328,19 +326,18 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
                 \addplot[color=black, dashed] table [x=Iteration, y =Quad2] {IterationError.txt};
                 \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
             \end{axis}
-            
         \end{tikzpicture}
         \caption{Evolução do erro do Método da Secante com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i^2 = 0.5$).}
+        \label{fig:erro}
     \end{figure*}
     
     O Método de Newton-Raphson se mostrou instável para algumas das funções de teste \cite{relatorionewtonraphson}, ficando muito dependente do ponto inicial para conseguir convergir. Uma função especialmente complicada para o Método de Newton-Raphson foi\footnote{Esta função é diferente da função 'Trigonométrica' listada na Tabela \ref{table:iteracoes} e na Figura \ref{fig:erro}, que é $\cos x + \sin x$.}: $3x + x^2 \sin^2 \frac{x\pi}{10}$. 
     
-    Com o Método da Secante não foi observado este problema, e diferentes valores iniciais conseguiram convergir para a raiz do problema. Os valores de $x_i$ \textbf{não} convergiram monotonicamente para a raiz, mas conseguiram encontrar o resultado correto (\ref{fig:ftrigonometrica}). Aparentemente, ao avaliar dois pontos em uma região com derivada perto de zero, o método irá \emph{pular} para um novo ponto longe do anterior, e na próxima iteração serão utilizados dois pontos distantes entre si. Ao fazer a inclinação média entre os dois pontos distantes o método irá dar maior relevância à tendência mais geral da função, e menor às variações de maior frequência. 
+    Com o Método da Secante não foi observado este problema, e diferentes valores iniciais conseguiram convergir para a raiz do problema. Os valores de $x_i$ \textbf{não} convergiram monotonicamente para a raiz, mas conseguiram encontrar o resultado correto (Figura \ref{fig:ftrigonometrica}). Aparentemente, ao avaliar dois pontos em uma região com derivada perto de zero, o método irá \emph{pular} para um novo ponto longe do anterior, e na próxima iteração serão utilizados dois pontos distantes entre si. Ao fazer a inclinação média entre os dois pontos distantes o método irá dar maior relevância à tendência mais geral da função, e menor às variações de maior frequência. 
 
-    O Método da Secante precisa de dois valores iniciais de $x$, e a ordem em que estes valores são fornecidos pelo usuário pode impactar o resultado. A Figura \ref{fig:erroinv} mostra que, para funções \emph{bem comportadas}, é uma boa prática entrar um valor de $x_1$ mais próximo da raiz que o valor de $x_0$. Ao fazer isto, o valor de $x_1$ é que será utilizado na 2$^a$ iteração. Para as funções testadas o impacto foi pequeno, mas foi positivo seguir a boa prática. O impacto foi maior apenas na avaliação da função trigonométrica (\ref{fig:ftrigonometrica}). Neste exemplo a convergência foi muito impactada e a raiz encontrada pelos dois testes foi diferente.
+    O Método da Secante precisa de dois valores iniciais de $x$, e a ordem em que estes valores são fornecidos pelo usuário pode impactar o resultado. A Figura \ref{fig:erroinv} mostra que, para funções \emph{bem comportadas}, é uma boa prática entrar um valor de $x_1$ mais próximo da raiz que o valor de $x_0$. Ao fazer isto, o valor de $x_1$ é que será utilizado na 2$^a$ iteração. Para as funções testadas o impacto foi pequeno, mas foi positivo seguir a boa prática. O impacto foi maior apenas na avaliação da função trigonométrica (Figura \ref{fig:ftrigonometrica}). Neste exemplo a convergência foi muito impactada e a raiz encontrada pelos dois testes foi diferente.
 
     \begin{figure*} 
-        \label{fig:erroinv}
         \centering
         \begin{tikzpicture}
             \begin{axis}[
@@ -369,9 +366,10 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
             
         \end{tikzpicture}
         \caption{Sensibilidade da evolução do erro do Método da Secante em função dos pontos iniciais: $x_0$ e $x_1$ (Linhas contínuas tem $|f(x_1)|<|f(x_0)|$, e as tracejadas o inverso).}
+        \label{fig:erroinv}
     \end{figure*}
     
-    Na aplicação do Método da Secante para resolver o inverso da mínima curvatura os resultados foram ainda melhores que os do Método de Newton Raphson, que já foram muito bons. O lado \emph{à direita} da raiz tem forma próxima de uma reta (\ref{fig:fpoco3d}), e a aproximação da derivada do Método da Secante por uma inclinação \emph{média} se mostrou muito eficaz logo na primeira iteração. Nos testes realizados esta primeira iteração, a partir dos pontos iniciais fornecidos pelo usuário, conseguiram uma aproximação muito boa da raiz.
+    Na aplicação do Método da Secante para resolver o inverso da mínima curvatura os resultados foram ainda melhores que os do Método de Newton Raphson, que já foram muito bons. O lado \emph{à direita} da raiz tem forma próxima de uma reta (Figura \ref{fig:fpoco3d}), e a aproximação da derivada do Método da Secante por uma inclinação \emph{média} se mostrou muito eficaz logo na primeira iteração. Nos testes realizados esta primeira iteração, a partir dos pontos iniciais fornecidos pelo usuário, conseguiram uma aproximação muito boa da raiz.
     No código foram utilizados por padrão valores 50\% e 10\% maior que o mínimo como $x_0$ e $x_1$, respectivamente. 
 
     O código dos três métodos foi implementado em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/03_Secante/03_secante.c}{https://github.com/ TiagoCAAmorim/numerical-methods}.
@@ -392,8 +390,6 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
 Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou raízes) está denotada pelo quadrado azul. São apresentadas apenas algumas das funções de teste. Em vermelho estão os pontos avaliados ao longo de um dos testes realizados.
 
 \begin{figure}[hbt!] 
-    \label{fig:polinomial}
-    \centering
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
@@ -435,11 +431,10 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
             \end{axis}
     \end{tikzpicture}
     \caption{Polinômio de 3$^o$ grau: $3x^3 + 2x^2$.}
+    \label{fig:polinomial}
 \end{figure}
 
 \begin{figure}[hbt!] 
-    \label{fig:fexponencial}
-    \centering
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot [domain=-3.05:3.05, smooth, thick] { exp(x^2 - 4) -1 };
@@ -467,11 +462,10 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
             \end{axis}
         \end{tikzpicture}
         \caption{Função exponencial: $e^{x^2-4}-1$.}
+        \label{fig:fexponencial}
     \end{figure}
     
     \begin{figure}[hbt!] 
-        \label{fig:ftrigonometrica}
-        \centering
         \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot[smooth, thick] table [x=x, y = fx] {f_trig.txt};
@@ -543,11 +537,10 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
         \end{axis}
     \end{tikzpicture}
     \caption{Função trigonométrica: $3x + x^2 \sin^2 \frac{x\pi}{10}$. Pontos inciais: 27 e 25.}
+    \label{fig:ftrigonometrica}
 \end{figure}
 
 \begin{figure}[hbt!] 
-    \label{fig:fpoco3d}
-    \centering
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot[smooth, thick] table [x=x, y = fx] {f_3Dwell.txt};
@@ -564,6 +557,7 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
         \end{axis}
     \end{tikzpicture}
     \caption{Função de erro de $\Delta S f(\alpha)$ para o caso Poço 3D.}
+    \label{fig:fpoco3d}
 \end{figure}
 
 %% \section{}
