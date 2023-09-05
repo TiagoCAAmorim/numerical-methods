@@ -164,9 +164,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-
-
-    % A partir da formulação do Método da Mínima Curvatura, foi desenvolvido um algoritmo para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Este algoritmo tem formulação implícita, e pode ser resolvido utilizando métodos de busca de raiz de funções de uma variável. Neste relatório foi aplicado o Método de Newton-Raphson para resolver este problema. Com um ajuste ao método foi possível encontrar soluções para este problema com uma taxa de convergência duas vezes maior que aquela conseguida com o Método da Bissecção.
+    A partir do Método da Mínima Curvatura, para calcular os parâmetros de perfuração de um poço direcional em função das coordenadas cartesianas da sua trajetória é preciso resolver uma equação implícita do tipo $g(x)=x$. Este tipo de problema pode ser resolvido com algoritmos que buscam a raiz de uma função de uma variável. O Método da Secante se mostrou mais eficiente que o Método de Newton-Raphson para resolver este problema, com convergência mais que quadrátrica.
 
 \end{abstract}
 
@@ -200,7 +198,7 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-Foi desenvolvido um método de cálculo de parâmetros de perfuração ($\Delta$S, $\theta$, $\phi$) em função de coordenadas cartesianas ($\Delta$N, $\Delta$E, $\Delta$V) da trajetória de um poço a partir da formulação do Método da Mínima \cite{relatoriobisseccao}. A formulação desenvolvida é implícita, e tem a forma $g(x)=x$.
+Foi desenvolvido um método de cálculo de parâmetros de perfuração ($\Delta$S, $\theta$, $\phi$) em função de coordenadas cartesianas ($\Delta$N, $\Delta$E, $\Delta$V) da trajetória de um poço a partir da formulação do Método da Mínima Curvatura \cite{relatoriobisseccao}. A formulação desenvolvida é implícita, e tem a forma $g(x)=x$.
 
 A primeira tentativa de resolver o problema proposto, neste relatório denominado de \textbf{Inverso da Mínima Curvatura}, foi com o Método da Bissecção. O Método da Bissecção conseguiu encontrar a resposta correta em todos os testes realizados. O segundo teste foi feito com o Método de Newton-Raphson que apresentou convergência mais que quadrática \cite{relatorionewtonraphson}.
 
@@ -233,11 +231,11 @@ onde
     C &= \cos \theta_1 + \cos \theta_2
 \end{align*}
 
-Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a implementação deste algoritmo e seus limites. Em \cite{relatorionewtonraphson} é apresentada a derivação do problema em função da variável principal ($\Delta S f(|alpha)$).
+Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a implementação deste algoritmo e seus limites. Em \cite{relatorionewtonraphson} é apresentada a derivação do problema em função da variável principal: $\Delta S f(\alpha)$.
 
     \subsection{Método da Secante}
     
-    O código desenvolvido foi baseado no pseudo-código de \cite{burden2016analise}. Uma forma simplificada é apresentada no Algoritmo \ref{alg:secante}. O Método da Secante deriva do Método de Newton-Raphson, e faz uma aproximação da derivada da função de interesse: $f^{\prime}(x) \approx \Delta f(x) / \Delta x$. O método precisa de dois pontos iniciais, e, assim como o Método de Newton-Raphson, converge mais rápido que o Método da Bissecção, mas não tem garantia de encontrar uma raiz. 
+    O código desenvolvido foi baseado no pseudo-código de \cite{burden2016analise}. Uma forma simplificada é apresentada no Algoritmo \ref{alg:secante}. O Método da Secante deriva do Método de Newton-Raphson, e faz uma aproximação da derivada da função de interesse: $f^{\prime}(x) \approx \Delta f(x) / \Delta x$. O método precisa de dois pontos iniciais, e, assim como o Método de Newton-Raphson, converge mais rápido que o Método da Bissecção, e não tem garantia de encontrar uma raiz. 
 
     \begin{algorithm}
         \caption{Método da Secante}\label{alg:secante}
@@ -274,16 +272,16 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
     Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
 
     \begin{description}
-        \item[tests\textunderscore newton\textunderscore raphson()] Testa o Método da Secante em diferentes funções: linear, quadrática, exponencial e trigonométrica. Também foram aplicados casos específicos para o algoritmo tratar: raiz no ponto inicial, ponto inicial muito próximo da raiz, ponto inicial em um ponto de mínimo da função (derivada nula), uso de critério de convergência relativo, função com derivada nula na raiz, função com vários mínimos e máximos locais.
+        \item[tests\textunderscore secant()] Testa o Método da Secante em diferentes funções: linear, quadrática, exponencial e trigonométrica. Também foram aplicados casos específicos para o algoritmo tratar: raiz no ponto inicial, ponto inicial muito próximo da raiz, ponto inicial em um ponto de mínimo da função (derivada nula), uso de critério de convergência relativo, função com derivada nula na raiz, função com vários mínimos e máximos locais.
         
         \item[tests\textunderscore minimum\textunderscore curvature()] Testa o algoritmo proposto para resolver o inversa da mínima curvatura para diferentes geometrias de trecho de poço: poço vertical, horizontal, inclinado, em curva.
     \end{description}
 
     A implementação do Método da Secante foi adaptada, impondo limites máximo e mínimo para os pontos a serem testados. No problema do inverso da mínima curvatura a variável principal ($\Delta S f(\alpha)$) não pode ter um valor qualquer. Optou-se por não parar prematuramente o processo iterativo quando os limites são ultrapassados. Quando o novo valor da variável principal ultrapassa algum dos limites pré-estabelecidos, é utilizado o valor do limite que foi violado. Para o problema do inverso da mínima curvatura foi utilizado um limite inferior de $\Delta S f(\alpha)$ igual ao discutido em \cite{relatoriobisseccao}.
 
-    Como esperado, as funções lineares convergiram em uma iteração, pois a aproximação da derivada feita no Método da Secante é exatam neste exemplo. As demais funções polinomiais testadas convergiram rapidamente, mas com mais iterações que o Método de Newton Raphson (Tabela \ref{table:iteracoes}). O Método da Secante teve problemas de convergência com a função exponencial: $e^{x^2-4}-1$. O método só conseguiu convergir quando foram definidos valores iniciais próximos da raiz. Como esta função \emph{cresce} muito rapidamente em $x<-2$ e $x>2$, o termo $(f(x_{i-1})-f(x_{i-2}))$ sofre com problemas numéricos, pois é a subtração de números com grandezas muito distintas.
+    Como esperado, as funções lineares convergiram em uma iteração, pois a aproximação da derivada feita no Método da Secante é exata neste exemplo. As demais funções polinomiais testadas convergiram rapidamente, mas com mais iterações que o Método de Newton Raphson (Tabela \ref{table:iteracoes}). O Método da Secante teve problemas de convergência com a função exponencial: $e^{x^2-4}-1$. O método só conseguiu convergir quando foram definidos valores iniciais próximos da raiz. Como esta função \emph{cresce} muito rapidamente em $x<-2$ e $x>2$, o termo $(f(x_{i-1})-f(x_{i-2}))$ sofre com problemas numéricos, pois é a subtração de números com grandezas muito distintas.
 
-    Para as diferentes funções testadas, o Método da Bisseção convergiu linearmente em uma razão de aproximadamente 2 \cite{relatoriobisseccao}, o Método de Newton-Raphson em geral teve convergência quadrática \cite{relatorionewtonraphson}. Com o Método da Secante a convergência foi aproximadamente quadrática, em geral um pouco pior que o Método de Newton-Raphson (Figura \ref{fig:Erro}). 
+    Para as diferentes funções testadas, o Método da Bisseção convergiu linearmente em uma razão de aproximadamente 2 \cite{relatoriobisseccao}, e o Método de Newton-Raphson em geral teve convergência quadrática \cite{relatorionewtonraphson}. Com o Método da Secante a convergência foi aproximadamente quadrática, em geral um pouco pior que o Método de Newton-Raphson (Figura \ref{fig:erro}). 
 
     \begin{table*} 
         \caption{Comparação entre o número de iterações necessários para um mesmo critério de convergência usando os Métodos da Bissecção, Newton-Raphson e Secante.}
@@ -305,7 +303,7 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
     \end{table*}
     
     \begin{figure*} 
-        \label{fig:Erro}
+        \label{fig:erro}
         \centering
         \begin{tikzpicture}
             \begin{axis}[
@@ -332,50 +330,55 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
             \end{axis}
             
         \end{tikzpicture}
-        \caption{Evolução do erro do Método de Newton-Raphson com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i^2 = 0.5$).}
+        \caption{Evolução do erro do Método da Secante com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i^2 = 0.5$).}
     \end{figure*}
     
-    O Método de Newton-Raphson se mostrou instável para algumas das funções de teste \cite{relatorionewtonraphson}, ficando muito dependente do ponto inicial para conseguir convergir. Uma função especialmente complicada para o Método de Newton-Raphson foi $3x + x^2 \sin^2 \frac{x\pi}{10}$. Com o Método da Secante não foi observado este problema, e diferentes valores iniciais conseguiram convergir para a raiz do problema. Os valores de $x_i$ não convergiram monotonicamente para a raiz, mas conseguiram encontrar o resultado correto (\ref{fig:ftrigonometrica}).
+    O Método de Newton-Raphson se mostrou instável para algumas das funções de teste \cite{relatorionewtonraphson}, ficando muito dependente do ponto inicial para conseguir convergir. Uma função especialmente complicada para o Método de Newton-Raphson foi\footnote{Esta função é diferente da função 'Trigonométrica' listada na Tabela \ref{table:iteracoes} e na Figura \ref{fig:erro}, que é $\cos x + \sin x$.}: $3x + x^2 \sin^2 \frac{x\pi}{10}$. 
     
-    A função $\cos x + \sin x$ tem muitas raízes, e o resultado do Método de Newton-Raphson se mostrou muito dependente do ponto inicial. Para conseguir encontrar a raiz de uma determinada região foi preciso definir um ponto inicial \emph{bem próximo} da raiz. Já a função $3x + x^2 \sin^2 \frac{x\pi}{10}$ mostrou muita instabilidade, e em muitos casos não conseguiu convergir ao fazer pequenas mudanças no valor do ponto inicial.
+    Com o Método da Secante não foi observado este problema, e diferentes valores iniciais conseguiram convergir para a raiz do problema. Os valores de $x_i$ \textbf{não} convergiram monotonicamente para a raiz, mas conseguiram encontrar o resultado correto (\ref{fig:ftrigonometrica}). Aparentemente, ao avaliar dois pontos em uma região com derivada perto de zero, o método irá \emph{pular} para um novo ponto longe do anterior, e na próxima iteração serão utilizados dois pontos distantes entre si. Ao fazer a inclinação média entre os dois pontos distantes o método irá dar maior relevância à tendência mais geral da função, e menor às variações de maior frequência. 
 
-    Na aplicação do Método de Newton para resolver o inverso da mínima curvatura os resultados foram muito bons. Nenhum dos testes teve problemas de convergência, e convergiram com um número de iterações menor que o do Método da Bissecção. O formato da função de construída favorece o uso do Método de Newton-Raphson, pois tem a forma próxima de uma reta (ver \ref{fig:fpoco3d}).
+    O Método da Secante precisa de dois valores iniciais de $x$, e a ordem em que estes valores são fornecidos pelo usuário pode impactar o resultado. A Figura \ref{fig:erroinv} mostra que, para funções \emph{bem comportadas}, é uma boa prática entrar um valor de $x_1$ mais próximo da raiz que o valor de $x_0$. Ao fazer isto, o valor de $x_1$ é que será utilizado na 2$^a$ iteração. Para as funções testadas o impacto foi pequeno, mas foi positivo seguir a boa prática. O impacto foi maior apenas na avaliação da função trigonométrica (\ref{fig:ftrigonometrica}). Neste exemplo a convergência foi muito impactada e a raiz encontrada pelos dois testes foi diferente.
 
-    Para o problema proposto foram testados alguns valores distintos de ponto inicial, mas o impacto no resultado não é expressivo. Um valor inicial \emph{melhor} resultou em uma ou duas iterações a menos (Figura \ref{fig:pontoinicial}). Inicializar no valor mínimo de $\Delta S f(\alpha)$ não teve um resultado muito bom em alguns dos testes realizados, pois nesta região a derivada tem maior variação. No código foi utilizado por padrão um valor 10\% maior que o mínimo. 
-
-    No exemplo da Figura \ref{fig:pontoinicial} a resposta exata é aproximadamente 4.7\% maior que $\Delta S f(\alpha)_{min}$, e os pontos iniciais mais próximos convergem mais rápido. O principal resultado deste gráfico é mostrar que para o problema do inverso da mínima curvatura a definição do ponto inicial tem pouco impacto no número de iterações que o Método de Newton-Raphson precisará para alcançar o critério de convergência definido. 
-
-    \begin{figure}[hbt!]
-        \label{fig:pontoinicial}
+    \begin{figure*} 
+        \label{fig:erroinv}
         \centering
         \begin{tikzpicture}
             \begin{axis}[
                 height = 8cm, % standard 10cm
-                width = 0.4\textwidth, %15cm,  % standard 10cm
+                width = 0.8\textwidth, %15cm,  % standard 10cm
                 % xmode=log,
-                % ymode=log,
+                ymode=log,
                 grid=both,
-                % ymin=1e-12,
-                % ymax=1e0,
-                xlabel = {$\frac{\Delta S f(\alpha)_{inicial}}{\Delta S f(\alpha)_{min}}$},
-                ylabel = {Número de Iterações},
-                legend style={at={(0.25,0.55)}, anchor=east},
+                ymin=1e-6,
+                ymax=1e3,
+                xlabel = {Iterações},
+                ylabel = {$\varepsilon_i = |P_i - P|$},
+                legend style={at={(0.99,0.85)}, anchor=east},
                 ]
-                \addplot[color=black, solid, mark=*, mark size=2.pt] coordinates {
-                    (1.000,8)(1.188,9)(1.376,10)(1.564,10)(1.751,10)(2.503,11)(3.254,11)
-                    (4.006,11)(4.757,11)(5.509,12)(6.260,12)(7.012,12)(7.763,12)(8.515,12)
-                };
+    
+                \addplot[color=black, solid, mark=*] table [x=Iteration, y =Normal] {InvertedPoints_3rdDegree.txt};
+                \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Normal] {InvertedPoints_Exp.txt};
+                \addplot[color=red, solid, mark=*] table [x=Iteration, y =Normal] {InvertedPoints_Trig.txt};
+
+                \addplot[color=black, dashed, mark=*] table [x=Iteration, y =Inv] {InvertedPoints_3rdDegree.txt};
+                \addplot[color=blue, dashed, mark=*] table [x=Iteration, y =Inv] {InvertedPoints_Exp.txt};
+                \addplot[color=red, dashed, mark=*] table [x=Iteration, y =Inv] {InvertedPoints_TrigInv.txt};
+                
+                \legend{Polinômio 3$^o$ grau, Exponencial, Trigonométrica};
             \end{axis}
             
         \end{tikzpicture}
-        \caption{Número de iterações em função do valor inicial da variável do problema.}
-    \end{figure}
+        \caption{Sensibilidade da evolução do erro do Método da Secante em função dos pontos iniciais: $x_0$ e $x_1$ (Linhas contínuas tem $|f(x_1)|<|f(x_0)|$, e as tracejadas o inverso).}
+    \end{figure*}
+    
+    Na aplicação do Método da Secante para resolver o inverso da mínima curvatura os resultados foram ainda melhores que os do Método de Newton Raphson, que já foram muito bons. O lado \emph{à direita} da raiz tem forma próxima de uma reta (\ref{fig:fpoco3d}), e a aproximação da derivada do Método da Secante por uma inclinação \emph{média} se mostrou muito eficaz logo na primeira iteração. Nos testes realizados esta primeira iteração, a partir dos pontos iniciais fornecidos pelo usuário, conseguiram uma aproximação muito boa da raiz.
+    No código foram utilizados por padrão valores 50\% e 10\% maior que o mínimo como $x_0$ e $x_1$, respectivamente. 
 
-    O código de ambos métodos foi implementado em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/02_NewtonRaphson/02_newton_raphson.c}{https://github.com/ TiagoCAAmorim/numerical-methods}.
+    O código dos três métodos foi implementado em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/03_Secante/03_secante.c}{https://github.com/ TiagoCAAmorim/numerical-methods}.
 
     \section{Conclusão}
     
-    O Método de Newton-Raphson se mostrou adequado para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Foi necessário adaptar o Método de Newton-Raphson para conseguir continuar o processo iterativo caso o novo valor de teste não esteja na região de validade da função. Com este ajuste todos os testes realizados alcançaram o critério de convergência com um número de iterações menor do que o que foi alcançado com o Método da Bissecção.
+    O Método da Secante apresentou desempenho melhor que o do Método de Newton-Raphson para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. O formato da função de interesse para resolver o problema proposto levou a uma estimativa muito boa da solução na primeira iteração em todos os testes realizados. Além de alcançar convergência em um número menor de iterações, o Método da Secante tem a vantagem adicional de não precisar calcular a derivada da função, ou seja, reduzindo ainda mais o custo computacional necessário para resolver o problema proposto.
 
     % \label{}
     
@@ -386,7 +389,7 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
 
 \section{Funções de Teste}
 
-Nos gráficos a seguir as curvas contínuas são as funções de teste e as tracejadas são as respectivas derivadas. A raiz (ou raízes) está denotada pelo quadrado azul. São apresentadas apenas algumas das funções de teste. Em vermelho estão os pontos avaliados ao longo de um dos testes realizados.
+Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou raízes) está denotada pelo quadrado azul. São apresentadas apenas algumas das funções de teste. Em vermelho estão os pontos avaliados ao longo de um dos testes realizados.
 
 \begin{figure}[hbt!] 
     \label{fig:polinomial}
@@ -394,22 +397,42 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
-            \addplot [dashed, domain=-3:3, smooth, thick] { 3*x*(3*x + 4) };
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(0,0)};
-            \addplot[color=red, mark=square, mark size=2.pt] coordinates {
-               (     2.585,     91.9138)
-               (   1.57673,      26.676)
-               (  0.930747,     7.61663)
-               (  0.529144,     2.12443)
-               (  0.289628,    0.576191)
-               (  0.153428,    0.152076)
-               (  0.079353,   0.0392804)
-               ( 0.0404194,   0.0100005)
-               ( 0.0204079,  0.00252439)
-               ( 0.0102552, 0.000634253)
-               (0.00514066, 0.000158966)
-            };
-        \end{axis}
+            % \addplot [dashed, domain=-3:3, smooth, thick] { 3*x*(3*x + 4) };
+            \addplot[color=red, mark=o, mark size=2.pt] coordinates {
+                (   2.69717,         102.512)
+                (   1.93213,         44.0375)
+                (   1.35597,               0)
+                (   1.35597,         18.5116)
+                (   1.93213,         44.0375)
+                (   1.35597,         18.5116)
+                (  0.938142,               0)
+                (  0.938142,         7.75767)
+                (   1.35597,         18.5116)
+                (  0.938142,         7.75767)
+                (  0.636725,               0)
+                (  0.636725,         3.20693)
+                (  0.938142,         7.75767)
+                (  0.636725,         3.20693)
+                (  0.424314,               0)
+                (  0.424314,         1.30944)
+                (  0.636725,         3.20693)
+                (  0.424314,         1.30944)
+                (  0.277732,               0)
+                (  0.277732,        0.527079)
+                (  0.178979,        0.209401)
+                (  0.113885,       0.0822499)
+                ( 0.0717777,       0.0320216)
+                ( 0.0449334,       0.0123862)
+                ( 0.0279997,      0.00476976)
+                ( 0.0173951,      0.00183133)
+                (  0.010786,     0.000701786)
+                (0.00667969,     0.000268604)
+                (0.00413351,     0.000102728)
+                (0.00255666,     3.92692e-05)
+                (0.00158087,     1.50068e-05)
+                };
+                \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(0,0)};
+            \end{axis}
     \end{tikzpicture}
     \caption{Polinômio de 3$^o$ grau: $3x^3 + 2x^2$.}
 \end{figure}
@@ -420,78 +443,106 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot [domain=-3.05:3.05, smooth, thick] { exp(x^2 - 4) -1 };
-            \addplot [dashed, domain=-2.5:2.8, smooth, thick] { 2*x*exp(x^2-4) };
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(2,0)};
-            \addplot[color=red, mark=square, mark size=2.pt] coordinates {
-            %    (      5,  1.31882e+09)
-            %    (    4.9,  4.90041e+08)
-            %    (4.79796,  1.82163e+08)
-            %    (4.69375,  6.77457e+07)
-            %    (4.58722,  2.52067e+07)
-            %    (4.47823,  9.38385e+06)
-            %    (4.36657,  3.49543e+06)
-            %    (4.25207,  1.30287e+06)
-            %    (4.13448,       485971)
-            %    (4.01354,       181412)
-            %    (3.88897,      67781.5)
-            %    ( 3.7604,      25350.8)
-            %    (3.62744,       9492.1)
-            %    (3.48962,      3558.66)
-            %    (3.34637,      1336.05)
-            %    (3.19707,      502.337)
-               (3.04099,      189.111)
-               (2.87743,      71.2129)
-               (2.70607,      26.7388)
-               (2.52796,      9.92009)
-               (2.34829,      3.54697)
-               ( 2.1822,       1.1425)
-               (2.06001,     0.275895)
-               (2.00753,    0.0306256)
-               (2.00013,  0.000505357)
-               (      2,   1.4355e-07)
-            };
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Função exponencial: $e^{x^2-4}-1$.}
-\end{figure}
-
-\begin{figure}[hbt!] 
-    \label{fig:ftrigonometrica}
-    \centering
-    \begin{tikzpicture}
+            % \addplot [dashed, domain=-2.5:2.8, smooth, thick] { 2*x*exp(x^2-4) };
+            \addplot[color=red, mark=o, mark size=2.pt] coordinates {
+                (      3,         147.413)
+                (    2.5,         8.48774)
+                (2.46945,               0)
+                (2.46945,         7.15144)
+                (      3,         147.413)
+                (2.46945,         7.15144)
+                ( 2.4424,               0)
+                ( 2.4424,         6.13723)
+                (2.27871,               0)
+                (2.27871,         2.29537)
+                (2.18091,               0)
+                (2.18091,         1.13053)
+                (2.08599,        0.421002)
+                (2.02967,        0.127008)
+                (2.00534,       0.0216211)
+                (2.00035,      0.00139638)
+                (      2,      1.6707e-05)
+                };
+                \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(2,0)};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Função exponencial: $e^{x^2-4}-1$.}
+    \end{figure}
+    
+    \begin{figure}[hbt!] 
+        \label{fig:ftrigonometrica}
+        \centering
+        \begin{tikzpicture}
         \begin{axis} [axis lines=center]
-        %     \addplot[smooth, thick] table [x=x, y = fx] {f_trig.txt};
+            \addplot[smooth, thick] table [x=x, y = fx] {f_trig.txt};
             % \addplot[smooth, thick, dashed] table [x=x, y = fpx] {f_trig.txt};
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(0.,0)(-28.9569,0)(-21.2268,0)(-18.6878,0)(-11.6909,0)(-7.88405,0)(-3.63114,0)};
-            \addplot[color=red, mark=square, mark size=2.pt] coordinates {
-              (          9,     34.7348)
-              (     14.297,     237.489)
-              (    12.2492,     99.9961)
-              (    11.0297,     45.3814)
-              (    9.65614,     30.0523)
-              (      21.33,     138.902)
-              (    20.2703,     63.7679)
-              (    17.7928,     182.715)
-              (    21.5136,     161.534)
-              (    20.4344,     69.0319)
-              (    18.7399,     108.441)
-              (    20.6096,     77.2179)
-              (    19.2681,     77.0878)
-              (     21.083,     112.747)
-              (    20.0154,     60.0555)
-              (    5.77983,     48.7807)
-              (     4.2668,      30.057)
-              (    3.29579,     17.9223)
-              (    2.45487,     10.2924)
-              (     1.6239,     5.50052)
-              (    0.72792,     2.21099)
-              (  0.0596544,    0.178964)
-              (3.03375e-06, 9.10124e-06)
-              (          0,           0)
-            };
+            \addplot[color=red, mark=o, mark size=2.pt] coordinates {
+               (         27,         558.137)
+               (         25,             700)
+               (    34.8687,               0)
+               (    34.8687,         1318.36)
+               (         25,             700)
+               (    34.8687,         1318.36)
+               (    13.8284,               0)
+               (    13.8284,         207.954)
+               (    34.8687,         1318.36)
+               (    13.8284,         207.954)
+               (    9.88806,               0)
+               (    9.88806,          29.785)
+               (    13.8284,         207.954)
+               (    9.88806,          29.785)
+               (    9.22934,               0)
+               (    9.22934,         32.5843)
+               (    9.88806,          29.785)
+               (    9.22934,         32.5843)
+               (    16.8971,               0)
+               (    16.8971,         246.243)
+               (    9.22934,         32.5843)
+               (    16.8971,         246.243)
+               (    8.05996,               0)
+               (    8.05996,         45.4676)
+               (    16.8971,         246.243)
+               (    8.05996,         45.4676)
+               (    6.05871,               0)
+               (    6.05871,         50.9709)
+               (    8.05996,         45.4676)
+               (    6.05871,         50.9709)
+               (    24.5942,               0)
+               (    24.5942,         668.878)
+               (    6.05871,         50.9709)
+               (    24.5942,         668.878)
+               (    4.52973,               0)
+               (    4.52973,         33.6631)
+               (    24.5942,         668.878)
+               (    4.52973,         33.6631)
+               (    3.46642,               0)
+               (    3.46642,         19.8354)
+               (    4.52973,         33.6631)
+               (    3.46642,         19.8354)
+               (    1.94113,               0)
+               (    1.94113,         7.05933)
+               (    3.46642,         19.8354)
+               (    1.94113,         7.05933)
+               (    1.09834,               0)
+               (    1.09834,         3.43304)
+               (    1.94113,         7.05933)
+               (    1.09834,         3.43304)
+               (   0.300464,               0)
+               (   0.300464,        0.902195)
+               (    1.09834,         3.43304)
+               (   0.300464,        0.902195)
+               (  0.0160378,               0)
+               (  0.0160378,       0.0481135)
+               (   0.300464,        0.902195)
+               (  0.0160378,       0.0481135)
+               (1.50578e-05,     4.51734e-05)
+               (1.50578e-05,     4.51734e-05)
+               (2.04541e-12,     6.13622e-12)
+                };
+              \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(0.,0)(-28.9569,0)(-21.2268,0)(-18.6878,0)(-11.6909,0)(-7.88405,0)(-3.63114,0)};
         \end{axis}
     \end{tikzpicture}
-    \caption{Função trigonométrica: $3x + x^2 \sin^2 \frac{x\pi}{10}$.}
+    \caption{Função trigonométrica: $3x + x^2 \sin^2 \frac{x\pi}{10}$. Pontos inciais: 27 e 25.}
 \end{figure}
 
 \begin{figure}[hbt!] 
@@ -499,21 +550,16 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
     \centering
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
-            % \addplot[smooth, thick] table [x=x, y = fx] {f_3Dwell.txt};
+            \addplot[smooth, thick] table [x=x, y = fx] {f_3Dwell.txt};
             % \addplot[smooth, thick, dashed] table [x=x, y = fpx] {f_3Dwell.txt};
             \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(10.3144,0)};
             \addplot[color=red, mark=square, mark size=2.pt] coordinates {
                 (14.7738,    -2.92074 )
-                (11.6607,   -0.882014 )
-                (10.6903,   -0.252789 )
-                (10.4038,  -0.0612647 )
-                (10.3330,  -0.0127958 )
-                (10.3181, -0.00251734 )
-                (10.3152, -0.000488076)
-                (10.3146, -9.43509e-05)
-                (10.3145, -1.82286e-05)
-                (10.3144, -3.52136e-06)
-                (10.3144, -6.80235e-07)
+                (10.8341,   -0.347228 )
+                (10.3025,  0.00823089 )
+                (10.3149, -0.000284164)
+                (10.3144, -3.47599e-07)
+                (10.3144,  1.45128e-11)
                 };
         \end{axis}
     \end{tikzpicture}

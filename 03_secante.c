@@ -580,10 +580,12 @@ void tests_secant(){
     
     test_secant(f_x2, 0.0, 10., 20, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "2nd deegre polinomial with minimum = root");
     test_secant(f_x3, 0.0, 10., 20, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "3rd deegre polinomial with f'(root)=0");
+    test_secant(f_x3, 0.0, 20., 10, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "3rd deegre polinomial with f'(root)=0, x0 and x1 inverted");
 
     test_secant(f_exponential, 2., 5, 10, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Exponential function, root #1A");
     test_secant(f_exponential, 2., 1., 5, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Exponential function, root #1B");
     test_secant(f_exponential, 2., 2.5, 3., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Exponential function, root #1C");
+    test_secant(f_exponential, 2., 3., 2.5, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Exponential function, root #1C, with x0 and x1 inverted");
     test_secant(f_exponential, -2., -5, 0, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Exponential function, root #2");
     test_secant(f_exponential, 2, 0, 2., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Exponential function, x_init = minimum");
 
@@ -592,9 +594,10 @@ void tests_secant(){
 
     test_secant(f_trigonometric, 3./4*pi, 0., 3., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple roots");
     
-    test_secant(f_trigonometric2, 0, 10., 12., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima A");
-    test_secant(f_trigonometric2, 0, 12, 15., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima B");
-    test_secant(f_trigonometric2, 0, 9, 15, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima C");
+    test_secant(f_trigonometric2, 0, 12., 10., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima A");
+    test_secant(f_trigonometric2, 0, 18, 25., -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima B");
+    test_secant(f_trigonometric2, 0, 27, 25, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima C");
+    test_secant(f_trigonometric2, 0, 25, 27, -1E99, 1E99, 0.001, relative_convergence, max_iterations, debug, "Trigonometric function with multiple minima C, x0 and x1 inverted");
 }
 
 
@@ -1111,7 +1114,7 @@ void print_fx_fpx(double (*func)(double), double (*func_prime)(double), int poin
 
 int main(){
     // tests_newton_raphson();
-    // tests_secant();
-    tests_minimum_curvature();
+    tests_secant();
+    // tests_minimum_curvature();
     return 0;
 }
