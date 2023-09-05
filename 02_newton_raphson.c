@@ -735,26 +735,15 @@ double calculate_deltaSfa_prime(double deltaE, double deltaN, double deltaV, dou
     double aN = sin_theta1 * cos_phi1 + sin_theta2 * cos_phi2;
     double aV = cos_theta1 + cos_theta2;
 
-    printf("aE=%g, aN=%g, aV=%g.\n",aE,aN,aV);
-
     double aE_prime = sin_theta2 * sin_phi2_prime + sin_theta2_prime * sin_phi2;
     double aN_prime = sin_theta2 * cos_phi2_prime + sin_theta2_prime * cos_phi2;
     double aV_prime = cos_theta2_prime;
-    printf("aE'=%g, aN'=%g, aV'=%g.\n",aE_prime,aN_prime,aV_prime);
 
     double dS2 = deltaE*deltaE + deltaN*deltaN + deltaV*deltaV;
     double dA2 = aE*aE + aN*aN + aV*aV;
-    printf("dS2 = %g.\n",dS2);
-    printf("dA2 = %g.\n",dA2);
-    printf("dS2/dA2 = %g.\n",dS2/dA2);
-    printf("pow = %g.\n",pow(dS2/dA2, 3/2.));
-    printf("dAA = %g.\n",(aE*aE_prime + aN*aN_prime + aV*aV_prime));
-
     double ddSfa = - 2 * pow(dS2/dA2, 3/2.) / dS2 * (aE*aE_prime + aN*aN_prime + aV*aV_prime);
 
-    printf("ddSfa = %g.\n",ddSfa);
-
-    return - 2 * pow(dS2/dA2, 3/2.) / dS2 * (aE*aE_prime + aN*aN_prime + aV*aV_prime);
+    return ddSfa;
 }
 
 double calculate_deltaSfa_aproximate(double deltaE, double deltaN, double deltaV, double cos_theta1, double sin_theta1, double cos_phi1, double sin_phi1, double deltaSfa){
@@ -764,14 +753,10 @@ double calculate_deltaSfa_aproximate(double deltaE, double deltaN, double deltaV
 }
 
 double calculate_deltaSfa_aproximate_prime(double deltaE, double deltaN, double deltaV, double cos_theta1, double sin_theta1, double cos_phi1, double sin_phi1, double deltaSfa){
-    printf("dV = %g, x=%g, CosTheta1=%g.\n",deltaV, deltaSfa, cos_theta1);
     struct tangle theta2 = calculate_theta2(deltaV, deltaSfa, cos_theta1);
-    printf("Theta 2: cos=%g, sin=%g.\n",theta2.cos, theta2.sin);
     struct tangle theta2_prime = calculate_theta2_prime(deltaV, deltaSfa, cos_theta1);
-    printf("Theta 2 prime: cos=%g, sin=%g.\n",theta2_prime.cos, theta2_prime.sin);
     struct tangle phi2 = calculate_phi2(deltaE, deltaN, sin_theta1, cos_phi1, sin_phi1, theta2.sin);
     struct tangle phi2_prime = calculate_phi2_prime(deltaE, deltaN, sin_theta1, cos_phi1, sin_phi1, theta2.sin, theta2_prime.sin);
-    printf("Phi 2 prime: cos=%g, sin=%g.\n",phi2_prime.cos, phi2_prime.sin);
     return calculate_deltaSfa_prime(deltaE, deltaN, deltaV, cos_theta1, sin_theta1, cos_phi1, sin_phi1, theta2.cos, theta2.sin, phi2.cos, phi2.sin, theta2_prime.cos, theta2_prime.sin, phi2_prime.cos, phi2_prime.sin);
 }
 
@@ -782,7 +767,6 @@ double calculate_deltaSfa_error(double deltaE, double deltaN, double deltaV, dou
 
 double calculate_deltaSfa_error_prime(double deltaE, double deltaN, double deltaV, double cos_theta1, double sin_theta1, double cos_phi1, double sin_phi1, double deltaSfa){
     double deltaSfa_calc_prime = calculate_deltaSfa_aproximate_prime( deltaE, deltaN, deltaV, cos_theta1, sin_theta1, cos_phi1, sin_phi1, deltaSfa);
-    printf("dSfa prime = %g\n",deltaSfa_calc_prime);
     return deltaSfa_calc_prime - 1;
 }
 
@@ -845,7 +829,7 @@ void test_MCM_formulas(char *message, double deltaS, double theta1, double phi1,
         deltaSfa_min = max(deltaSfa_min, 2*dV/(cos_theta1-1) );
     }
 
-    deltaSfa_calc = find_root_newton_raphson_debug(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, deltaSfa_min*1.5, deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa, true);
+    deltaSfa_calc = find_root_newton_raphson_debug(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, deltaSfa_min*5., deltaSfa_min, deltaSfa_max, convergence_limit, relative_convergence, 100, true, deltaSfa, true);
         
     print_error("  Delta S x f(alfa)", deltaSfa, deltaSfa_calc, convergence_limit, relative_convergence);
     theta2_ = calculate_theta2(dV, deltaSfa_calc, cos(theta1));
@@ -970,6 +954,20 @@ void print_fx_fpx(double (*func)(double), double (*func_prime)(double), int poin
 
 int main(){
     // tests_newton_raphson();
-    tests_minimum_curvature();
+    // tests_minimum_curvature();
+
+    double dS=10.;
+    double theta1=pi/10;      
+    double phi1=pi/4;
+    double theta2=pi/6;       
+    double phi2=7*pi/4;
+    
+    double dE = deltaE(dS, theta1, phi1, theta2, phi2);
+    double dN = deltaN(dS, theta1, phi1, theta2, phi2);
+    double dV = deltaV(dS, theta1, phi1, theta2, phi2);
+    define_well_path_data(dE, dN, dV, theta1, phi1);
+    print_fx_fpx(calculate_defined_deltaSfa_error, calculate_defined_deltaSfa_error_prime, 300, 9.7826, 15.);
+
+
     return 0;
 }

@@ -164,7 +164,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-    A partir da formulação do Método da Mínima Curvatura, foi desenvolvido um algoritmo para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Este algoritmo tem formulação implícita, e pode ser resolvido utilizando métodos de busca de raiz de funções de uma variável. Neste relatório foi aplicado o Método de Newton-Raphson para resolver este problema. Com um ajuste ao método foi possível encontrar soluções para este problema com uma taxa de convergência duas vezes maior que aquela conseguida com o Método da Bissecção.
+    A partir da formulação do Método da Mínima Curvatura, foi desenvolvido um algoritmo para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. Este algoritmo tem formulação implícita, e pode ser resolvido utilizando métodos de busca de raiz de funções de uma variável. Neste relatório foi aplicado o Método de Newton-Raphson para resolver este problema. Com um ajuste ao método foi possível encontrar soluções para este problema com uma taxa de convergência mais que quadrática.
 
 \end{abstract}
 
@@ -202,7 +202,7 @@ O Método da Mínima Curvatura possibilita o cálculo de cooordenadas cartesiana
 
 No primeiro relatório desta série \cite{relatoriobisseccao} foi apresentada uma proposta de metodologia para cálculo dos parâmetros de perfuração a partir das coordenadas cartesianas de pontos ao longo da geometria do poço, neste relatório denominado de \textbf{Inverso da Mínima Curvatura}. O algoritmo proposto tem formulação implícita e foi organizado como um problema do tipo $g(x)=x$. O problema foi resolvido com o Método da Bissecção, encontrando bons resultados.
 
-Neste segundo relatório é aplicado o método de Newton-Raphson de para resolver o mesmo problema.
+Neste segundo relatório é aplicado o método de Newton-Raphson para resolver o mesmo problema.
 
 \section{Metodologia}
 
@@ -248,7 +248,7 @@ onde
 Derivando $f(x)$:
 
 \begin{align} \label{eq:fxprime}
-    f(x)^{\prime} =& - \frac{2}{\Delta S^2} \left( \frac{ \Delta N^2 + \Delta E^2 + \Delta V^2}{A(x)^2+B(x)^2+C(x)^2} \right) ^{3/2} \nonumber \\
+    f(x)^{\prime} =& - \frac{2\left( \frac{\Delta N^2 + \Delta E^2 + \Delta V^2}{A(x)^2+B(x)^2+C(x)^2} \right) ^{3/2}}{\Delta N^2 + \Delta E^2 + \Delta V^2}  \nonumber \\
     & [A(x)A(x)^{\prime}+B(x)B(x)^{\prime}+C(x)C(x)^{\prime}] - 1
 \end{align}
 
@@ -268,7 +268,7 @@ As demais derivadas que apareceram serão encontradas derivando as demais equaç
         \sin \phi_2(x)^{\prime} =& \frac{\Delta \varphi(x)}{\Delta H^2} \frac{\sin \theta_2(x)^{\prime}}{\sin \theta_2(x)} \cdot \nonumber \\
         &\left( \Delta N + \Delta E \frac{\Delta \varphi(x)}{\sqrt{\Delta H^2 - \Delta \varphi^2(x)}} \right) \label{eq:sinphi2prime} \\
         \cos \phi_2(x)^{\prime} =& \frac{\Delta \varphi(x)}{\Delta H^2} \frac{\sin \theta_2(x)^{\prime}}{\sin \theta_2(x)} \cdot \nonumber \\
-        &\left( \Delta E - \Delta N \frac{\Delta \varphi(x)}{\sqrt{\Delta H^2 - \Delta \varphi^2(x)}} \right)   \label{eq:cosphi2prime}
+        &\left( -\Delta E + \Delta N \frac{\Delta \varphi(x)}{\sqrt{\Delta H^2 - \Delta \varphi^2(x)}} \right)   \label{eq:cosphi2prime}
     \end{align}
     \end{subequations}
 
@@ -292,7 +292,7 @@ As demais derivadas que apareceram serão encontradas derivando as demais equaç
             \State $x_{melhor} \gets x_{0}$
             \Repeat
                 \State $x_{i+1} \gets x_i - \frac{f(x_i)}{f(x_i)^{\prime}}$
-                \If{$|(f(x_{i+1}))| < |f(x_{melhor})|$}
+                \If{$|f(x_{i+1})| < |f(x_{melhor})|$}
                     \State $x_{melhor} \gets x_{i+1}$
                 \EndIf
                 \State $i \gets i+1$
@@ -322,9 +322,9 @@ As demais derivadas que apareceram serão encontradas derivando as demais equaç
 
     A implementação do Método de Newton-Raphson teve uma alteração adicional em função dos resultados dos testes realizados. Nas fórmulas do inverso da mínima curvatura fica evidente que a variável principal ($\Delta S f(\alpha)$) não pode ter um valor qualquer. Para evitar parar prematuramente o processo iterativo quando o novo ponto a ser avaliado é menor que o limite inferior, foi implementada uma verificação adicional no método. Caso o novo valor de $x$ estiver fora dos limites pré-estabelecidos, usará o valor do limite que foi violado. Desta forma é dada uma \emph{chance} para o processo iterativo conseguir convergir para uma resposta melhor. Para o problema do inverso da mínima curvatura foi utilizado um limite inferior de $\Delta S f(\alpha)$ igual ao discutido em \cite{relatoriobisseccao}.
 
-    As funções polinomiais testadas convergiram muito rapidamente, mesmo as que tinham a derivada nula na raiz. O único teste em que o Método da Bissecção teve uma convergência mais rápida foi na função exponencial: $e^{x^2-4}-1$ (Tabela \ref{table:iteracoes}). Esta função se mostrou difícil para o Método de Newton-Raphson porque tem uma mudança brusca da derivada à esquerda e à direita de cada raiz. Esta grande mudança na derivada torna o método instável na região de derivada muito próxima de zero ($-2<x<2$) e com baixa taxa de convergência nas regiões com módulo de derivada muito alto ($x<-2$ e $x>2$). 
+    As funções polinomiais testadas convergiram muito rapidamente, mesmo as que tinham a derivada nula na raiz. O único teste em que o Método da Bissecção teve uma convergência mais rápida foi na função exponencial: $e^{x^2-4}-1$ (Tabela \ref{table:iteracoes}). Esta função se mostrou difícil para o Método de Newton-Raphson porque uma região tem derivada muito próxima de zero ($-2<x<2$), o que torna o método instável, e outras regiões com uma alta taxa de aumento da derivada ($x<-2$ e $x>2$), o que reduz a taxa de convergência do método. 
     
-    Enquanto o Método da Bisseção para as diferentes funções testadas o erro reduziu em uma razão de aproximadamente 2 (\cite{relatoriobisseccao}), o Método de Newton-Raphson teve comportamentos variados: convergência muito rápida para funções quadráticas e trigonométricas, convergência muito lenta para a função exponencial. Para o problema do inverso da mínima curvatura o erro caiu em uma razão de aproximadamente 4, ou seja, duas vezes mais rápido que com o Método da Bissecção (Figura \ref{fig:Erro}). 
+    Enquanto o Método da Bisseção para as diferentes funções testadas o erro reduziu linearmente em uma razão de aproximadamente 2 (\cite{relatoriobisseccao}), o Método de Newton-Raphson teve, em geral, convergência quadrática (Figura \ref{fig:Erro}). 
 
     \begin{table*} 
         \caption{Comparação entre o número de iterações necessários para um mesmo critério de convergência usando os Métodos da Bissecção e Newton-Raphson.}
@@ -338,8 +338,8 @@ As demais derivadas que apareceram serão encontradas derivando as demais equaç
             Exponencial  & 2. & 0. & 10. & 14 & 5. & 25 \\
             Trigonométrica & $3\pi/4$ & 0. & 5. & 13 & 3. & 3  \\
             1/4 círculo horizontal & 20 & 14.1421 & 120.417 & 17 & 14.4743 & 1 \\
-            Seção 2 do poço em S & 131.652 & 130.526 & 1111.4 & 20 & 133.592 & 11 \\
-            Poço 3D & 10.3144 & 9.84918 & 83.8634 & 17 & 10.0805 & 4 \\
+            Seção 2 do poço em S & 131.652 & 130.526 & 1111.4 & 20 & 133.592 & 3 \\
+            Poço 3D & 10.3144 & 9.84918 & 83.8634 & 17 & 10.0805 & 3 \\
             \hline
         \end{tabular}
         \label{table:iteracoes}
@@ -359,56 +359,28 @@ As demais derivadas que apareceram serão encontradas derivando as demais equaç
                 ymax=1e3,
                 xlabel = {Iterações},
                 ylabel = {$\varepsilon_i = |P_i - P|$},
-                legend style={at={(0.99,0.85)}, anchor=east},
+                legend style={at={(0.99,0.90)}, anchor=east},
                 ]
     
-                % \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
+                \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
                 \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
                 \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
                 \addplot[color=red, solid, mark=*] table [x=Iteration, y =Trigonometric] {IterationError.txt};
                 \addplot[color=purple, solid, mark=*] table [x=Iteration, y =3Dwell] {IterationError.txt};
-                \addplot[color=black, dashed] table [x=Iteration, y =Ratio2] {IterationError.txt};
-                \addplot[color=black, dashed] table [x=Iteration, y =Ratio4] {IterationError.txt};
-                \legend{Quadrática, Exponencial, Trigonométrica, Poço 3D};
+                \addplot[color=black, dashed] table [x=Iteration, y =Linear2] {IterationError.txt};
+                \addplot[color=black, dashed] table [x=Iteration, y =Quad2] {IterationError.txt};
+                \legend{Linear, Quadrática, Exponencial, Trigonométrica, Poço 3D};
             \end{axis}
             
         \end{tikzpicture}
-        \caption{Evolução do erro do Método de Newton-Raphson com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i = 0.25$).}
+        \caption{Evolução do erro do Método de Newton-Raphson com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i^2 = 0.5$).}
     \end{figure*}
     
     Para algumas funções o Método de Newton-Raphson se mostrou instável, ficando muito dependente do ponto inicial para conseguir convergir. A função $\cos x + \sin x$ tem muitas raízes, e o resultado do Método de Newton-Raphson se mostrou muito dependente do ponto inicial. Para conseguir encontrar a raiz de uma determinada região foi preciso definir um ponto inicial \emph{bem próximo} da raiz. Já a função $3x + x^2 \sin^2 \frac{x\pi}{10}$ mostrou muita instabilidade, e em muitos casos não conseguiu convergir ao fazer pequenas mudanças no valor do ponto inicial.
 
-    Na aplicação do Método de Newton para resolver o inverso da mínima curvatura os resultados foram muito bons. Nenhum dos testes teve problemas de convergência, e convergiram com um número de iterações menor que o do Método da Bissecção. O formato da função de construída favorece o uso do Método de Newton-Raphson, pois tem a forma próxima de uma reta (ver \ref{fig:fpoco3d}).
+    Na aplicação do Método de Newton para resolver o inverso da mínima curvatura os resultados foram muito bons. Nenhum dos testes teve problemas de convergência, e convergiram com um número de iterações menor que o do Método da Bissecção. O formato da função de construída favorece o uso do Método de Newton-Raphson, pois tem a forma próxima de uma reta e, consequentemente, uma derivada bem comportada (ver \ref{fig:fpoco3d}).
 
-    Para o problema proposto foram testados alguns valores distintos de ponto inicial, mas o impacto no resultado não é expressivo. Um valor inicial \emph{melhor} resultou em uma ou duas iterações a menos (Figura \ref{fig:pontoinicial}). Inicializar no valor mínimo de $\Delta S f(\alpha)$ não teve um resultado muito bom em alguns dos testes realizados, pois nesta região a derivada tem maior variação. No código foi utilizado por padrão um valor 10\% maior que o mínimo. 
-
-    No exemplo da Figura \ref{fig:pontoinicial} a resposta exata é aproximadamente 4.7\% maior que $\Delta S f(\alpha)_{min}$, e os pontos iniciais mais próximos convergem mais rápido. O principal resultado deste gráfico é mostrar que para o problema do inverso da mínima curvatura a definição do ponto inicial tem pouco impacto no número de iterações que o Método de Newton-Raphson precisará para alcançar o critério de convergência definido. 
-
-    \begin{figure}[hbt!]
-        \label{fig:pontoinicial}
-        \centering
-        \begin{tikzpicture}
-            \begin{axis}[
-                height = 8cm, % standard 10cm
-                width = 0.4\textwidth, %15cm,  % standard 10cm
-                % xmode=log,
-                % ymode=log,
-                grid=both,
-                % ymin=1e-12,
-                % ymax=1e0,
-                xlabel = {$\frac{\Delta S f(\alpha)_{inicial}}{\Delta S f(\alpha)_{min}}$},
-                ylabel = {Número de Iterações},
-                legend style={at={(0.25,0.55)}, anchor=east},
-                ]
-                \addplot[color=black, solid, mark=*, mark size=2.pt] coordinates {
-                    (1.000,8)(1.188,9)(1.376,10)(1.564,10)(1.751,10)(2.503,11)(3.254,11)
-                    (4.006,11)(4.757,11)(5.509,12)(6.260,12)(7.012,12)(7.763,12)(8.515,12)
-                };
-            \end{axis}
-            
-        \end{tikzpicture}
-        \caption{Número de iterações em função do valor inicial da variável do problema.}
-    \end{figure}
+    Para o problema proposto foram testados alguns valores distintos de ponto inicial, mas o impacto no resultado não é expressivo. No código foi utilizado por padrão um valor 10\% maior que o mínimo. 
 
     O código de ambos métodos foi implementado em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/02_NewtonRaphson/02_newton_raphson.c}{https://github.com/ TiagoCAAmorim/numerical-methods}.
 
@@ -434,20 +406,26 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
         \begin{axis} [axis lines=center]
             \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
             \addplot [dashed, domain=-3:3, smooth, thick] { 3*x*(3*x + 4) };
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(0,0)};
             \addplot[color=red, mark=square, mark size=2.pt] coordinates {
                (     2.585,     91.9138)
+               (   1.57673,           0)
                (   1.57673,      26.676)
+               (  0.930747,           0)
                (  0.930747,     7.61663)
+               (  0.529144,           0)
                (  0.529144,     2.12443)
+               (  0.289628,           0)
                (  0.289628,    0.576191)
+               (  0.153428,           0)
                (  0.153428,    0.152076)
+               (  0.079353,           0)
                (  0.079353,   0.0392804)
-               ( 0.0404194,   0.0100005)
-               ( 0.0204079,  0.00252439)
+               ( 0.0404194,           0)
                ( 0.0102552, 0.000634253)
+               (0.00514066,           0)
                (0.00514066, 0.000158966)
             };
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(0,0)};
         \end{axis}
     \end{tikzpicture}
     \caption{Polinômio de 3$^o$ grau: $3x^3 + 2x^2$.}
@@ -460,7 +438,6 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
         \begin{axis} [axis lines=center]
             \addplot [domain=-3.05:3.05, smooth, thick] { exp(x^2 - 4) -1 };
             \addplot [dashed, domain=-2.5:2.8, smooth, thick] { 2*x*exp(x^2-4) };
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(2,0)};
             \addplot[color=red, mark=square, mark size=2.pt] coordinates {
             %    (      5,  1.31882e+09)
             %    (    4.9,  4.90041e+08)
@@ -479,16 +456,26 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
             %    (3.34637,      1336.05)
             %    (3.19707,      502.337)
                (3.04099,      189.111)
+               (2.87743,            0)
                (2.87743,      71.2129)
+               (2.70607,            0)
                (2.70607,      26.7388)
+               (2.52796,            0)
                (2.52796,      9.92009)
+               (2.34829,            0)
                (2.34829,      3.54697)
+               ( 2.1822,            0)
                ( 2.1822,       1.1425)
+               (2.06001,            0)
                (2.06001,     0.275895)
+               (2.00753,            0)
                (2.00753,    0.0306256)
+               (2.00013,            0)
                (2.00013,  0.000505357)
+               (      2,            0)
                (      2,   1.4355e-07)
             };
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(-2,0)(2,0)};
         \end{axis}
     \end{tikzpicture}
     \caption{Função exponencial: $e^{x^2-4}-1$.}
@@ -501,33 +488,55 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
         \begin{axis} [axis lines=center]
             \addplot[smooth, thick] table [x=x, y = fx] {f_trig.txt};
             \addplot[smooth, thick, dashed] table [x=x, y = fpx] {f_trig.txt};
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(0.,0)(-28.9569,0)(-21.2268,0)(-18.6878,0)(-11.6909,0)(-7.88405,0)(-3.63114,0)};
             \addplot[color=red, mark=square, mark size=2.pt] coordinates {
               (          9,     34.7348)
+              (     14.297,           0)
               (     14.297,     237.489)
+              (    12.2492,           0)
               (    12.2492,     99.9961)
+              (    11.0297,           0)
               (    11.0297,     45.3814)
+              (    9.65614,           0)
               (    9.65614,     30.0523)
+              (      21.33,           0)
               (      21.33,     138.902)
+              (    20.2703,           0)
               (    20.2703,     63.7679)
+              (    17.7928,           0)
               (    17.7928,     182.715)
+              (    21.5136,           0)
               (    21.5136,     161.534)
+              (    20.4344,           0)
               (    20.4344,     69.0319)
+              (    18.7399,           0)
               (    18.7399,     108.441)
+              (    20.6096,           0)
               (    20.6096,     77.2179)
+              (    19.2681,           0)
               (    19.2681,     77.0878)
+              (     21.083,           0)
               (     21.083,     112.747)
+              (    20.0154,           0)
               (    20.0154,     60.0555)
+              (    5.77983,           0)
               (    5.77983,     48.7807)
+              (     4.2668,           0)
               (     4.2668,      30.057)
+              (    3.29579,           0)
               (    3.29579,     17.9223)
+              (    2.45487,           0)
               (    2.45487,     10.2924)
+              (     1.6239,           0)
               (     1.6239,     5.50052)
+              (    0.72792,           0)
               (    0.72792,     2.21099)
+              (  0.0596544,           0)
               (  0.0596544,    0.178964)
+              (3.03375e-06,           0)
               (3.03375e-06, 9.10124e-06)
               (          0,           0)
             };
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(0.,0)(-28.9569,0)(-21.2268,0)(-18.6878,0)(-11.6909,0)(-7.88405,0)(-3.63114,0)};
         \end{axis}
     \end{tikzpicture}
     \caption{Função trigonométrica: $3x + x^2 \sin^2 \frac{x\pi}{10}$.}
@@ -540,20 +549,16 @@ Nos gráficos a seguir as curvas contínuas são as funções de teste e as trac
         \begin{axis} [axis lines=center]
             \addplot[smooth, thick] table [x=x, y = fx] {f_3Dwell.txt};
             \addplot[smooth, thick, dashed] table [x=x, y = fpx] {f_3Dwell.txt};
-            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(10.3144,0)};
             \addplot[color=red, mark=square, mark size=2.pt] coordinates {
-                (14.7738,    -2.92074 )
-                (11.6607,   -0.882014 )
-                (10.6903,   -0.252789 )
-                (10.4038,  -0.0612647 )
-                (10.3330,  -0.0127958 )
-                (10.3181, -0.00251734 )
-                (10.3152, -0.000488076)
-                (10.3146, -9.43509e-05)
-                (10.3145, -1.82286e-05)
-                (10.3144, -3.52136e-06)
-                (10.3144, -6.80235e-07)
+                (13.9017,     -2.3402)
+                (10.3613,           0)
+                (10.3613,  -0.0322114)
+                (10.3142,           0)
+                (10.3142, 0.000139829)
+                (10.3144,           0)
+                (10.3144, 2.87517e-09)
                 };
+            \addplot[color=blue, mark=square, only marks, mark size=3.pt] coordinates {(10.3144,0)};
         \end{axis}
     \end{tikzpicture}
     \caption{Função de erro de $\Delta S f(\alpha)$ para o caso Poço 3D.}
