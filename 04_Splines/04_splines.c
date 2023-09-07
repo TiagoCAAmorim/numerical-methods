@@ -138,6 +138,21 @@ int find_interval(int npoints, double *x_array, double x_evaluate){
     return npoints-2;
 }
 
+double evaluate_linear(struct tspline spline, double x){
+    double y;
+    double h1, h2, h;
+    int j;
+
+    j = find_interval(spline.npoints, spline.x, x);
+    h1 = x - spline.x[j];
+    h2 = spline.x[j+1] - x;
+    h = spline.x[j+1] - spline.x[j];
+
+    y = spline.a[j] * h2/h + spline.a[j+1] * h1/h;
+
+    return y;
+}
+
 double evaluate_spline(struct tspline spline, double x){
     double y=0;
     double h;
@@ -163,7 +178,6 @@ double evaluate_spline_prime(struct tspline spline, double x){
     double y=0;
     double h;
     double dx=1;
-    double coef[4];
     int j;
 
     j = find_interval(spline.npoints, spline.x, x);
@@ -182,7 +196,6 @@ double evaluate_spline_prime2(struct tspline spline, double x){
     double y=0;
     double h;
     double dx=1;
-    double coef[4];
     int j;
 
     j = find_interval(spline.npoints, spline.x, x);
@@ -199,7 +212,6 @@ double evaluate_spline_integral_point(struct tspline spline, int interval, doubl
     double y=0;
     double h;
     double dx=1;
-    double coef[4];
     int j;
 
     j = interval;
@@ -328,7 +340,7 @@ bool check_spline_values(struct tspline spline, double npoints, double *x, doubl
 
 bool print_spline_table_file(struct tspline spline, double npoints, char *fname){
     double x0, x1, x;
-    double y, yp, ypp, Sy;
+    double y, yp, ypp, Sy, ylin;
     int j=1;
 
     FILE* file = fopen(fname, "w");
@@ -338,7 +350,7 @@ bool print_spline_table_file(struct tspline spline, double npoints, char *fname)
         return false;
     }
 
-    fprintf(file, "%16s\t%16s\t%16s\t%16s\t%16s\n","x","y","dy/dx","d2y/dx2","Int(y)");
+    fprintf(file, "%16s\t%16s\t%16s\t%16s\t%16s\t%16s\n","x","y","dy/dx","d2y/dx2","Int(y)","ylinear");
 
     x0 = spline.x[0];
     x1 = spline.x[spline.npoints-1];
@@ -355,7 +367,8 @@ bool print_spline_table_file(struct tspline spline, double npoints, char *fname)
         yp = evaluate_spline_prime(spline, x);
         ypp = evaluate_spline_prime2(spline, x);
         Sy = evaluate_spline_integral(spline, x0, x);
-        fprintf(file, "%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", x, y, yp, ypp, Sy);
+        ylin = evaluate_linear(spline, x);
+        fprintf(file, "%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", x, y, yp, ypp, Sy, ylin);
     }
 
     fclose(file);
