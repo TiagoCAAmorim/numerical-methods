@@ -1,20 +1,29 @@
-# numerical-methods
-Code for IM253 (Numerical Methods) exercises and final project.
+# Numerical Methods
+Code for IM253 (Numerical Methods) exercises and final project in C.
 
-## Timeline
+Reports (in Latex) in Brazilian Portuguese.
 
-### **2023.08**
+## Root of 1D functions
 
-* Bissection method to find root of 1D functions.
-  * Implemented Minimum Curvature Method as a practical example to be tested.
-  * Managed to converge in all tests.
-* Newton Raphson method to find root of 1D functions.
-  * Developed derivative of the Inverse of the Minimum Curvatura Method.
-  * Included Mathematica notebook with formulas and additional tests.
-* Reports (in Portuguese) of all exercises.
+* Practical example: **Inverse of the Minimum Curvature**
+    * Calculation of drilling parameters as a function of cartesian coordinates using de Minimum Curvature Method ([SPE-84246-MS](https://doi.org/10.2118/84246-MS)). This problem is implicit, with the form $g(x)=x$, which can be transformed into $f(x) = g(x) - x = 0$.
+    * Developed derivative of the Inverse of the Minimum Curvature for the Newton-Raphson method.
+    * Included Mathematica notebook with formulas and additional tests.
+    * The best results were found with the Secant model.
+* Methods implemented:
+  * **Bissection**: All tests converged linearly.
+  * **Newton-Raphson**: Convergence was more than quadratic, for $f(x)$ for the proposed problem is closely a straight line. Needed to include limits to $x$ due to the nature of the proposed problem, that doesn't allow for any value of $x$.
+  * **Secant**: Even better convergence than the Newton-Raphson Method. In all tests the first iteration managed to estimate an $x$ very close to the solution of the problem. The _mean_ inclination used by the Secant method proved better than the local inclination (derivative) of the Newton-Raphson method.
 
-### **2023.09**
+## Interpolation
 
-* Secant method to find root of 1D functions.
-  * Better results than Newton-Raphson.
-  * iMCM is close to a straight line, and Secant yielded better results because it uses a _mean_ derivative. First iteration already gives very good results.
+* Practical example: **VFP Table Interpolation**
+  * Numerical porous-flow models usually relly on VFP tables to associate subsurface and surface flow conditions. Interpolation of the VFP table in the better known simulators is linear.
+  * The proposed problem is to compare linear and Spline interpolation with VFP tables.
+  * VFP tables from [Unisim-II-H](https://www.unisim.cepetro.unicamp.br/benchmarks/en/unisim-ii/unisim-ii-h) were used as examples. Half of the input variables were ignored when using the interpolation methods and the _missing_ data was compared to the interpolated values.
+    * These files were a part of Unisim-II-H when accessed in Nov/19. In the current version (Sep/23) the model no longer uses VFP tables.
+  * Although it is not recomended, some of the data was estimated using the interpolation methods as extrapolators.
+  * The results.... 
+* Methods implemented:
+  * Linear interpolation: Most basic for of interpolation (maybe nearest-neighbour can be considered _simpler_). Used as a _benchmark_ to compare with Splines.
+  * Splines: Implemented Natural (zero $2^{nd}$ derivative in the extremes) and Fixed Splines (defined $1^{st}$ derivative in the extremes). For the proposed problem it was used Natural Splines, for there is no information about derivatives.
