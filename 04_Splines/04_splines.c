@@ -341,10 +341,38 @@ bool check_spline_values(struct tspline spline, double npoints, double *x, doubl
     return true;
 }
 
-bool print_spline_table_file(struct tspline spline, double npoints, char *fname){
+bool print_xy_table_file(char *fname, double npoints, double *x, double *y){
+    FILE* file = fopen(fname, "w");
+
+    if (file == NULL) {
+        perror("Error creating file!");
+        return false;
+    }
+
+    fprintf(file, "%16s\t%16s\n","x","y");
+
+    for( int i = 0; i < npoints; i++) {
+        fprintf(file, "%16.10g\t%16.10g\n", x[i], y[i]);
+    }
+
+    fclose(file);
+    return true;
+}
+
+bool print_spline_table_file(struct tspline spline, double npoints, char *fname, int nxTests, double *xTests){
     double x0, x1, x;
     double y, yp, ypp, Sy, ylin;
     int j=1;
+    double *xTry;
+    int *n;
+
+    if( nxTests > 0){
+        xTry = xTests;
+        n = &nxTests;
+    } else{
+        xTry = spline.x;
+        n = &spline.npoints;
+    }
 
     FILE* file = fopen(fname, "w");
 
@@ -355,14 +383,14 @@ bool print_spline_table_file(struct tspline spline, double npoints, char *fname)
 
     fprintf(file, "%16s\t%16s\t%16s\t%16s\t%16s\t%16s\n","x","y","dy/dx","d2y/dx2","Int(y)","ylinear");
 
-    x0 = spline.x[0];
-    x1 = spline.x[spline.npoints-1];
+    x0 = xTry[0]; //spline.x[0];
+    x1 = xTry[*n-1]; //.x[spline.npoints-1];
     for( int i = 0; i < npoints; i++) {
         x = x0 + (x1-x0) * i / (npoints - 1);
-        if( x >=spline.x[j] && j < spline.npoints-1){
-            x = spline.x[j];
+        if( x >= xTry[j] && j < *n-1){
+            x = xTry[j];
             j++;
-            if( x >spline.x[j]){
+            if( x >xTry[j]){
                 i--;
             }
         };
@@ -419,7 +447,7 @@ void test_splines(){
     } else{
         printf("%s: No error in calculating last 2nd derivative.\n", message);
     }  
-    assert(print_spline_table_file(spline, points_file, "Ex1.txt"));  
+    assert(print_spline_table_file(spline, points_file, "Ex1.txt", 0, spline.x));  
     
     sprintf(message, "Example 2 - Exponential function (natural)");
     npoints = 4;
@@ -475,7 +503,7 @@ void test_splines(){
     } else{
         printf("%s: No error in calculating integral.\n", message);
     }
-    assert(print_spline_table_file(spline, points_file, "Ex2.txt"));
+    assert(print_spline_table_file(spline, points_file, "Ex2.txt", 0, spline.x));
 
     sprintf(message, "Example 3 - 3 points (fixed)");
     npoints = 3;
@@ -509,7 +537,7 @@ void test_splines(){
     } else{
         printf("%s: No error in calculating last 1st derivative.\n", message);
     }    
-    assert(print_spline_table_file(spline, points_file, "Ex3.txt"));
+    assert(print_spline_table_file(spline, points_file, "Ex3.txt", 0, spline.x));
     
     sprintf(message, "Example 4 - Exponential function (fixed)");
     npoints = 4;
@@ -566,7 +594,7 @@ void test_splines(){
     } else{
         printf("%s: No error in calculating integral.\n", message);
     } 
-    assert(print_spline_table_file(spline, points_file, "Ex4.txt"));
+    assert(print_spline_table_file(spline, points_file, "Ex4.txt", 0, spline.x));
 }
 
 
@@ -739,48 +767,49 @@ void get_data_from_vfp(struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP
     }
 }
 
-bool print_vfp_test(char *fname, double npoints, double *yTrue, double *ySpline, double *yLinear){
-    FILE* file = fopen(fname, "w");
-
-    if (file == NULL) {
-        perror("Error creating file!");
-        return false;
-    }
-
-    fprintf(file, "%16s\t%16s\t%16s\t%16s\t%16s\n","True","Spline","eSpline","Linear","eLinear");
-
-    for( int i = 0; i < npoints; i++) {
-        fprintf(file, "%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", yTrue[i], ySpline[i], yTrue[i] - ySpline[i], yLinear[i], yTrue[i] - yLinear[i]);
-    }
-
-    fclose(file);
-    return true;
-}
-
-void test_vfp(char *fname, struct tVFP *vfp){ //struct tVFP vfp){
-    printf("OK\n");
+void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate){
     struct tPoints points;
     struct tTestPoints testPoints;
     struct tspline spline;
-    double yTrue[10000];
-    double ySpline[10000];
-    double yLinear[10000];
+    double yTrue;
+    double ySpline;
+    double yLinear;
     int n=0;
+    int iLIQ;
+    FILE* file = fopen(fname, "w");
+    int iLIQstart, iLIQend;
+
+    if( extrapolate){
+        iLIQstart = 0;
+        iLIQend = vfp->nLIQ;
+    } else{
+        iLIQstart = 1;
+        iLIQend = vfp->nLIQ - 1;
+    }
+
+
+    if (file == NULL) {
+        perror("Error creating file!");
+        printf("Couldn't write file %s\n",fname);
+        assert(false);
+    }
+    fprintf(file, "%4s\t%4s\t%4s\t%4s\t%4s\t%-16s\t%-16s\t%-16s\t%-16s\t%-16s\n","LIQ","GLR","WCUT","LFG","WHP","True","Spline","eSpline","Linear","eLinear");
 
     for( int iGLR=0; iGLR<vfp->nGLR; iGLR++){
         for( int iWCUT=0; iWCUT<vfp->nWCUT; iWCUT++){
             for( int iLFG=0; iLFG<vfp->nLFG; iLFG++){
                 for( int iWHP=0; iWHP<vfp->nWHP; iWHP++){
-                    printf("GLR=%i WCUT=%i LFG=%i WHP=%i\n",iGLR,iWCUT,iLFG,iWHP);
                     get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP, &points);
-                    for( int j=1; j<points.n-1; j++){
+                    for( int j=iLIQstart; j<iLIQend; j++){
                         SeparatePoints(&points, &testPoints, j, 99);
                         spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
                         for( int i=0; i<testPoints.test.n; i++){
-                            yTrue[n] = testPoints.test.y[i];
-                            ySpline[n] = evaluate_spline(spline, testPoints.test.x[i]);
-                            yLinear[n] = evaluate_linear(spline, testPoints.test.x[i]);
-                            printf("%i. %16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", n, yTrue[n], ySpline[n], yTrue[n] - ySpline[n], yLinear[n], yTrue[n] - yLinear[n]);
+                            yTrue = testPoints.test.y[i];
+                            ySpline = evaluate_spline(spline, testPoints.test.x[i]);
+                            yLinear = evaluate_linear(spline, testPoints.test.x[i]);
+                            iLIQ = j;
+                            fprintf(file, "%4i\t%4i\t%4i\t%4i\t%4i\t",iLIQ+1,iGLR+1,iWCUT+1,iLFG+1,iWHP+1);
+                            fprintf(file, "%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", yTrue, ySpline, yTrue - ySpline, yLinear, yTrue - yLinear);
                             n += 1;
                         }
                     }
@@ -788,9 +817,28 @@ void test_vfp(char *fname, struct tVFP *vfp){ //struct tVFP vfp){
             }
         }
     }
+    fclose(file);
+}
 
-    if( !print_vfp_test(fname, n, yTrue, ySpline, yLinear)){
-        printf("Couldn't write file %s\n",fname);
+void test_vfp_print_table(char *fname, struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP, int iLIQ){
+    struct tPoints points;
+    struct tTestPoints testPoints;
+    struct tspline spline;
+    
+    get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP, &points);
+    SeparatePoints(&points, &testPoints, iLIQ, 99);
+    spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
+    if( !print_spline_table_file(spline, 100, fname, points.n, points.x)){
+        printf("Couldn't create file %s.", fname);
+    }
+}
+
+void test_vfp_print_table_true(char *fname, struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP){
+    struct tPoints points;
+    
+    get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP, &points);
+    if( !print_xy_table_file(fname, points.n, points.x, points.y)){
+        printf("Couldn't create file %s.", fname);
     }
 }
 
@@ -802,11 +850,38 @@ void tests_vfp_interpolation(){
     sprintf(fname,"%s%s",folder,"P1.inc");
     read_VFP_file(fname, &vfp);
     sprintf(fname,"%s%s",folder,"P1.txt");
-    test_vfp(fname, &vfp);
+    test_vfp(fname, &vfp, true);
+    sprintf(fname,"%s%s",folder,"P1_noExtrap.txt");
+    test_vfp(fname, &vfp, false);
+
+    sprintf(fname,"%s%s", folder, "P1_Ok.txt");
+    test_vfp_print_table(fname, &vfp, 1-1, 1-1, 1-1, 3-1, 5-1);
+    sprintf(fname,"%s%s",folder,"P1_Ok_true.txt");
+    test_vfp_print_table_true(fname, &vfp, 1-1, 1-1, 1-1, 3-1);
+    sprintf(fname,"%s%s", folder, "P1_BadSpline.txt");
+    test_vfp_print_table(fname, &vfp, 2-1, 6-1, 1-1, 1-1, 3-1);
+    sprintf(fname,"%s%s",folder,"P1_BadSpline_true.txt");
+    test_vfp_print_table_true(fname, &vfp, 2-1, 6-1, 1-1, 1-1);
+    sprintf(fname,"%s%s", folder, "P1_BadLinear.txt");
+    test_vfp_print_table(fname, &vfp, 1-1, 1-1, 2-1, 1-1, 3-1);
+    sprintf(fname,"%s%s",folder,"P1_BadLinear_true.txt");
+    test_vfp_print_table_true(fname, &vfp, 1-1, 1-1, 2-1, 1-1);
+    sprintf(fname,"%s%s", folder, "P1_Bad.txt");
+    test_vfp_print_table(fname, &vfp, 2-1, 6-1, 1-1, 2-1, 2-1);
+    sprintf(fname,"%s%s",folder,"P1_Bad_true.txt");
+    test_vfp_print_table_true(fname, &vfp, 2-1, 6-1, 1-1, 2-1);
+    sprintf(fname,"%s%s", folder, "P1_ExtrapLower.txt");
+    test_vfp_print_table(fname, &vfp, 1-1, 4-1, 2-1, 3-1, 1-1);
+    sprintf(fname,"%s%s",folder,"P1_ExtrapLower_true.txt");
+    test_vfp_print_table_true(fname, &vfp, 1-1, 4-1, 2-1, 3-1);
+    sprintf(fname,"%s%s", folder, "P1_ExtrapUpper.txt");
+    test_vfp_print_table(fname, &vfp, 5-1, 4-1, 3-1, 2-1, 6-1);
+    sprintf(fname,"%s%s",folder,"P1_ExtrapUpper_true.txt");
+    test_vfp_print_table_true(fname, &vfp, 5-1, 4-1, 3-1, 2-1);
 }
 
 int main(){
-    // test_splines();
+    test_splines();
     tests_vfp_interpolation();
     return 0;
 }

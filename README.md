@@ -22,8 +22,9 @@ Reports (in Latex) in Brazilian Portuguese.
   * The proposed problem is to compare linear and Spline interpolation with VFP tables.
   * VFP tables from [Unisim-II-H](https://www.unisim.cepetro.unicamp.br/benchmarks/en/unisim-ii/unisim-ii-h) were used as examples. Half of the input variables were ignored when using the interpolation methods and the _missing_ data was compared to the interpolated values.
     * These files were a part of Unisim-II-H when accessed in Nov/19. In the current version (Sep/23) the model no longer uses VFP tables.
-  * Although it is not recomended, some of the data was estimated using the interpolation methods as extrapolators.
-  * The results.... 
+  * For each possible combination of parameters in the VFP table, a curve of (LiqFlow,BHP) was extracted. One of the values was ignored and a spline built with the remaing data. And then the difference between the original BHP and interpolated with the spline was recorded. The same was done with a linear interpolator.
+  * Although it is not recomended, some of the test used the interpolation methods as extrapolators.
+  * The results show that, for the example studied and this particular problem, spline interpolation doesn't offer better results. Linear interpolation is computationally easier and the errors slightly better than spline interpolation.
 * Methods implemented:
   * Linear interpolation: Most basic for of interpolation (maybe nearest-neighbour can be considered _simpler_). Used as a _benchmark_ to compare with Splines.
   * Splines: Implemented Natural (zero $2^{nd}$ derivative in the extremes) and Fixed Splines (defined $1^{st}$ derivative in the extremes). For the proposed problem it was used Natural Splines, for there is no information about derivatives.
