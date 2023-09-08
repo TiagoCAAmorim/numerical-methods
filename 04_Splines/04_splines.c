@@ -3,9 +3,12 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
+#include <errno.h>
+#include <string.h>
 
 const double epsilon = 1E-7;
 const int points_file = 201;
@@ -566,8 +569,271 @@ void test_splines(){
     assert(print_spline_table_file(spline, points_file, "Ex4.txt"));
 }
 
-int main(){
-    test_splines();
 
+// ###### VFP Tables ######
+struct tVFP{
+    int number;
+    double depth;
+    int nLIQ;
+    int nGLR;
+    int nWCUT;
+    int nLFG;
+    int nWHP;
+    double LIQ[10];
+    double GLR[10];
+    double WCUT[10];
+    double LFG[10];
+    double WHP[10];
+    double BHP[10][10][10][10][10];
+};
+
+struct tVFP read_VFP_file(char *fname){
+    FILE* file = fopen(fname, "r");
+    struct tVFP vfp;
+    int nLIQ, nGLR, nWCUT, nLFG, nWHP;
+    int iLIQ, iGLR, iWCUT, iLFG, iWHP, iBHP;
+    enum tcurrent {none, PTUBE, DEPTH, LIQ, GLR, WCUT, LFG, WHP, BHP};
+    enum tcurrent current;
+
+    if (file == NULL) {
+        perror("Error reading file!");
+        assert(false);
+    }
+
+    printf("Reading VFP file: %s...\n", fname);
+
+    iLIQ = 0;
+    iGLR = 0;
+    iWCUT = 0;
+    iLFG = 0;
+    iWHP = 0;
+    
+    nLIQ = 0;
+    nGLR = 0;
+    nWCUT = 0;
+    nLFG = 0;
+    nWHP = 0;
+    iBHP = 0;
+
+    current = none;
+    char message[30];
+    while (fscanf(file, "%[^\n ] ", message) != EOF) {
+        // printf("> '%s'\n", message);
+        if(      strcmp(message,"*PTUBE1") == 0){ current = PTUBE;}
+        else if( strcmp(message,"*DEPTH") == 0 ){ current = DEPTH;}
+        else if( strcmp(message,"*LIQ"  ) == 0 ){ current = LIQ;}
+        else if( strcmp(message,"*GLR"  ) == 0 ){ current = GLR;}
+        else if( strcmp(message,"*WCUT" ) == 0 ){ current = WCUT;}
+        else if( strcmp(message,"*LFG"  ) == 0 ){ current = LFG;}
+        else if( strcmp(message,"*WHP"  ) == 0 ){ current = WHP;}
+        else if( strcmp(message,"*BHP"  ) == 0 ){ current = BHP;}
+        else{
+            switch (current)
+            {
+            case PTUBE:
+                vfp.number = atoi(message);
+                break;
+            case DEPTH:
+                vfp.depth = atof(message);
+                break;
+            case LIQ:
+                vfp.LIQ[nLIQ] = atof(message);
+                nLIQ += 1;
+                break;           
+            case GLR:
+                vfp.GLR[nGLR] = atof(message);
+                nGLR += 1;
+                break;           
+            case WCUT:
+                vfp.WCUT[nWCUT] = atof(message);
+                nWCUT += 1;
+                break;           
+            case LFG:
+                vfp.LFG[nLFG] = atof(message);
+                nLFG += 1;
+                break;           
+            case WHP:
+                vfp.WHP[nWHP] = atof(message);
+                nWHP += 1;
+                break;           
+            case BHP:
+                if( iLIQ == 0){iLIQ = atoi(message);}
+                else if( iGLR == 0){iGLR = atoi(message);}
+                else if( iWCUT == 0){iWCUT = atoi(message);}
+                else if( iLFG == 0){iLFG = atoi(message);}
+                else{
+                    // printf("%i %i %i %i %i => %s\n",iLIQ,iGLR,iWCUT,iLFG,iWHP+1,message);
+                    vfp.BHP[iLIQ-1][iGLR-1][iWCUT-1][iLFG-1][iWHP] = atof(message);
+                    iWHP += 1;
+                    iBHP += 1;
+                    if( iWHP == nWHP){
+                        iLIQ=0;
+                        iGLR=0;
+                        iWCUT=0;
+                        iLFG=0;
+                        iWHP=0;
+                    }
+                }
+                break;           
+            default:
+                assert(false);
+                break;
+            }
+        }
+    }
+    printf("Table #%i at %g:\n", vfp.number, vfp.depth);
+    printf(" %i LIQ:  [%10.4g;%10.4g]\n",nLIQ,  vfp.LIQ [0], vfp.LIQ [nLIQ-1]);
+    printf(" %i GLR:  [%10.4g;%10.4g]\n",nGLR,  vfp.GLR [0], vfp.GLR [nGLR-1]);
+    printf(" %i WCUT: [%10.4g;%10.4g]\n",nWCUT, vfp.WCUT[0], vfp.WCUT[nWCUT-1]);
+    printf(" %i LFG:  [%10.4g;%10.4g]\n",nLFG,  vfp.LFG [0], vfp.LFG [nLFG-1]);
+    printf(" %i WHP:  [%10.4g;%10.4g]\n",nWHP,  vfp.WHP [0], vfp.WHP [nWHP-1]);
+    printf(" %i BHP\n",iBHP);
+    fflush(stdout);
+    assert( iBHP == (nLIQ*nGLR*nWCUT*nLFG*nWHP));
+    vfp.nLIQ  = nLIQ;
+    vfp.nGLR  = nGLR;
+    vfp.nWCUT = nWCUT;
+    vfp.nLFG  = nLFG;
+    vfp.nWHP  = nWHP;
+    fclose(file);
+    return vfp;
+}
+
+struct tPoints{
+    double x[100];
+    double y[100];
+    int n;
+};
+
+struct tTestPoints{
+    struct tPoints data;
+    struct tPoints test;
+};
+
+struct tTestPoints SeparatePoints(struct tPoints points){
+    bool is_true=true;
+    struct tTestPoints testPoints;
+
+    for( int i=0; i<points.n; i++){
+        if( is_true){
+            testPoints.data.x[testPoints.data.n] = points.x[i];
+            testPoints.data.y[testPoints.data.n] = points.y[i];
+            testPoints.data.n += 1;
+        } else{
+            testPoints.test.x[testPoints.test.n] = points.x[i];
+            testPoints.test.y[testPoints.test.n] = points.y[i];
+            testPoints.test.n += 1;
+        }
+    }
+    return testPoints;
+}
+
+struct tPoints get_data_from_vfp(struct tVFP vfp, int iGLR, int iWCUT, int iLFG, int iWHP){
+    struct tPoints points;
+    points.n = vfp.nLIQ;
+    for( int i=0; i<vfp.nLIQ; i++){
+        points.x[i] = vfp.LIQ[i];
+        points.y[i] = vfp.BHP[i][iGLR][iWCUT][iLFG][iWHP];
+    }
+    return points;
+}
+
+bool print_vfp_test(char *fname, double npoints, double *yTrue, double *ySpline, double *yLinear){
+    FILE* file = fopen(fname, "w");
+
+    if (file == NULL) {
+        perror("Error creating file!");
+        return false;
+    }
+
+    fprintf(file, "%16s\t%16s\t%16s\t%16s\t%16s\n","True","Spline","eSpline","Linear","eLinear");
+
+    for( int i = 0; i < npoints; i++) {
+        fprintf(file, "%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", yTrue[i], ySpline[i], yTrue[i] - ySpline[i], yLinear[i], yTrue[i] - yLinear[i]);
+    }
+
+    fclose(file);
+    return true;
+}
+
+// void test_vfp(char *fname, struct tVFP vfp){ //struct tVFP vfp){
+//     printf("OK\n");
+//     struct tPoints points;
+//     struct tTestPoints testPoints;
+//     struct tspline spline;
+//     double yTrue[1000];
+//     double ySpline[1000];
+//     double yLinear[1000];
+//     int n=0;
+
+//     for( int iGLR=0; iGLR<vfp.nGLR; iGLR++){
+//         for( int iWCUT=0; iWCUT<vfp.nWCUT; iWCUT++){
+//             for( int iLFG=0; iLFG<vfp.nLFG; iLFG++){
+//                 for( int iWHP=0; iWHP<vfp.nWHP; iWHP++){
+//                     points = get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP);
+//                     testPoints = SeparatePoints(points);
+//                     spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
+//                     for( int i=0; i<testPoints.test.n; i++){
+//                         yTrue[n] = testPoints.test.y[i];
+//                         ySpline[n] = evaluate_spline(spline, testPoints.test.x[i]);
+//                         yLinear[n] = evaluate_linear(spline, testPoints.test.x[i]);
+//                         n += 1;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     if( !print_vfp_test(fname, n, yTrue, ySpline, yLinear)){
+//         printf("Couldn't write file %s\n",fname);
+//     }
+// }
+
+void tests_vfp_interpolation(){
+    struct tVFP vfp;
+    char folder[] = "C:/Users/tiago.LENOVO-I7/Unicamp/2023.02/IM253_MetodosNumericos/Trabalhos/04_Splines/vfp/";
+    char fname[256];
+
+    sprintf(fname,"%s%s",folder,"P1.inc");
+    vfp = read_VFP_file(fname);
+    sprintf(fname,"%s%s",folder,"P1.txt");
+    printf("%i\n", vfp.number);
+    // test_vfp(fname, vfp);
+
+    // struct tPoints points;
+    // struct tTestPoints testPoints;
+    // struct tspline spline;
+    // double yTrue[100];
+    // double ySpline[100];
+    // double yLinear[100];
+    // int n=0;
+
+    // for( int iGLR=0; iGLR<vfp.nGLR; iGLR++){
+    //     for( int iWCUT=0; iWCUT<vfp.nWCUT; iWCUT++){
+    //         for( int iLFG=0; iLFG<vfp.nLFG; iLFG++){
+    //             for( int iWHP=0; iWHP<vfp.nWHP; iWHP++){
+    //                 points = get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP);
+    //                 testPoints = SeparatePoints(points);
+    //                 spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
+    //                 for( int i=0; i<testPoints.test.n; i++){
+    //                     yTrue[n] = testPoints.test.y[i];
+    //                     ySpline[n] = evaluate_spline(spline, testPoints.test.x[i]);
+    //                     yLinear[n] = evaluate_linear(spline, testPoints.test.x[i]);
+    //                     n += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    // if( !print_vfp_test(fname, n, yTrue, ySpline, yLinear)){
+    //     printf("Couldn't write file %s\n",fname);
+    // }
+
+}
+
+int main(){
+    // test_splines();
+    tests_vfp_interpolation();
     return 0;
 }
