@@ -710,22 +710,24 @@ struct tTestPoints{
     struct tPoints test;
 };
 
-void SeparatePoints(struct tPoints *points, struct tTestPoints *testPoints){
-    bool is_true=true;
+void SeparatePoints(struct tPoints *points, struct tTestPoints *testPoints, int first, int step){
+    // bool is_true=true;
+    int is_test = first;
 
     testPoints->data.n = 0;
     testPoints->test.n = 0;
     for( int i=0; i<points->n; i++){
-        if( is_true){
-            testPoints->data.x[testPoints->data.n] = points->x[i];
-            testPoints->data.y[testPoints->data.n] = points->y[i];
-            testPoints->data.n += 1;
-        } else{
+        if( is_test == 0){
             testPoints->test.x[testPoints->test.n] = points->x[i];
             testPoints->test.y[testPoints->test.n] = points->y[i];
             testPoints->test.n += 1;
+            is_test = step;
+        } else{
+            testPoints->data.x[testPoints->data.n] = points->x[i];
+            testPoints->data.y[testPoints->data.n] = points->y[i];
+            testPoints->data.n += 1;
         }
-        is_true = !is_true;
+        is_test -= 1;
     }
 }
 
@@ -771,14 +773,16 @@ void test_vfp(char *fname, struct tVFP *vfp){ //struct tVFP vfp){
                 for( int iWHP=0; iWHP<vfp->nWHP; iWHP++){
                     printf("GLR=%i WCUT=%i LFG=%i WHP=%i\n",iGLR,iWCUT,iLFG,iWHP);
                     get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP, &points);
-                    SeparatePoints(&points, &testPoints);
-                    spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
-                    for( int i=0; i<testPoints.test.n; i++){
-                        yTrue[n] = testPoints.test.y[i];
-                        ySpline[n] = evaluate_spline(spline, testPoints.test.x[i]);
-                        yLinear[n] = evaluate_linear(spline, testPoints.test.x[i]);
-                        printf("%i. %16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", n, yTrue[n], ySpline[n], yTrue[n] - ySpline[n], yLinear[n], yTrue[n] - yLinear[n]);
-                        n += 1;
+                    for( int j=1; j<points.n-1; j++){
+                        SeparatePoints(&points, &testPoints, j, 99);
+                        spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
+                        for( int i=0; i<testPoints.test.n; i++){
+                            yTrue[n] = testPoints.test.y[i];
+                            ySpline[n] = evaluate_spline(spline, testPoints.test.x[i]);
+                            yLinear[n] = evaluate_linear(spline, testPoints.test.x[i]);
+                            printf("%i. %16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", n, yTrue[n], ySpline[n], yTrue[n] - ySpline[n], yLinear[n], yTrue[n] - yLinear[n]);
+                            n += 1;
+                        }
                     }
                 }
             }
