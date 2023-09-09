@@ -1,5 +1,5 @@
 /*
-    Implementation of the bissection method to find root of 1D functions    
+    Implementation of Spline interpolation to estimate intemediate values in VFP tables  
 */
 
 #include <stdio.h>
