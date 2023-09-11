@@ -1,5 +1,5 @@
 /*
-    Implementation of the bissection method to find root of 1D functions    
+    Implementation of the Newton-Raphson method to find root of 1D functions    
 */
 
 #include <stdio.h>

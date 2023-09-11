@@ -65,7 +65,6 @@ struct tspline build_natural_spline(int npoints, double *x, double *y){
     }
 
     r[n] = 1.;
-    m[n] = 0.;
     z[n] = 0.;
     spline.c[n] = 0.;
 
@@ -844,7 +843,7 @@ void test_vfp_print_table_true(char *fname, struct tVFP *vfp, int iGLR, int iWCU
 
 void tests_vfp_interpolation(){
     struct tVFP vfp;
-    char folder[] = "C:/Users/tiago.LENOVO-I7/Unicamp/2023.02/IM253_MetodosNumericos/Trabalhos/04_Splines/vfp/";
+    char folder[] = "./vfp/";
     char fname[256];
 
     sprintf(fname,"%s%s",folder,"P1.inc");
