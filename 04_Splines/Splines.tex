@@ -1,0 +1,670 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics} 
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,     
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Avaliação do Uso de Splines para Interpolar Tabelas de Fluxo Vertical Multifásico\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 4 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28}, 
+city={Rio de Janeiro},
+postcode={20231-030}, 
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+    
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Splines \sep Simulação Numérica \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+    A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). É possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}, mas o método mais tradicional de realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP (\emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}).
+
+    As tabelas de VFP representam o comportamento em um poço associando diferentes variáveis de fluxo (vazões) com as pressões nos extremos deste elemento (pressões de fundo e de superfície). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensa, pois é preciso gerar um significativo número de combinações de parâmetros. A interpolação de valores intermediários é usualmente linear \cite{computer2022cmg}\cite{schlumberger2009technical}. Este relatório compara os resultados de interpolação linear com interpolação com splines para um exemplo de tabela de VFP.
+
+\section{Metodologia}
+
+    \subsection{Tabelas de Fluxo Vertical Multifásico}
+
+        Do \emph{ponto de vista} do reservatório, diversos parâmetros irão influenciar o potencial de produção (ou injeção de um poço):
+
+        \begin{itemize}
+            \item Características do reservatório: espessura, permeabilidade absoluta, profundidade etc.
+            \item Características dos fluidos presentes: viscosidade, permeabilidade relativa, fator volume de formação\footnote{O fator volume de formação ($B$) é a razão entre o volume de fuido em condição de reservatório ($P_{res}$ e $T_{res}$) e o volume deste mesmo fluido em condição de superfície ($P_{std}=1 \, atm$ e $T_{std}=60^oF$).} etc.
+            \item Geometria do poço no reservatório: diâmetro, extensão aberta ao fluxo, inclinação do poço, dano à formação etc.
+            \item Condição inicial de reservatório: pressão estática, temperatura, saturações (óleo, água e gás).
+        \end{itemize}
+        
+        O que controla a vazão de fluido que entra no poço (ou sai, no caso de poços injetores) é a pressão de fundo ($P_{wf}$ ou BHP\footnote{BHP é \emph{Bottom Hole Pressure}.}). Esta relação entre pressão de fundo e vazão de um poço é conhecida por IPR - \emph{Inflow Performance Relationship}. Para reservatórios com geometrias simples e fluidos com características bem comportadas é possível construir equações diretas para a curva de IPR, mas em geral esta correlação é estimada com simulação numérica 3D.
+
+        Do \emph{ponto de vista} do sistema produtivo, outras variáveis terão impacto no potencial de um poço:
+
+        \begin{itemize}
+            \item diâmetro e rugosidade da coluna de produção, da linha de produção\footnote{Trecho horizontal, apoiado no fundo do mar para o caso de poços marítimos.} e do \emph{riser}\footnote{Trecho vertical final da linha de um poço marítimo.}.
+            \item Equipamentos adicionais presentres no poço ou na linha (instrumentação de poço, árvore de natal, manifold, válvulas de \emph{gas-lift}, chokes etc.).
+            \item  Condições operacionais de superfície: pressão e temperatura de chegada na unidade de produção.
+        \end{itemize}
+
+        A relação entre a pressão de fundo no poço ($P_{wf}$) e a sua vazão é a VFP. O encontro da curva de disponibilidade do reservatório (IPR) com a curva de necessidade do sistema de produção (VFP) é o que define o ponto de operação do poço (Figura \ref{fig:ipr}).
+        
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xmin=0,
+                    xmax=3000,
+                    ymin=0,
+                    ymax=400,
+                    xlabel = {$Q \; (m^3/d)$},
+                    ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
+                    legend style={at={(0.65,0.20)}, anchor=east},
+                    ]
+                    % \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
+                    % \addplot [dashed, domain=-3:3, smooth, thick] { 3*x*(3*x + 4) };
+                    % \addplot[color=black, mark=o, mark size=2.pt] coordinates {
+                    \addplot [color=black, smooth, thick] coordinates{ 
+                        (   0, 375.00)
+                        ( 100, 367.85)
+                        ( 200, 360.57)
+                        ( 300, 353.15)
+                        ( 400, 345.60)
+                        ( 500, 337.90)
+                        ( 600, 330.04)
+                        ( 700, 322.02)
+                        ( 800, 313.81)
+                        ( 900, 305.42)
+                        (1000, 296.82)
+                        (1100, 288.00)
+                        (1200, 278.94)
+                        (1300, 269.62)
+                        (1400, 260.02)
+                        (1500, 250.11)
+                        (1600, 239.86)
+                        (1700, 229.22)
+                        (1800, 218.16)
+                        (1900, 206.62)
+                        (2000, 194.53)
+                        (2100, 181.79)
+                        (2200, 168.31)
+                        (2300, 153.92)
+                        (2400, 138.42)
+                        (2500, 121.49)
+                        (2600, 102.67)
+                        (2700, 81.10)
+                        (2800, 55.07)
+                        (2900, 19.51)
+                        (2937, 0.00)
+                    };
+                    \addplot [color=black, smooth, very thick, densely dotted] coordinates{ 
+                        ( 200, 335)
+                        ( 250, 320)
+                        ( 300, 305)
+                        ( 350, 292)
+                        ( 400, 283)
+                        ( 500, 270)
+                        ( 600, 265)
+                        ( 700, 268)
+                        ( 800, 272)
+                        (1000, 282)
+                        (1100, 288)
+                        (1200, 292)
+                        (1400, 302)
+                        (1600, 312)
+                        (1800, 322)
+                        (2000, 332)
+                        (2200, 342)
+                        (3200, 383)                   
+                        };
+                    \addplot[color=black, mark=*, only marks, mark size=3.pt] coordinates {(1100,288)};
+                    \addplot[color=black, very thin ] coordinates {(0,288)(1100,288)(1100,0)};
+                    \legend{IPR, VFP, Ponto de Operação};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Exemplo de definição do ponto de operação de um poço produtor.}
+            \label{fig:ipr}
+        \end{figure}
+
+        No simulador de fluxo este ponto de operação é reavaliado a cada iteração de cada passo de tempo. Para acelerar a resolução do problema, não é feita uma simulação do fluxo dentro do poço. Esta simulação é substituída por uma tabela com múltiplas variáveis. Para os dois simuladores mais utilizados na indústria o formato desta tabela é o mesmo, com a pressão de fundo ($P_{wf}$) em função de:
+
+        \begin{itemize}
+            \item Pressão de cabeça: WHP\footnote{WHP é \emph{Well Head Pressure}.}.
+            \item Vazão: óleo, gás, água ou líquido\footnote{Respectivamente $Q_o$, $Q_g$, $Q_w$,$Q_{liq}$.}.
+            \item Fração de água: WCUT\footnote{WCUT é \emph{Water Cut} ou corte de água ($Q_w/Q_{liq}$)} ou RAO\footnote{RAO é razão água óleo ($Q_g/Q_o$).}
+            \item Fração de gás: RGL\footnote{RGL é razão gás líquido ($Q_g/Q_{liq}$).} ou RGO\footnote{RGO é razão gás óleo ($Q_g/Q_o$).}).
+            \item Vazão de injeção de \emph{gas-lift}.
+        \end{itemize}
+
+        Para cada variável de entrada são definidos alguns valores representativos. Estas tabelas de VFP são completas, ou seja, são fornecidos valores de BHP para todas as combinações possíveis dos valores representativos dos dados de entrada.    
+
+    \subsection{Splines}
+    
+        Dado um conjunto de $n+1$ pontos ($x_i,y_i \; para \; i=0,1,\ldots,n$), as splines são um método de interpolação que utiliza $n$ equações cúbicas por partes na forma:
+        
+        \begin{align*}
+            S_j(x) = a_j + b_j (x-x_j) + c_j (x-x_j)^2 + d_j (x-x_j)^2& \\
+            para \; x_j \le x \le x_{j+1}&
+        \end{align*}
+        
+        Os termos das equações são definidos de forma a garantir que os valores da função interpoladora ($S(x)$) sejam exatos nos pontos dados ($S(x_i)=y_i$), e que exista continuidade das derivadas primeira e segunda da função interpoladora. Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Foram implementadas duas opções: splines naturais ($S''(x_0)=S''(x_n)=0$) e splines  fixadas ($S'(x_0)=f'(x_0)$ e $S'(x_n)=f'(x_n)$). O código desenvolvido é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines naturais é apresentada no Algoritmo \ref{alg:splines}. 
+
+        \begin{algorithm}
+            \caption{Splines Naturais}\label{alg:splines}
+            \begin{algorithmic}
+                \Require $x_i,y_i \; para \; i=0,1,\ldots,n$
+                \ForAll{$i \in \{0, \dots, n\}$}
+                    \State $a_i \gets y_i$
+                \EndFor
+                \ForAll{$i \in \{0, \dots, n-1\}$}
+                    \State $h_i \gets x_{i+1} - x_i$
+                \EndFor
+                \ForAll{$i \in \{1, \dots, n-1\}$}
+                    \State $\alpha_i \gets \frac{3}{h_i} (a_{i+1}-a_i) - \frac{3}{h_{i-1}} (a_i-a_{i-1})$
+                \EndFor
+                
+                \State $r_0 \gets 1$
+                \State $m_0 \gets 0$
+                \State $z_0 \gets 0$
+                
+                \ForAll{$i \in \{1, \dots, n-1\}$}
+                    \State $r_i \gets 2 (x_{i+1} - x_{i-1}) - h_{i-1} m_{i-1}$
+                    \State $m_i \gets \frac{h_i}{r_i}$
+                    \State $z_i \gets \frac{\alpha_i - h_{i-1} z_{i-1}}{r_i}$
+                \EndFor
+                
+                \State $r_n \gets 1$
+                \State $z_n \gets 0$
+                \State $c_n \gets 0$
+                
+                \ForAll{$i \in \{n-1, \dots, 0\}$}
+                    \State $c_i \gets z_i - m_i c_{i+1}$
+                    \State $b_i \gets \frac{a_{i+1} - a_i}{h_i} - h_i \frac{c_{i+1} + 2 c_i}{3}$
+                    \State $d_i \gets \frac{c_{i-1} - c_i}{3 h_i}$
+                \EndFor
+                \State \Return $a_i,b_i,c_i,d_i \; para \; i=0,1,\ldots,n-1$
+            \end{algorithmic}
+        \end{algorithm}
+    
+    \section{Resultados}
+    
+        Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
+
+        \begin{description}
+            \item[tests\textunderscore splines()] Testa as implementações de splines naturais e splines fixadas em dois exemplos: conjunto de 3 pontos e aproximação da integral da função exponencial (exemplos 1 a 4 do capítulo 3.5 de \cite{burden2016analise}).
+            
+            \item[tests\textunderscore vfp\textunderscore interpolation()] Compara o uso de interpolação linear e interpolação com splines naturais de pontos de uma tabela VFP.
+        \end{description}
+
+        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultado igual ao do livro. O exemplo mais interessante é o da função exponencial, que é aproximada por splines nos pontos $x \; \epsilon \; \{0,1, 2, 3\}$ (Figura \ref{fig:exp}). O exemplo demonstra que a aproximação com spline fixada, impondo as derivadas da função original no primeiro ponto e no último ponto, melhora a estimativa da integral no intervalo aproximado por splines (Figura \ref{fig:intexp}).
+        
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    % xmin=0,
+                    % xmax=3000,
+                    % ymin=0,
+                    % ymax=400,
+                    % xlabel = {$Q \; (m^3/d)$},
+                    % ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
+                    legend style={at={(0.60,0.80)}, anchor=east},
+                    ]
+
+                    \addplot [domain=0:3.0, smooth, thick] { exp(x) };
+                    
+                    \addplot[color=blue, solid, smooth] table [x=x, y=y] {Ex2.txt};
+                    \addplot[color=red, solid, smooth] table [x=x, y=y] {Ex4.txt};
+                    
+                    \addplot[color=black, mark=o, only marks, mark size=2.pt] coordinates {
+                        (0,1)
+                        (1,2.718281828)
+                        (2,7.389056099)
+                        (3,20.08553692)};
+                    
+                    \legend{$f(x)=e^x$, Spline Natural, Spline Fixada};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Aproximação com splines da função exponencial: $f(x) = e^x$.}
+            \label{fig:exp}
+        \end{figure}
+                
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    legend style={at={(0.65,0.20)}, anchor=east},
+                    ]
+                   
+                    \addplot[color=blue, solid, smooth] table [x=x, y=eNatural] {Error_Ex2_4.txt};
+                    \addplot[color=red, solid, smooth] table [x=x, y=eFixed] {Error_Ex2_4.txt};
+                    
+                    \addplot[color=black, mark=o, only marks, mark size=2.pt] coordinates {(0,0)(1,0)(2,0)(3,0)};
+                    
+                    \legend{Erro Spline Natural, Erro Spline Fixada};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Erro da integral das aproximações com splines da função exponencial, entre 0 e $x$.}
+            \label{fig:intexp}
+        \end{figure}
+        
+        Para realizar o teste proposto foi utilizada uma tabela de VFP do modelo Unisim-II-H \cite{maschio2018case}. A tabela escolhida é de produção e tem os seguintes parâmetros descritos na Tabela \ref{table:tabvfp}.
+
+        \begin{table*} 
+            \caption{Parâmetros da tabela de VFP utilizada nas comparações. O parâmetro principal (BHP) é em $kgf/cm^2$.}
+            \label{table:tabvfp}
+            \begin{tabular}{ l l c c c c }
+                \hline
+                Variável & Descrição & Unidade & Valores & Mínimo & Máximo \\ 
+                \hline
+                LIQ  & Vazão de líquido         & $m^3/d$    & 6 & 200 &   3200 \\
+                GLR  & Razão gás líquido        & $m^3/m^3$  & 8 & 30  &    240 \\
+                WCUT & Corte de água            & $m^3/m^3$  & 6 &  0  &    0.9 \\
+                LFG  & Vazão de \emph{gas-lift} & $m^3/d$    & 3 &  0  &  20$\,$000 \\
+                WHP  & Pressão de cabeça        & $kgf/cm^2$ & 3 & 10  &     30 \\
+                \hline
+            \end{tabular}
+        \end{table*}
+
+        A proposta do teste é de verificar se uma interpolação com splines pode ser mais eficiente para estimar valores intermediários que uma interpolação linear, que é o método usualmente utilizado pelo simuladores de fluxo em meios porosos. Para cada uma das 432 combinações de GLR, WCUT, LFG e WHP foram construídas 6 funções interpoladoras dos pontos (LIQ, BHP). A diferença entre estas 6 variações é o ponto que é excluído. Posteriormente o valor de BHP do ponto excluído é estimado com a função interpoladora e comparado com o valor original (Figura \ref{fig:exvfp}). Em todos os testes foram utilizadas splines naturais, pois não informação sobre a derivada da função que gerou a tabela de VFP, e interpolação linear. 
+        
+        Dos 6 testes realizados, 2 foram de extrapolações (quando os pontos extremos foram os excluídos). Esta não é uma boa prática. Usualmente o simulador de fluxo irá avisar ao usuário quando estiver extrapolando valores da tabela de VFP, mas não irá parar a simulação. Os resultados de extrapolações são apresentados em separado.
+
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    % xmin=0,
+                    % xmax=3000,
+                    % ymin=0,
+                    % ymax=400,
+                    xlabel = {$Q \; (m^3/d)$},
+                    ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
+                    legend style={at={(0.40,0.90)}, anchor=east},
+                    ]
+                   
+                    \addplot[color=black, solid, smooth, thick] table [x=x, y=y] {vfp/P1_Bad.txt};
+                    \addplot[color=black, mark=o, only marks, mark size=2.pt] table [x=x, y=y] {vfp/P1_Bad_True.txt};
+                    \addplot[color=black, mark=*, only marks, mark size=2.pt] coordinates {(400, 383.901761)};
+                    
+                    \legend{Spline, Tabelados, Excluído};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Spline construída com 5 dos 6 valores de (LIQ,BHP) para uma das combinações de GLR, WCUT, LFG e WHP.}
+            \label{fig:exvfp}
+        \end{figure}
+
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}
+                    [
+                    ytick={1,2,3,4,5,6},
+                    yticklabels={LIQ=200, LIQ=400, LIQ=800, LIQ=1600, LIQ=2400, LIQ=3200},
+                    xmin=-60,
+                    xmax=100,
+                    ]
+                    \addplot+[
+                    boxplot prepared={
+                        median=-3.0099283075,
+                        upper quartile=34.8511285625,
+                        lower quartile=-11.661481645,
+                        upper whisker=87.37028804,
+                        lower whisker=-18.88029125,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=1.098113864,
+                        upper quartile=5.97379165075,
+                        lower quartile=-20.46857672,
+                        upper whisker=10.27655936,
+                        lower whisker=-51.3246126,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=0.60786930725,
+                        upper quartile=27.1931668275,
+                        lower quartile=-5.54907854075,
+                        upper whisker=68.1779129,
+                        lower whisker=-11.96436218,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=-3.5615469125,
+                        upper quartile=-0.41523451875,
+                        lower quartile=-10.7981950575,
+                        upper whisker=4.21248588,
+                        lower whisker=-24.41612724,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                        boxplot prepared={
+                        median=1.203924668,
+                        upper quartile=3.92193537925,
+                        lower quartile=-0.4740216875,
+                        upper whisker=10.33980045,
+                        lower whisker=-2.678721812,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=-3.1343745,
+                        upper quartile=2.18892375,
+                        lower quartile=-6.062954,
+                        upper whisker=8.848972,
+                        lower whisker=-13.206596,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                \end{axis}
+            \end{tikzpicture}
+        \caption{Erros na estimativa de BHP com splines, em função do valor de LIQ excluído.}
+        \label{fig:errosvfpspline}
+        \end{figure}
+
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}
+                    [
+                    ytick={1,2,3,4,5,6},
+                    yticklabels={LIQ=200, LIQ=400, LIQ=800, LIQ=1600, LIQ=2400, LIQ=3200},
+                    xmin=-60,
+                    xmax=100,
+                    ]
+                    \addplot+[
+                    boxplot prepared={
+                        median=-3.55133075,
+                        upper quartile=35.260269875,
+                        lower quartile=-12.593767875,
+                        upper whisker=88.392209,
+                        lower whisker=-20.082742,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=2.3675538335,
+                        upper quartile=8.39584525025,
+                        lower quartile=-23.50684658,
+                        upper whisker=13.38849467,
+                        lower whisker=-58.92813933,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=8.226421333,
+                        upper quartile=11.3735147525,
+                        lower quartile=-4.374550333,
+                        upper whisker=21.19345867,
+                        lower whisker=-11.23103167,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=3.76609575,
+                        upper quartile=7.743125625,
+                        lower quartile=-2.642448,
+                        upper whisker=16.4773995,
+                        lower whisker=-9.746704,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                        boxplot prepared={
+                        median=1.56718725,
+                        upper quartile=3.031477,
+                        lower quartile=-1.094461875,
+                        upper whisker=6.603298,
+                        lower whisker=-4.424486,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=-3.1343745,
+                        upper quartile=2.18892375,
+                        lower quartile=-6.062954,
+                        upper whisker=8.848972,
+                        lower whisker=-13.206596,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                \end{axis}
+            \end{tikzpicture}
+        \caption{Erros na estimativa de BHP com interpolação linear, em função do valor de LIQ excluído.}
+        \label{fig:errosvfplinear}
+        \end{figure}
+
+        O código foi implementado em C e em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/04_Splines/04_splines.c}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+    \section{Conclusão}
+    
+        O Método da Secante apresentou desempenho melhor que o do Método de Newton-Raphson para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. O formato da função de interesse para resolver o problema proposto levou a uma estimativa muito boa da solução na primeira iteração em todos os testes realizados. Além de alcançar convergência em um número menor de iterações, o Método da Secante tem a vantagem adicional de não precisar calcular a derivada da função, ou seja, reduzindo ainda mais o custo computacional necessário para resolver o problema proposto.
+
+    % \label{}
+    
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+% \section{Funções de Teste}
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num} 
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
