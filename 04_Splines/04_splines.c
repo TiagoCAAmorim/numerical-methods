@@ -766,17 +766,21 @@ void get_data_from_vfp(struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP
     }
 }
 
-void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate){
+void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed){
     struct tPoints points;
     struct tTestPoints testPoints;
     struct tspline spline;
     double yTrue;
     double ySpline;
     double yLinear;
+    double fp[100], beta0, betan;
     int n=0;
     int iLIQ;
     FILE* file = fopen(fname, "w");
     int iLIQstart, iLIQend;
+
+    beta0 = 3;
+    betan = 1;
 
     if( extrapolate){
         iLIQstart = 0;
@@ -799,9 +803,19 @@ void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate){
             for( int iLFG=0; iLFG<vfp->nLFG; iLFG++){
                 for( int iWHP=0; iWHP<vfp->nWHP; iWHP++){
                     get_data_from_vfp(vfp, iGLR, iWCUT, iLFG, iWHP, &points);
+                    
+                    if( fixed){
+                        fp[0] = (points.y[1] - points.y[0]) / (points.x[1] - points.x[0]) * beta0;
+                        fp[vfp->nLIQ] = (points.y[vfp->nLIQ] - points.y[vfp->nLIQ-1]) / (points.x[vfp->nLIQ] - points.x[vfp->nLIQ-1]) * betan;
+                    }
+
                     for( int j=iLIQstart; j<iLIQend; j++){
                         SeparatePoints(&points, &testPoints, j, 99);
-                        spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
+                        if( fixed){
+                            spline = build_fixed_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y, fp);
+                        } else{
+                            spline = build_natural_spline(testPoints.data.n, testPoints.data.x, testPoints.data.y);
+                        }
                         for( int i=0; i<testPoints.test.n; i++){
                             yTrue = testPoints.test.y[i];
                             ySpline = evaluate_spline(spline, testPoints.test.x[i]);
@@ -849,9 +863,11 @@ void tests_vfp_interpolation(){
     sprintf(fname,"%s%s",folder,"P1.inc");
     read_VFP_file(fname, &vfp);
     sprintf(fname,"%s%s",folder,"P1.txt");
-    test_vfp(fname, &vfp, true);
+    test_vfp(fname, &vfp, true, false);
     sprintf(fname,"%s%s",folder,"P1_noExtrap.txt");
-    test_vfp(fname, &vfp, false);
+    test_vfp(fname, &vfp, false, false);
+    sprintf(fname,"%s%s",folder,"P1_fixed.txt");
+    test_vfp(fname, &vfp, false, true);
 
     sprintf(fname,"%s%s", folder, "P1_Ok.txt");
     test_vfp_print_table(fname, &vfp, 1-1, 1-1, 1-1, 3-1, 5-1);
