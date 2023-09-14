@@ -382,8 +382,8 @@ bool print_spline_table_file(struct tspline spline, double npoints, char *fname,
 
     fprintf(file, "%16s\t%16s\t%16s\t%16s\t%16s\t%16s\n","x","y","dy/dx","d2y/dx2","Int(y)","ylinear");
 
-    x0 = xTry[0]; //spline.x[0];
-    x1 = xTry[*n-1]; //.x[spline.npoints-1];
+    x0 = xTry[0]; 
+    x1 = xTry[*n-1]; 
     for( int i = 0; i < npoints; i++) {
         x = x0 + (x1-x0) * i / (npoints - 1);
         if( x >= xTry[j] && j < *n-1){
@@ -645,7 +645,6 @@ void read_VFP_file(char *fname, struct tVFP *vfp){
     current = none;
     char message[30];
     while (fscanf(file, "%[^\n ] ", message) != EOF) {
-        // printf("> '%s'\n", message);
         if(      strcmp(message,"*PTUBE1") == 0){ current = PTUBE;}
         else if( strcmp(message,"*DEPTH") == 0 ){ current = DEPTH;}
         else if( strcmp(message,"*LIQ"  ) == 0 ){ current = LIQ;}
@@ -689,7 +688,6 @@ void read_VFP_file(char *fname, struct tVFP *vfp){
                 else if( iWCUT == 0){iWCUT = atoi(message);}
                 else if( iLFG == 0){iLFG = atoi(message);}
                 else{
-                    // printf("%i %i %i %i %i => %s\n",iLIQ,iGLR,iWCUT,iLFG,iWHP+1,message);
                     vfp->BHP[iLIQ-1][iGLR-1][iWCUT-1][iLFG-1][iWHP] = atof(message);
                     iWHP += 1;
                     iBHP += 1;
@@ -723,7 +721,6 @@ void read_VFP_file(char *fname, struct tVFP *vfp){
     vfp->nLFG  = nLFG;
     vfp->nWHP  = nWHP;
     fclose(file);
-    // return vfp;
 }
 
 struct tPoints{
@@ -738,7 +735,6 @@ struct tTestPoints{
 };
 
 void SeparatePoints(struct tPoints *points, struct tTestPoints *testPoints, int first, int step){
-    // bool is_true=true;
     int is_test = first;
 
     testPoints->data.n = 0;
@@ -766,6 +762,46 @@ void get_data_from_vfp(struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP
     }
 }
 
+double calculate_mean(const double data[], const int filter[], int n, int filterValue) {
+    double sum = 0.0;
+    int count = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (filter[i]==filterValue) {
+            sum += data[i];
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        printf("No valid elements found for mean calculation.\n");
+        return 0.0;
+    }
+
+    return sum / count;
+}
+
+double calculate_StdDev(const double data[], const int filter[], int n, int filterValue) {
+    double mean = calculate_mean(data, filter, n, filterValue);
+    double sum = 0.0;
+    int count = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (filter[i] == filterValue) {
+            double diff = data[i] - mean;
+            sum += diff * diff;
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        printf("No valid elements found for standard deviation calculation.\n");
+        return 0.0; 
+    }
+
+    return sqrt(sum / count);
+}
+
 void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed, double beta0, double betan){
     struct tPoints points;
     struct tTestPoints testPoints;
@@ -778,6 +814,11 @@ void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed, doubl
     int iLIQ;
     FILE* file = fopen(fname, "w");
     int iLIQstart, iLIQend;
+    double eSpline[10000];
+    double eLinear[10000];
+    int LIQ[10000];
+    double meanESpl, stdDevESpl;
+    double meanELin, stdDevELin;
 
     if( extrapolate){
         iLIQstart = 0;
@@ -803,7 +844,7 @@ void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed, doubl
                     
                     if( fixed){
                         fp[0] = (points.y[1] - points.y[0]) / (points.x[1] - points.x[0]) * beta0;
-                        fp[vfp->nLIQ] = (points.y[vfp->nLIQ] - points.y[vfp->nLIQ-1]) / (points.x[vfp->nLIQ] - points.x[vfp->nLIQ-1]) * betan;
+                        fp[vfp->nLIQ-2] = (points.y[vfp->nLIQ-1] - points.y[vfp->nLIQ-2]) / (points.x[vfp->nLIQ-1] - points.x[vfp->nLIQ-2]) * betan;
                     }
 
                     for( int j=iLIQstart; j<iLIQend; j++){
@@ -820,6 +861,10 @@ void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed, doubl
                             iLIQ = j;
                             fprintf(file, "%4i\t%4i\t%4i\t%4i\t%4i\t",iLIQ+1,iGLR+1,iWCUT+1,iLFG+1,iWHP+1);
                             fprintf(file, "%16.10g\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", yTrue, ySpline, yTrue - ySpline, yLinear, yTrue - yLinear);
+
+                            eSpline[n] = yTrue - ySpline; 
+                            eLinear[n] = yTrue - yLinear; 
+                            LIQ[n] = iLIQ; 
                             n += 1;
                         }
                     }
@@ -828,6 +873,19 @@ void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed, doubl
         }
     }
     fclose(file);
+
+
+    printf("Error Statistics by LIQ Value\n");
+    printf("%4s\t%16s\t%16s\t%16s\t%16s\n","LIQ","meanESpl", "stdDevESpl", "meanELin", "stdDevELin");
+    for( int j=iLIQstart; j<iLIQend; j++){
+        meanESpl = calculate_mean(eSpline, LIQ, n, j);
+        meanELin = calculate_mean(eLinear, LIQ, n, j);
+        stdDevESpl = calculate_StdDev(eSpline, LIQ, n, j);
+        stdDevELin = calculate_StdDev(eLinear, LIQ, n, j);
+        
+        printf("%4i\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n",j,meanESpl, stdDevESpl, meanELin, stdDevELin);
+    }
+
 }
 
 void test_vfp_print_table(char *fname, struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP, int iLIQ){
@@ -854,7 +912,7 @@ void test_vfp_print_table_true(char *fname, struct tVFP *vfp, int iGLR, int iWCU
 
 void tests_vfp_interpolation(){
     struct tVFP vfp;
-    char folder[] = "./vfp/";
+    char folder[] = "C:/Users/tiago.LENOVO-I7/Unicamp/2023.02/IM253_MetodosNumericos/Trabalhos/04_Splines/vfp/";
     char fname[256];
 
     sprintf(fname,"%s%s",folder,"P1.inc");
@@ -863,12 +921,6 @@ void tests_vfp_interpolation(){
     test_vfp(fname, &vfp, true, false,1,1);
     sprintf(fname,"%s%s",folder,"P1_noExtrap.txt");
     test_vfp(fname, &vfp, false, false,1,1);
-    sprintf(fname,"%s%s",folder,"P1_fixed_1.txt");
-    test_vfp(fname, &vfp, false, true,1,1);
-    sprintf(fname,"%s%s",folder,"P1_fixed_2.txt");
-    test_vfp(fname, &vfp, false, true,2,1);
-    sprintf(fname,"%s%s",folder,"P1_fixed_3.txt");
-    test_vfp(fname, &vfp, false, true,3,1);
 
     sprintf(fname,"%s%s", folder, "P1_Ok.txt");
     test_vfp_print_table(fname, &vfp, 1-1, 1-1, 1-1, 3-1, 5-1);
@@ -941,6 +993,25 @@ void tests_vfp_interpolation(){
     sprintf(fname,"%s%s",folder,"P10.txt");
     test_vfp(fname, &vfp, true, false,1,1);
 
+
+    sprintf(fname,"%s%s",folder,"P1.inc");
+    read_VFP_file(fname, &vfp);
+    
+    double beta0;
+    for( int i=0; i<35; i++){
+        sprintf(fname,"%s%s%i%s",folder,"P1_fixed_beta0_",i,".txt");
+        beta0 = 0.6 + 4.*i/40.;
+        printf("Beta0 = %g\n", beta0);
+        test_vfp(fname, &vfp, false, true,beta0,1.);
+    }
+
+    double betan;
+    for( int i=0; i<10; i++){
+        sprintf(fname,"%s%s%i%s",folder,"P1_fixed_betan_",i,".txt");
+        betan = 0.4 + 1.*i/10.;
+        printf("%i. Betan = %g\n", i, betan);
+        test_vfp(fname, &vfp, false, true,1.8,betan);
+    }
 }
 
 int main(){
