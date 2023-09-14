@@ -137,8 +137,8 @@
 %%             country={}}
 %% \fntext[label3]{}
 
-\title{Avaliação do Uso de Splines Naturais para Interpolar Tabelas de Fluxo Vertical Multifásico\tnoteref{label_title}}
-\tnotetext[label_title]{Relatório número 4 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+\title{Aplicação de Splines Fixas para Interpolar Tabelas de Fluxo Vertical Multifásico\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 5 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
@@ -168,10 +168,10 @@ country={Brasil}}
 
 \begin{abstract}
 
-    É uma prática comum da indústria o uso de tabelas de VFP para representar o fluxo multifásico em poços produtores e injetores, e assim conseguir associar condições de fundo (reservatório) com condições de superfície (unidade de produção). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensiva, para adequadamete representar todas as possíveis combinações de parâmetros.
+    A construção de curvas de fluxo vertical multifásico para utilizar em simulação de fluxo em meios porosos pode ser uma tarefa computacionalmente custosa. Como uma tabela estática irá substituir um simulador de fluxo multifásico, é preciso um número adequado de parâmetros de entrada. A nuvem de pontos da tabela deve garantir que os valores a serem interpolados em uma simulação de fluxo em meios porosos sejam próximos dos valores reais.
 
-    Pontos intermediários entre os tabelados são usualmente estimados por interpolação linear. Foi comparado o desempenho da interpolação linear contra interpolação com splines para uma tabela de VFP de exemplo. Para os testes realizados os resultados mostraram que a interpolação com splines naturais teve pior desempenho que a interpolação linear.
-
+    Tradicionalmente os simuladores de fluxo em meio poroso utilizam interpolação linear entre os pontos tabelados. Um primeiro estudo verificou que usar splines naturais para interpolar os valores tabelados não resulta em melhora das estimativas. Um segundo estudo utilizou os dados tabelados para estimar valores para as derivadas da função $P_{wf}=f(Q)$ no extremos do domínio, e assim poder construir splines fixadas. Os resultados mostraram que as splines fixadas conseguiram resultados melhores que os da interpolação com splines naturais ou linear.
+    
 \end{abstract}
 
 
@@ -204,123 +204,25 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-    A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). É possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}. Mas o método mais tradicional de realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}.
+    As tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Ou VLP - \emph{vertical lift performance}.}, são a abordagem mais usual para acoplar uma simulação de fluxo em meios porosos com os limites da unidade de produção.
 
-    As tabelas de VFP representam o comportamento em um poço associando diferentes variáveis de fluxo (vazões) com as pressões nos extremos deste elemento (pressões de fundo e de superfície). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensa, pois é preciso gerar um significativo número de combinações de parâmetros. A interpolação de valores intermediários é usualmente linear \cite{computer2022cmg}\cite{schlumberger2009technical}. Este relatório compara os resultados de interpolação linear com interpolação com splines para um exemplo de tabela de VFP.
+    As tabelas de VFP associam diferentes variáveis de fluxo (vazões) com as pressões nos extremos do elemento modelado\footnote{Poço, pedaço de linha de produção, \emph{manifold} etc.}. As tabelas são geradas com um número limitado de pontos, e invariavelmente o simulador de fluxo terá que buscar valores para condições de fluxo que não estão na tabela. O mais comum é realizar interpolação linear entre os pontos da tabela \cite{computer2022cmg}\cite{schlumberger2009technical}. Uma avaliação anterior avaliou o uso de splines naturais para interpolar valores em tabelas de VFP, e concluiu que, para os testes realizados, a interpolação linear é melhor \cite{relatoriosplinesnaturais}. Este relatório revisita os mesmos exemplos e avalia a interpolação com splines fixas.
 
 \section{Metodologia}
 
     \subsection{Tabelas de Fluxo Vertical Multifásico}
 
-        Do \emph{ponto de vista} do reservatório, diversos parâmetros irão influenciar o potencial de produção (ou injeção de um poço):
-
-        \begin{itemize}
-            \item Características do reservatório: espessura, permeabilidade absoluta, profundidade etc.
-            \item Características dos fluidos presentes: viscosidade, permeabilidade relativa, fator volume de formação\footnote{O fator volume de formação ($B$) é a razão entre o volume de fuido em condição de reservatório ($P_{res}$ e $T_{res}$) e o volume deste mesmo fluido em condição de superfície ($P_{std}=1 \, atm$ e $T_{std}=60^oF$).} etc.
-            \item Geometria do poço no reservatório: diâmetro, extensão aberta ao fluxo, inclinação do poço, dano à formação etc.
-            \item Condição inicial de reservatório: pressão estática, temperatura, saturações (óleo, água e gás).
-        \end{itemize}
+        Os simuladores de fluxo em meio poroso utilizam as tabelas de VFP para poder relacionar condições de fluxo de fundo e de superfície. O comum é que a tabela de VFP relacione pressão de cabeça (WHP\footnote{WHP é \emph{Well Head Pressure}.}) com as demais variáveis associadas ao poço (e que são calculadas pelo simulador de fluxo em meios porosos): 
         
-        O que controla a vazão de fluido que entra no poço (ou sai, no caso de poços injetores) é a pressão de fundo ($P_{wf}$ ou BHP\footnote{BHP é \emph{Bottom Hole Pressure}.}). Esta relação entre pressão de fundo e vazão de um poço é conhecida por IPR - \emph{Inflow Performance Relationship}. Para reservatórios com geometrias simples e fluidos com características bem comportadas é possível construir equações diretas para a curva de IPR, mas em geral esta correlação é estimada com simulação numérica 3D.
-
-        Do \emph{ponto de vista} do sistema produtivo, outras variáveis terão impacto no potencial de um poço:
-
         \begin{itemize}
-            \item Diâmetro e rugosidade da coluna de produção, da linha de produção\footnote{Trecho horizontal, apoiado no fundo do mar para o caso de poços marítimos.} e do \emph{riser}\footnote{Trecho vertical final da linha de um poço marítimo.}.
-            \item Equipamentos adicionais presentes no poço ou na linha: instrumentação de poço, árvore de natal, manifold, válvulas de \emph{gas-lift}, chokes etc.
-            \item  Condições operacionais de superfície: pressão e temperatura de chegada na unidade de produção.
-        \end{itemize}
-
-        A relação entre a pressão de fundo no poço ($P_{wf}$) e a sua vazão é a VFP. O encontro da curva de disponibilidade do reservatório (IPR) com a curva de necessidade do sistema de produção (VFP) é o que define o ponto de operação do poço (Figura \ref{fig:ipr}).
-        
-        \begin{figure}[hbt!] 
-            \begin{tikzpicture}
-                \begin{axis}[
-                    grid=both,
-                    xmin=0,
-                    xmax=3000,
-                    ymin=0,
-                    ymax=400,
-                    xlabel = {$Q \; (m^3/d)$},
-                    ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
-                    legend style={at={(0.65,0.20)}, anchor=east},
-                    ]
-                    % \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
-                    % \addplot [dashed, domain=-3:3, smooth, thick] { 3*x*(3*x + 4) };
-                    % \addplot[color=black, mark=o, mark size=2.pt] coordinates {
-                    \addplot [color=black, smooth, thick] coordinates{ 
-                        (   0, 375.00)
-                        ( 100, 367.85)
-                        ( 200, 360.57)
-                        ( 300, 353.15)
-                        ( 400, 345.60)
-                        ( 500, 337.90)
-                        ( 600, 330.04)
-                        ( 700, 322.02)
-                        ( 800, 313.81)
-                        ( 900, 305.42)
-                        (1000, 296.82)
-                        (1100, 288.00)
-                        (1200, 278.94)
-                        (1300, 269.62)
-                        (1400, 260.02)
-                        (1500, 250.11)
-                        (1600, 239.86)
-                        (1700, 229.22)
-                        (1800, 218.16)
-                        (1900, 206.62)
-                        (2000, 194.53)
-                        (2100, 181.79)
-                        (2200, 168.31)
-                        (2300, 153.92)
-                        (2400, 138.42)
-                        (2500, 121.49)
-                        (2600, 102.67)
-                        (2700, 81.10)
-                        (2800, 55.07)
-                        (2900, 19.51)
-                        (2937, 0.00)
-                    };
-                    \addplot [color=black, smooth, very thick, densely dotted] coordinates{ 
-                        ( 200, 335)
-                        ( 250, 320)
-                        ( 300, 305)
-                        ( 350, 292)
-                        ( 400, 283)
-                        ( 500, 270)
-                        ( 600, 265)
-                        ( 700, 268)
-                        ( 800, 272)
-                        (1000, 282)
-                        (1100, 288)
-                        (1200, 292)
-                        (1400, 302)
-                        (1600, 312)
-                        (1800, 322)
-                        (2000, 332)
-                        (2200, 342)
-                        (3200, 383)                   
-                        };
-                    \addplot[color=black, mark=*, only marks, mark size=3.pt] coordinates {(1100,288)};
-                    \addplot[color=black, very thin ] coordinates {(0,288)(1100,288)(1100,0)};
-                    \legend{IPR, VFP, Ponto de Operação};
-                \end{axis}
-            \end{tikzpicture}
-            \caption{Exemplo de definição do ponto de operação de um poço produtor.}
-            \label{fig:ipr}
-        \end{figure}
-
-        No simulador de fluxo este ponto de operação é reavaliado a cada iteração de cada passo de tempo. Para acelerar a resolução do problema, não é feita uma simulação do fluxo dentro do poço. Esta simulação é substituída por uma tabela com múltiplas variáveis. Para os dois simuladores mais utilizados na indústria o formato desta tabela é o mesmo, com a pressão de fundo ($P_{wf}$) em função de:
-
-        \begin{itemize}
-            \item Pressão de cabeça: WHP\footnote{WHP é \emph{Well Head Pressure}.}.
+            \item Pressão de fundo: $P_{wf}$ ou BHP\footnote{BHP é \emph{Bottom Head Pressure}.}.
             \item Vazão: óleo, gás, água ou líquido\footnote{Respectivamente $Q_o$, $Q_g$, $Q_w$,$Q_{liq}$.}.
             \item Fração de água: WCUT\footnote{WCUT é \emph{Water Cut} ou corte de água ($Q_w/Q_{liq}$)} ou RAO\footnote{RAO é razão água óleo ($Q_g/Q_o$).}
-            \item Fração de gás: RGL\footnote{RGL é razão gás líquido ($Q_g/Q_{liq}$).} ou RGO\footnote{RGO é razão gás óleo ($Q_g/Q_o$).}).
+            \item Fração de gás: RGL\footnote{RGL é razão gás líquido ($Q_g/Q_{liq}$).} ou RGO\footnote{RGO é razão gás óleo ($Q_g/Q_o$).}..
             \item Vazão de injeção de \emph{gas-lift}.
         \end{itemize}
 
-        Para cada variável de entrada são definidos alguns valores representativos. Estas tabelas de VFP são completas, ou seja, são fornecidos valores de BHP ($P_{wf}$) para todas as combinações possíveis dos valores representativos dos dados de entrada.    
+        No simulador de fluxo um poço terá sempre uma condição de produção especificada: vazão, pressão de fundo, pressão de cabeça ou vazão de grupo. Enquanto estiver em uma determinada condição de produção, os demais limitantes devem ser observados: pressão de fundo mínima, pressão de cabeça mínima, vazão de líquido máxima, vazão de óleo máxima, vazão de gás máxima\footnote{Para o caso de um produtor.}. Se algum limite não for satisfeito, o simulador irá mudar o controle de poço para o limite da condição violada e buscar uma nova solução para o problema. Este processo é realizado a cada passo de tempo da simulação, e a tabela de VFP será utilizada toda vez que for necessário calcular a pressão de cabeça do poço.
 
     \subsection{Splines}
     
@@ -331,25 +233,29 @@ country={Brasil}}
             para \; x_j \le x \le x_{j+1}&
         \end{align*}
         
-        Os termos das equações são definidos de forma a garantir que os valores da função interpoladora ($S(x)$) sejam exatos nos pontos dados ($S(x_i)=y_i$), e que exista continuidade das derivadas primeira e segunda da função interpoladora. Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Foram implementadas duas opções: splines naturais ($S''(x_0)=S''(x_n)=0$) e splines  fixadas ($S'(x_0)=f'(x_0)$ e $S'(x_n)=f'(x_n)$). O código desenvolvido é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines naturais é apresentada no Algoritmo \ref{alg:splines}. 
+        Os termos das equações são definidos de forma a garantir que os valores da função interpoladora ($S(x)$) sejam exatos nos pontos dados ($S(x_i)=y_i$), e que exista continuidade da função interpoladora, e de suas derivadas primeira e segunda. Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Splines naturais tem derivada segunda nula nos extremos do domínio ($S''(x_0)=S''(x_n)=0$). Já as splines fixadas tem as derivadas primeiras nos extremos do domínio definidas: $S'(x_0)=f'(x_0)$ e $S'(x_n)=f'(x_n)$. O código desenvolvido para as splines fixas é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines naturais é apresentada no Algoritmo \ref{alg:splines}. 
 
         \begin{algorithm}
-            \caption{Splines Naturais}\label{alg:splines}
+            \caption{Splines Fixas}\label{alg:splines}
             \begin{algorithmic}
-                \Require $x_i,y_i \; para \; i=0,1,\ldots,n$
+                \Require $x_i,y_i \; para \; i=0,1,\ldots,n; \; y'_0=f'(x_0); \; y'_n=f'(x_n)$
                 \ForAll{$i \in \{0, \dots, n\}$}
                     \State $a_i \gets y_i$
                 \EndFor
                 \ForAll{$i \in \{0, \dots, n-1\}$}
                     \State $h_i \gets x_{i+1} - x_i$
                 \EndFor
+
+                \State $\alpha_0 \gets \frac{3}{h_0}(a_1-a_0) - 3 y'_0$
+                \State $\alpha_n \gets 3 y'_n - \frac{3}{h_{n-1}}(a_n-a_{n-1})$
+
                 \ForAll{$i \in \{1, \dots, n-1\}$}
                     \State $\alpha_i \gets \frac{3}{h_i} (a_{i+1}-a_i) - \frac{3}{h_{i-1}} (a_i-a_{i-1})$
                 \EndFor
                 
-                \State $r_0 \gets 1$
-                \State $m_0 \gets 0$
-                \State $z_0 \gets 0$
+                \State $r_0 \gets 2 h_0$
+                \State $m_0 \gets 0.5$
+                \State $z_0 \gets \frac{\alpha_0}{r_0}$
                 
                 \ForAll{$i \in \{1, \dots, n-1\}$}
                     \State $r_i \gets 2 (x_{i+1} - x_{i-1}) - h_{i-1} m_{i-1}$
@@ -357,9 +263,9 @@ country={Brasil}}
                     \State $z_i \gets \frac{\alpha_i - h_{i-1} z_{i-1}}{r_i}$
                 \EndFor
                 
-                \State $r_n \gets 1$
-                \State $z_n \gets 0$
-                \State $c_n \gets 0$
+                \State $r_n \gets h_{n-1} (2 - m_{n-1})$
+                \State $z_n \gets \frac{\alpha_n - h_{n-1} z_{n-1}}{r_n}$
+                \State $c_n \gets z_n$
                 
                 \ForAll{$i \in \{n-1, \dots, 0\}$}
                     \State $c_i \gets z_i - m_i c_{i+1}$
@@ -386,12 +292,8 @@ country={Brasil}}
             \begin{tikzpicture}
                 \begin{axis}[
                     grid=both,
-                    % xmin=0,
-                    % xmax=3000,
-                    % ymin=0,
-                    % ymax=400,
-                    % xlabel = {$Q \; (m^3/d)$},
-                    % ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
+                    xlabel = {$x$},
+                    ylabel = {$f(x)$},
                     legend style={at={(0.60,0.80)}, anchor=east},
                     ]
 
@@ -417,6 +319,8 @@ country={Brasil}}
             \begin{tikzpicture}
                 \begin{axis}[
                     grid=both,
+                    xlabel = {$x$},
+                    ylabel = {$\int_{0}^{x} e^x \,dx \; - \; \int_{0}^{x} S(x) \,dx$},
                     legend style={at={(0.65,0.20)}, anchor=east},
                     ]
                    
@@ -432,7 +336,7 @@ country={Brasil}}
             \label{fig:intexp}
         \end{figure}
         
-        Para realizar o teste proposto foi utilizada uma tabela de VFP do modelo Unisim-II-H \cite{maschio2018case}. A tabela escolhida é de produção e tem os seus parâmetros descritos na Tabela \ref{table:tabvfp}.
+        Para realizar o teste proposto foi utilizada uma das tabela de VFP do modelo Unisim-II-H \cite{maschio2018case}. A tabela escolhida é de produção e tem os seus parâmetros descritos na Tabela \ref{table:tabvfp}.
 
         \begin{table*} 
             \caption{Parâmetros da tabela de VFP utilizada nas comparações. O parâmetro principal (BHP) é em $kgf/cm^2$.}
@@ -450,34 +354,154 @@ country={Brasil}}
             \end{tabular}
         \end{table*}
 
-        A proposta do teste é de verificar se uma interpolação com splines pode ser mais eficiente para estimar valores intermediários que uma interpolação linear, que é o método usualmente utilizado pelo simuladores de fluxo em meios porosos. Para cada uma das 432 combinações de GLR, WCUT, LFG e WHP foram construídas 6 funções interpoladoras dos pontos (LIQ, BHP). A diferença entre estas 6 variações é o ponto que é excluído. Posteriormente o valor de BHP do ponto excluído é estimado com a função interpoladora e comparado com o valor original (Figura \ref{fig:exvfp}). Em todos os testes foram utilizadas splines naturais, pois não há informação sobre a derivada da função que gerou a tabela de VFP. 
+        O teste realizado é o mesmo descrito em \cite{relatoriosplinesnaturais}. Para diferentes combinações dos parâmetros GLR, WCUT, LFG e WHP foram construídas funções interpoladoras dos pontos (LIQ, BHP). Em cada teste um dos pontos (LIQ, BHP) foi excluído. Este mesmo ponto foi posteriormente estimado com a função interpoladora.
+
+        Para usar splines fixas é preciso fornecer a derivada da função a ser aproximada. A estimativa das derivadas nos extremos da função foi feita com os pares de valores conhecidos nos extremos (Figura \ref{fig:exvfp}):
+
+        \begin{align*}
+            f'(x_0) &\approx \frac{y_1-y_0}{x_1-x_0} \beta_0 \\
+            f'(x_n) &\approx \frac{y_n-y_{n-1}}{x_n-x_{n-1}} \beta_n \\
+        \end{align*}
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
                 \begin{axis}[
                     grid=both,
-                    % xmin=0,
-                    % xmax=3000,
-                    % ymin=0,
-                    % ymax=400,
                     xlabel = {$Q \; (m^3/d)$},
-                    ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
+                    ylabel = {$P_{wf} \; (kgf/cm^2)$},
                     legend style={at={(0.40,0.90)}, anchor=east},
                     ]
                    
-                    \addplot[color=black, solid, smooth, thick] table [x=x, y=y] {vfp/P1_Bad.txt};
-                    \addplot[color=black, mark=o, only marks, mark size=2.pt] table [x=x, y=y] {vfp/P1_Bad_True.txt};
-                    \addplot[color=black, mark=*, only marks, mark size=2.pt] coordinates {(400, 383.901761)};
+                    \addplot[color=red, solid, thick] coordinates {(100,413.4655885)(600,406.039331)};
+                    \addplot[color=blue, solid, thick] coordinates {(2000,421.797408)(3400,447.4062115)};
+                    \addplot[color=black, solid, smooth, thick] table [x=x, y=y] {vfp/P1_Ok.txt};
+                    \addplot[color=black, mark=o, only marks, mark size=2.pt] table [x=x, y=y] {vfp/P1_Ok_True.txt};
                     
-                    \legend{Spline, Tabelados, Excluído};
+                    \legend{$\approx f'(x_0)$, $\approx f'(x_n)$};
                 \end{axis}
             \end{tikzpicture}
-            \caption{Spline construída com 5 dos 6 valores de (LIQ,BHP) para uma das combinações de GLR, WCUT, LFG e WHP.}
+            \caption{Aproximação das derivadas nos extremos do domínio.}
             \label{fig:exvfp}
         \end{figure}
+        
+        Como as derivadas foram estimadas utilizando os dois primeiros e os dois últimos pontos de (LIQ, BHP), avaliou-se que não faria sentido avaliar pontos fora do domínio inicial. Desta forma, foram realizados 4 testes para cada combinação dos demais parâmetros, excluindo apenas pontos internos. 
+
+        Os parâmetros $\beta$ foram utilizados para buscar uma melhor estimativa destas derivadas. Foram feitas sensibilidades do erro médio e do desvio padrão do erro em função de $\beta_0$ e $\beta_n$.
+        
+        As Figuras \ref{fig:beta0media} e \ref{fig:beta0devpad} mostram que, como esperado, as estimativas mais afetadas pelo valor de $\beta_0$ são os pontos LIQ=400 e 800. Existe um tendência de redução do erro médio com valores baixos de $\beta_0$. Já o gráfico do desvio padrão dos erros mostra que existe uma região \emph{ótima} aproximadamente entre 1.4 e 2.4. Não existe um valor único que minimiza o desvio padrão dos erros de cada valor de LIQ. Optou-se por usar um valor intermediário: $\beta_0=1.8$. Com este valor os desvios padrão de LIQ=400 e 800 ficam aproximadamente iguais ou melhores que os valores com interpolação linear ou com splines naturais.
+
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$\beta_0$},
+                    ylabel = {Erro médio $(kgf/cm^2)$},
+                    legend style={at={(0.40,0.99)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Beta0, y=Mean400] {vfp/P1_Beta0.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Beta0, y=Mean800] {vfp/P1_Beta0.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Beta0, y=Mean1600] {vfp/P1_Beta0.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=Beta0, y=Mean2400] {vfp/P1_Beta0.txt};
+                    
+                    \addplot[color=black, densely dotted, smooth, thick] table [x=Beta0, y=MeanLin400] {vfp/P1_Beta0.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=Beta0, y=MeanSplNat400] {vfp/P1_Beta0.txt};
+
+                    \addplot[color=red, densely dotted, smooth, thick] table [x=Beta0, y=MeanLin800] {vfp/P1_Beta0.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=Beta0, y=MeanSplNat800] {vfp/P1_Beta0.txt};
+                    
+                    \legend{LIQ=400, LIQ=800, LIQ=1600, LIQ=2400};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Média dos erros de BHP com splines fixas em função do valor de $\beta_0$. Resultados da interpolação linear em pontilhado e splines naturais em tracejado.}
+            \label{fig:beta0media}
+        \end{figure}
+
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$\beta_0$},
+                    ylabel = {Desvio Padrão do Erro $(kgf/cm^2)$},
+                    legend style={at={(0.40,0.99)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Beta0, y=StdErr400] {vfp/P1_Beta0.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Beta0, y=StdErr800] {vfp/P1_Beta0.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Beta0, y=StdErr1600] {vfp/P1_Beta0.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=Beta0, y=StdErr2400] {vfp/P1_Beta0.txt};
+                    
+                    \addplot[color=black, densely dotted, smooth, thick] table [x=Beta0, y=StdErrLin400] {vfp/P1_Beta0.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=Beta0, y=StdErrSplNat400] {vfp/P1_Beta0.txt};
+
+                    \addplot[color=red, densely dotted, smooth, thick] table [x=Beta0, y=StdErrLin800] {vfp/P1_Beta0.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=Beta0, y=StdErrSplNat800] {vfp/P1_Beta0.txt};
+                    
+                    \legend{LIQ=400, LIQ=800, LIQ=1600, LIQ=2400};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Desvio padrão dos erros de BHP com splines fixas em função do valor de $\beta_0$. Resultados da interpolação linear em pontilhado e splines naturais em tracejado.}
+            \label{fig:beta0devpad}
+        \end{figure}
+
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$\beta_n$},
+                    ylabel = {Erro médio $(kgf/cm^2)$},
+                    legend style={at={(0.40,0.99)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Betan, y=Mean400] {vfp/P1_Betan.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Betan, y=Mean800] {vfp/P1_Betan.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Betan, y=Mean1600] {vfp/P1_Betan.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=Betan, y=Mean2400] {vfp/P1_Betan.txt};
+                    
+                    \addplot[color=blue, densely dotted, smooth, thick] table [x=Betan, y=MeanLin1600] {vfp/P1_Betan.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=Betan, y=MeanSplNat1600] {vfp/P1_Betan.txt};
+
+                    \addplot[color=green, densely dotted, smooth, thick] table [x=Betan, y=MeanLin2400] {vfp/P1_Betan.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=Betan, y=MeanSplNat2400] {vfp/P1_Betan.txt};
+                    
+                    \legend{LIQ=400, LIQ=800, LIQ=1600, LIQ=2400};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Média dos erros de BHP com splines fixas em função do valor de $\beta_n$. Resultados da interpolação linear em pontilhado e splines naturais em tracejado.}
+            \label{fig:betanmedia}
+        \end{figure}
+        
+        \begin{figure}[hbt!] 
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$\beta_n$},
+                    ylabel = {Desvio Padrão do Erro $(kgf/cm^2)$},
+                    legend style={at={(0.40,0.99)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Betan, y=StdErr400] {vfp/P1_Betan.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Betan, y=StdErr800] {vfp/P1_Betan.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Betan, y=StdErr1600] {vfp/P1_Betan.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=Betan, y=StdErr2400] {vfp/P1_Betan.txt};
+                    
+                    \addplot[color=blue, densely dotted, smooth, thick] table [x=Betan, y=StdErrLin1600] {vfp/P1_Betan.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=Betan, y=StdErrSplNat1600] {vfp/P1_Betan.txt};
+
+                    \addplot[color=green, densely dotted, smooth, thick] table [x=Betan, y=StdErrLin2400] {vfp/P1_Betan.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=Betan, y=StdErrSplNat2400] {vfp/P1_Betan.txt};
+                    
+                    \legend{LIQ=400, LIQ=800, LIQ=1600, LIQ=2400};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Desvio padrão dos erros de BHP com splines fixas em função do valor de $\beta_n$. Resultados da interpolação linear em pontilhado e splines naturais em tracejado.}
+            \label{fig:betandevpad}
+        \end{figure}
+        
+        
+        Como o pontos conhecidos se aproximam de uma reta para valores altos de LIQ, decidiu-se por utilizar $\beta_n=1$. Para os valores baixos de vazão a variação da derivada é mais brusca, de modo que foram testados três valores de $\beta_0$: 1, 2 e 3. Os melhores resultados foram com $\beta_0=2$ (Figura \ref{fig:errosvfpsplinefixa}). O uso de splines fixas melhorou as estimativas dos pontos excluídos tanto na região de baixas vazões como de alta vazões.
+
+
+
 
                 
-        Dos 6 testes realizados, 2 foram de extrapolações (quando os pontos extremos foram os excluídos). Esta não é uma boa prática. Usualmente o simulador de fluxo irá avisar ao usuário quando estiver extrapolando valores da tabela de VFP, mas não irá parar a simulação. Deste modo, não é incomum acontecer alguma extrapolação dos dados da tabela de VFP durante uma simulação.
+        
         
         As Figuras \ref{fig:errosvfpspline} e \ref{fig:errosvfplinear} mostram uma estatística simplificada dos erros das funções interpoladoras no ponto que foi excluído, para as interpolações com splines e linear, respectivamente. Algumas conclusões podem ser tiradas destes gráficos:
 
@@ -626,14 +650,7 @@ country={Brasil}}
         \label{fig:errosvfplinear}
         \end{figure}
 
-        Uma última tentativa de melhorar o desempenho da interpolação com splines foi usar splines fixas. A estimativa das derivadas nos extremos da função foi feita com os pares de valores conhecidos nos extremos:
-
-        \begin{align*}
-            f'(x_0) &\approx \frac{y_1-y_0}{x_1-x_0} \beta_0 \\
-            f'(x_n) &\approx \frac{y_n-y_{n-1}}{x_n-x_{n-1}} \beta_n \\
-        \end{align*}
-
-        Os parâmetros $\beta$ foram utilizados para buscar uma melhor estimativa destas derivadas. Como o pontos conhecidos se aproximam de uma reta para valores altos de LIQ, decidiu-se por utilizar $\beta_n=1$. Para os valores baixos de vazão a variação da derivada é mais brusca, de modo que foram testados três valores de $\beta_0$: 1, 2 e 3. Os melhores resultados foram com $\beta_0=2$ (Figura \ref{fig:errosvfpsplinefixa}). O uso de splines fixas melhorou as estimativas dos pontos excluídos tanto na região de baixas vazões como de alta vazões.
+        
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
