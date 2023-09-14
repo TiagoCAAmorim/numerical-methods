@@ -766,21 +766,18 @@ void get_data_from_vfp(struct tVFP *vfp, int iGLR, int iWCUT, int iLFG, int iWHP
     }
 }
 
-void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed){
+void test_vfp(char *fname, struct tVFP *vfp, bool extrapolate, bool fixed, double beta0, double betan){
     struct tPoints points;
     struct tTestPoints testPoints;
     struct tspline spline;
     double yTrue;
     double ySpline;
     double yLinear;
-    double fp[100], beta0, betan;
+    double fp[100];
     int n=0;
     int iLIQ;
     FILE* file = fopen(fname, "w");
     int iLIQstart, iLIQend;
-
-    beta0 = 3;
-    betan = 1;
 
     if( extrapolate){
         iLIQstart = 0;
@@ -863,11 +860,15 @@ void tests_vfp_interpolation(){
     sprintf(fname,"%s%s",folder,"P1.inc");
     read_VFP_file(fname, &vfp);
     sprintf(fname,"%s%s",folder,"P1.txt");
-    test_vfp(fname, &vfp, true, false);
+    test_vfp(fname, &vfp, true, false,1,1);
     sprintf(fname,"%s%s",folder,"P1_noExtrap.txt");
-    test_vfp(fname, &vfp, false, false);
-    sprintf(fname,"%s%s",folder,"P1_fixed.txt");
-    test_vfp(fname, &vfp, false, true);
+    test_vfp(fname, &vfp, false, false,1,1);
+    sprintf(fname,"%s%s",folder,"P1_fixed_1.txt");
+    test_vfp(fname, &vfp, false, true,1,1);
+    sprintf(fname,"%s%s",folder,"P1_fixed_2.txt");
+    test_vfp(fname, &vfp, false, true,2,1);
+    sprintf(fname,"%s%s",folder,"P1_fixed_3.txt");
+    test_vfp(fname, &vfp, false, true,3,1);
 
     sprintf(fname,"%s%s", folder, "P1_Ok.txt");
     test_vfp_print_table(fname, &vfp, 1-1, 1-1, 1-1, 3-1, 5-1);
@@ -893,6 +894,53 @@ void tests_vfp_interpolation(){
     test_vfp_print_table(fname, &vfp, 5-1, 4-1, 3-1, 2-1, 6-1);
     sprintf(fname,"%s%s",folder,"P1_ExtrapUpper_true.txt");
     test_vfp_print_table_true(fname, &vfp, 5-1, 4-1, 3-1, 2-1);
+
+
+    sprintf(fname,"%s%s",folder,"P2.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P2.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P3.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P3.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P4.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P4.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P5.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P5.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P6.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P6.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P7.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P7.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P8.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P8.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P9.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P9.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
+    sprintf(fname,"%s%s",folder,"P10.inc");
+    read_VFP_file(fname, &vfp);
+    sprintf(fname,"%s%s",folder,"P10.txt");
+    test_vfp(fname, &vfp, true, false,1,1);
+
 }
 
 int main(){

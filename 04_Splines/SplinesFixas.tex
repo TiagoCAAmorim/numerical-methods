@@ -137,7 +137,7 @@
 %%             country={}}
 %% \fntext[label3]{}
 
-\title{Avaliação do Uso de Splines para Interpolar Tabelas de Fluxo Vertical Multifásico\tnoteref{label_title}}
+\title{Avaliação do Uso de Splines Naturais para Interpolar Tabelas de Fluxo Vertical Multifásico\tnoteref{label_title}}
 \tnotetext[label_title]{Relatório número 4 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
 
 %% use optional labels to link authors explicitly to addresses:
@@ -170,7 +170,7 @@ country={Brasil}}
 
     É uma prática comum da indústria o uso de tabelas de VFP para representar o fluxo multifásico em poços produtores e injetores, e assim conseguir associar condições de fundo (reservatório) com condições de superfície (unidade de produção). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensiva, para adequadamete representar todas as possíveis combinações de parâmetros.
 
-    Pontos intermediários entre os tabelados são usualmente estimados por interpolação linear. Foi comparado o desempenho da interpolação linear contra interpolação com splines naturais para alguns exemplos de tabela de VFP. Os resultados mostraram que a interpolação com splines naturais teve pior desempenho que a interpolação linear. 
+    Pontos intermediários entre os tabelados são usualmente estimados por interpolação linear. Foi comparado o desempenho da interpolação linear contra interpolação com splines para uma tabela de VFP de exemplo. Para os testes realizados os resultados mostraram que a interpolação com splines naturais teve pior desempenho que a interpolação linear.
 
 \end{abstract}
 
@@ -204,9 +204,9 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-    A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). Apesar de ser possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}, o método mais utilizado de realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}.
+    A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). É possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}. Mas o método mais tradicional de realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}.
 
-    As tabelas de VFP representam o comportamento em um poço associando diferentes variáveis de fluxo (vazões) com as pressões nos extremos deste elemento (pressões de fundo e de superfície). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensa, pois é preciso gerar um significativo número de combinações de parâmetros. A interpolação de valores intermediários é usualmente linear \cite{computer2022cmg}\cite{schlumberger2009technical}. Este relatório compara os resultados de interpolação linear com interpolação com splines naturais.
+    As tabelas de VFP representam o comportamento em um poço associando diferentes variáveis de fluxo (vazões) com as pressões nos extremos deste elemento (pressões de fundo e de superfície). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensa, pois é preciso gerar um significativo número de combinações de parâmetros. A interpolação de valores intermediários é usualmente linear \cite{computer2022cmg}\cite{schlumberger2009technical}. Este relatório compara os resultados de interpolação linear com interpolação com splines para um exemplo de tabela de VFP.
 
 \section{Metodologia}
 
@@ -324,31 +324,14 @@ country={Brasil}}
 
     \subsection{Splines}
     
-        Dado um conjunto de $n+1$ pontos ($x_j,y_j \; para \; j=0,1,\ldots,n$), as splines são um método de interpolação que utiliza $n$ equações cúbicas por partes na forma:
+        Dado um conjunto de $n+1$ pontos ($x_i,y_i \; para \; i=0,1,\ldots,n$), as splines são um método de interpolação que utiliza $n$ equações cúbicas por partes na forma:
         
-        \begin{align}
-            S_j(x) = a_j + b_j (x-x_j) + c_j (x-x_j)^2 + d_j (x-x_j)^2& \nonumber \\
-            para \; x_j \le x \le x_{j+1}& \label{eq:splines}
-        \end{align}
+        \begin{align*}
+            S_j(x) = a_j + b_j (x-x_j) + c_j (x-x_j)^2 + d_j (x-x_j)^2& \\
+            para \; x_j \le x \le x_{j+1}&
+        \end{align*}
         
-        Os termos $a_j$, $b_j$, $c_j$ e $d_j$ de \ref{eq:splines} são definidos de forma a garantir que:
-        
-        \begin{itemize}
-            \item Os valores da função interpoladora sejam exatos nos pontos dados:
-            \begin{itemize}
-                \item $S_j(x_j)=y_j$
-                \item $S_j(x_{j+1})=y_{j+1} \; \; para \; j=0,1,\ldots,n-1$ 
-            \end{itemize} 
-            \item Exista continuidade da função interpoladora, da sua derivada primeira e derivada segunda:
-            \begin{itemize}
-                \item $S_j(x_{j+1})=S_{j+1}(x_{j+1})$
-                \item $S'_j(x_{j+1})=S'_{j+1}(x_{j+1})$
-                \item $S''_j(x_{j+1})=S''_{j+1}(x_{j+1}) \; \; para \; j=0,1,\ldots,n-2$ 
-            \end{itemize} 
-        \end{itemize}
-        Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Para as splines naturais é definido que a derivada segunda nos extremos é nula: $S''_0(x_0) = S''_{n-1}(x_n) = 0$.
-        
-        Aplicando as condições impostas ao conjunto de $S_j(x)$, é possível demonstrar que  a solução dos parâmetros de \ref{eq:splines} se resume a resolver um sistema de equações lineares de $c_j$. O sistema de equações lineares resultante é tridiagonal. O código implementado é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines naturais é apresentada no Algoritmo \ref{alg:splines}. 
+        Os termos das equações são definidos de forma a garantir que os valores da função interpoladora ($S(x)$) sejam exatos nos pontos dados ($S(x_i)=y_i$), e que exista continuidade das derivadas primeira e segunda da função interpoladora. Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Foram implementadas duas opções: splines naturais ($S''(x_0)=S''(x_n)=0$) e splines  fixadas ($S'(x_0)=f'(x_0)$ e $S'(x_n)=f'(x_n)$). O código desenvolvido é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines naturais é apresentada no Algoritmo \ref{alg:splines}. 
 
         \begin{algorithm}
             \caption{Splines Naturais}\label{alg:splines}
@@ -392,50 +375,37 @@ country={Brasil}}
         Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
 
         \begin{description}
-            \item[tests\textunderscore splines()] Testa as implementações de splines naturais e splines fixadas em dois exemplos: conjunto de 3 pontos e aproximação da integral da função exponencial (exemplos 1 e 2 do capítulo 3.5 de \cite{burden2016analise}).
+            \item[tests\textunderscore splines()] Testa as implementações de splines naturais e splines fixadas em dois exemplos: conjunto de 3 pontos e aproximação da integral da função exponencial (exemplos 1 a 4 do capítulo 3.5 de \cite{burden2016analise}).
             
             \item[tests\textunderscore vfp\textunderscore interpolation()] Compara o uso de interpolação linear e interpolação com splines naturais e fixas de pontos de uma tabela de VFP.
         \end{description}
 
-        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultado igual ao do livro. Na Figura \ref{fig:trespts} fica evidenciada a derivada segunda nula nos extremos. A Figura \ref{fig:exp} mostra um bom ajuste da função exponencial com as splines naturais. A integral da função exponencial ente 0 e 3 foi aproximada com as splines, com um erro de 2.45\% (Figura \ref{fig:intexp}).
+        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultado igual ao do livro. O exemplo mais interessante é o da função exponencial, que é aproximada por splines nos pontos $x \; \epsilon \; \{0,1, 2, 3\}$ (Figura \ref{fig:exp}). O exemplo demonstra que a aproximação com spline fixada, impondo as derivadas da função original no primeiro ponto e no último ponto, melhora a estimativa da integral no intervalo aproximado por splines (Figura \ref{fig:intexp}).
         
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
                 \begin{axis}[
                     grid=both,
-                    xlabel = {$x$},
-                    ylabel = {$f(x)$},
-                    legend style={at={(0.30,0.85)}, anchor=east},
-                    ]
-                    \addplot[color=black, solid, smooth] table [x=x, y=y] {Ex1.txt};
-                    \addplot[color=black, solid, smooth, dashed] table [x=x, y=dy/dx] {Ex1.txt};
-                    \addplot[color=black, solid, smooth, densely dotted] table [x=x, y=d2y/dx2] {Ex1.txt};
-                    \addplot[color=black, mark=o, only marks, mark size=2.pt] coordinates {
-                        (1,2)
-                        (2,3)
-                        (3,5)};
-                    \legend{$S(x)$, $S'(x)$, $S''(x)$};
-                \end{axis}
-            \end{tikzpicture}
-            \caption{Aproximação com splines de uma função desconhecida a partir de três pontos.}
-            \label{fig:trespts}
-        \end{figure}
-
-        \begin{figure}[hbt!] 
-            \begin{tikzpicture}
-                \begin{axis}[
-                    grid=both,
-                    xlabel = {$x$},
-                    ylabel = {$f(x)$},
+                    % xmin=0,
+                    % xmax=3000,
+                    % ymin=0,
+                    % ymax=400,
+                    % xlabel = {$Q \; (m^3/d)$},
+                    % ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
                     legend style={at={(0.60,0.80)}, anchor=east},
                     ]
-                    \addplot [color=black, domain=0:3.0, smooth, thick, dashed] { exp(x) };
-                    \addplot[color=black, solid, smooth] table [x=x, y=y] {Ex2.txt};
+
+                    \addplot [domain=0:3.0, smooth, thick] { exp(x) };
+                    
+                    \addplot[color=blue, solid, smooth] table [x=x, y=y] {Ex2.txt};
+                    \addplot[color=red, solid, smooth] table [x=x, y=y] {Ex4.txt};
+                    
                     \addplot[color=black, mark=o, only marks, mark size=2.pt] coordinates {
                         (0,1)
                         (1,2.718281828)
                         (2,7.389056099)
                         (3,20.08553692)};
+                    
                     \legend{$f(x)=e^x$, Spline Natural, Spline Fixada};
                 \end{axis}
             \end{tikzpicture}
@@ -447,22 +417,25 @@ country={Brasil}}
             \begin{tikzpicture}
                 \begin{axis}[
                     grid=both,
-                    xlabel = {$x$},
-                    ylabel = {$\int_{0}^{x} e^x \,dx \; - \; \int_{0}^{x} S(x) \,dx$},
                     legend style={at={(0.65,0.20)}, anchor=east},
                     ]
-                    \addplot[color=black, solid, smooth] table [x=x, y=eNatural] {Error_Ex2_4.txt};
+                   
+                    \addplot[color=blue, solid, smooth] table [x=x, y=eNatural] {Error_Ex2_4.txt};
+                    \addplot[color=red, solid, smooth] table [x=x, y=eFixed] {Error_Ex2_4.txt};
+                    
                     \addplot[color=black, mark=o, only marks, mark size=2.pt] coordinates {(0,0)(1,0)(2,0)(3,0)};
+                    
+                    \legend{Erro Spline Natural, Erro Spline Fixada};
                 \end{axis}
             \end{tikzpicture}
-            \caption{Erro da integral da aproximação com splines naturais da função exponencial, entre 0 e $x$.}
+            \caption{Erro da integral das aproximações com splines da função exponencial, entre 0 e $x$.}
             \label{fig:intexp}
         \end{figure}
         
-        Para realizar o teste proposto foram utilizadas tabelas de VFP do modelo Unisim-II-H \cite{maschio2018case}. Todas as tabelas testadas são de produção. Os parâmetros de entrada são os mesmo em todas as tabelas de VFP (Tabela \ref{table:tabvfp}).
+        Para realizar o teste proposto foi utilizada uma tabela de VFP do modelo Unisim-II-H \cite{maschio2018case}. A tabela escolhida é de produção e tem os seus parâmetros descritos na Tabela \ref{table:tabvfp}.
 
         \begin{table*} 
-            \caption{Parâmetros das tabelas de VFP do modelo Unisim-II-H. O parâmetro principal (BHP) é em $kgf/cm^2$.}
+            \caption{Parâmetros da tabela de VFP utilizada nas comparações. O parâmetro principal (BHP) é em $kgf/cm^2$.}
             \label{table:tabvfp}
             \begin{tabular}{ l l c c c c }
                 \hline
@@ -477,12 +450,16 @@ country={Brasil}}
             \end{tabular}
         \end{table*}
 
-        A proposta do teste realizado foi de verificar se uma interpolação com splines pode ser mais eficiente para estimar valores intermediários que uma interpolação linear, que é o método usualmente utilizado pelo simuladores de fluxo em meios porosos. Para cada uma das 432 combinações de GLR, WCUT, LFG e WHP foram construídas 6 funções interpoladoras dos pontos (LIQ, BHP). A diferença entre estas 6 variações é o ponto que é excluído. Posteriormente o valor de BHP do ponto excluído é estimado com a função interpoladora e comparado com o valor original (Figura \ref{fig:exvfp}). Em todos os testes foram utilizadas splines naturais, pois não há informação sobre a derivada das funções que geraram as tabelas de VFP. 
+        A proposta do teste é de verificar se uma interpolação com splines pode ser mais eficiente para estimar valores intermediários que uma interpolação linear, que é o método usualmente utilizado pelo simuladores de fluxo em meios porosos. Para cada uma das 432 combinações de GLR, WCUT, LFG e WHP foram construídas 6 funções interpoladoras dos pontos (LIQ, BHP). A diferença entre estas 6 variações é o ponto que é excluído. Posteriormente o valor de BHP do ponto excluído é estimado com a função interpoladora e comparado com o valor original (Figura \ref{fig:exvfp}). Em todos os testes foram utilizadas splines naturais, pois não há informação sobre a derivada da função que gerou a tabela de VFP. 
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
                 \begin{axis}[
                     grid=both,
+                    % xmin=0,
+                    % xmax=3000,
+                    % ymin=0,
+                    % ymax=400,
                     xlabel = {$Q \; (m^3/d)$},
                     ylabel = {$P_{wf} \; (kgf/cm^2)/(m^3/d)$},
                     legend style={at={(0.40,0.90)}, anchor=east},
@@ -492,25 +469,24 @@ country={Brasil}}
                     \addplot[color=black, mark=o, only marks, mark size=2.pt] table [x=x, y=y] {vfp/P1_Bad_True.txt};
                     \addplot[color=black, mark=*, only marks, mark size=2.pt] coordinates {(400, 383.901761)};
                     
-                    \legend{Spline, Incluídos, Excluído};
+                    \legend{Spline, Tabelados, Excluído};
                 \end{axis}
             \end{tikzpicture}
-            \caption{Spline construída com 5 dos 6 valores de (LIQ,BHP) para uma das combinações de GLR, WCUT, LFG e WHP da tabela de VFP P1.}
+            \caption{Spline construída com 5 dos 6 valores de (LIQ,BHP) para uma das combinações de GLR, WCUT, LFG e WHP.}
             \label{fig:exvfp}
         \end{figure}
+
                 
         Dos 6 testes realizados, 2 foram de extrapolações (quando os pontos extremos foram os excluídos). Esta não é uma boa prática. Usualmente o simulador de fluxo irá avisar ao usuário quando estiver extrapolando valores da tabela de VFP, mas não irá parar a simulação. Deste modo, não é incomum acontecer alguma extrapolação dos dados da tabela de VFP durante uma simulação.
         
-        As Figuras \ref{fig:errosvfpspline}, \ref{fig:errosvfplinear} e \ref{fig:desvpadvfp} mostram uma estatística simplificada dos erros das funções interpoladoras no ponto que foi excluído, para as interpolações com splines e linear, respectivamente. Algumas conclusões podem ser tiradas destes gráficos:
+        As Figuras \ref{fig:errosvfpspline} e \ref{fig:errosvfplinear} mostram uma estatística simplificada dos erros das funções interpoladoras no ponto que foi excluído, para as interpolações com splines e linear, respectivamente. Algumas conclusões podem ser tiradas destes gráficos:
 
         \begin{itemize}
             \item Não há significativa vantagem em utilizar interpolação com splines naturais em comparação com a interpolação linear. Na faixa intermediária (LIQ=800), a interpolação linear teve resultados melhores que as splines naturais.
             \item Os maiores erros estão associados a quando as funções interpoladoras são utilizadas para extrapolar valores baixos de vazão (LIQ=200).
             \item Para valores altos de vazão (LIQ=1600 e LIQ=2400) as funções interpoladoras tem um menor erro associado, indicando que esta região tem uma forma mais próxima de uma reta. Até mesmo quando as funções extrapolam (LIQ=3200), os erros são relativamente baixos.
-            \item A maior dificuldade de interpolação é na região de vazões baixas (LIQ=400), notadamente associado à grande variação na derivada da função original, como no exemplo da Figura \ref{fig:exvfp}.
+            \item A maior dificuldade de interpolação é na região de vazões baixas (LIQ=400), notadamente associado à grande variação na derivada dos pontos, como no exemplo da Figura \ref{fig:exvfp}.
         \end{itemize}
-
-        Os testes foram aplicados a todas as tabelas de VFP do modelo Unisim-II-H, e os resultados foram todos similares.
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
@@ -650,41 +626,71 @@ country={Brasil}}
         \label{fig:errosvfplinear}
         \end{figure}
 
+        Uma última tentativa de melhorar o desempenho da interpolação com splines foi usar splines fixas. A estimativa das derivadas nos extremos da função foi feita com os pares de valores conhecidos nos extremos:
+
+        \begin{align*}
+            f'(x_0) &\approx \frac{y_1-y_0}{x_1-x_0} \beta_0 \\
+            f'(x_n) &\approx \frac{y_n-y_{n-1}}{x_n-x_{n-1}} \beta_n \\
+        \end{align*}
+
+        Os parâmetros $\beta$ foram utilizados para buscar uma melhor estimativa destas derivadas. Como o pontos conhecidos se aproximam de uma reta para valores altos de LIQ, decidiu-se por utilizar $\beta_n=1$. Para os valores baixos de vazão a variação da derivada é mais brusca, de modo que foram testados três valores de $\beta_0$: 1, 2 e 3. Os melhores resultados foram com $\beta_0=2$ (Figura \ref{fig:errosvfpsplinefixa}). O uso de splines fixas melhorou as estimativas dos pontos excluídos tanto na região de baixas vazões como de alta vazões.
+
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
-                \begin{axis}[
-                    grid=both,
-                    xlabel = {LIQ},
-                    ylabel = {Desvio Padrão do Erro},
-                    legend style={at={(0.60,0.80)}, anchor=east},
+                \begin{axis}
+                    [
+                    ytick={1,2,3,4},
+                    yticklabels={LIQ=400, LIQ=800, LIQ=1600, LIQ=2400},
+                    xmin=-60,
+                    xmax=100,
                     ]
-                    \addplot[color=black, mark=o, solid] coordinates {
-                        (200, 29.92065655)
-                        (400, 17.25422076)
-                        (800, 21.99005368)
-                        (1600, 6.825466251)
-                        (2400, 3.109893657)
-                        (3200, 4.947298801)};
-                    \addplot[color=black, mark=*, solid, densely dotted] coordinates {
-                        (200, 30.62934547)
-                        (400, 20.41956365)
-                        (800, 8.52135957)
-                        (1600,5.981079347)
-                        (2400,2.473649401)
-                        (3200,4.947298801)};
-                    \legend{Splines, Linear};
+                    \addplot+[
+                    boxplot prepared={
+                        median=-12.14636815,
+                        upper quartile=7.41578987425,
+                        lower quartile=-16.2464021675,
+                        upper whisker=19.49765827,
+                        lower whisker=-21.90170097,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=11.8157386,
+                        upper quartile=17.961895225,
+                        lower quartile=8.40325290275,
+                        upper whisker=32.299858708375,
+                        lower whisker=1.631886171,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=-2.2042592405,
+                        upper quartile=-0.821767625025,
+                        lower quartile=-4.0795207445,
+                        upper whisker=2.704736438,
+                        lower whisker=-8.9661504237125,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
+                    \addplot+[
+                    boxplot prepared={
+                        median=-11.627703145,
+                        upper quartile=-9.615022115,
+                        lower quartile=-13.275439205,
+                        upper whisker=-4.688102678,
+                        lower whisker=-18.76606484,
+                    }, fill=gray, draw=black, solid
+                    ] coordinates {};
                 \end{axis}
             \end{tikzpicture}
-            \caption{Desvio padrão dos erros na estimativa de BHP em função do ponto excluído.}
-            \label{fig:desvpadvfp}
+        \caption{Erros na estimativa de BHP com splines fixas, em função do valor de LIQ excluído.}
+        \label{fig:errosvfpsplinefixa}
         \end{figure}
-        
 
         O código foi implementado em C e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/04_Splines/04_splines.c}{https://github.com/Tiago CAAmorim/numerical-methods}.
 
     \section{Conclusão}
     
-        O desempenho de splines naturais para interpolar valores de pressão de fundo a partir de uma tabela de VFP foi, em geral, pior que o da interpolação linear. Ambos métodos apresentaram dificuldade em estimar valores na região de baixas vazões.
+        O desempenho de splines naturais para interpolar valores de pressão de fundo a partir de uma tabela de VFP foi, em geral, pior que o da interpolação linear. Ambos métodos apresentaram dificuldade em estimar corretamente valores na região de baixas vazões. Uma primeira tentativa de uso de splines fixas se mostrou promissora. Foram utilizados os próprios pontos da tabela de VFP original para estimar as derivadas nos extremos da função, gerando resultados superiores aos da interpolação linear ou com splines naturais.
 
     % \label{}
     
