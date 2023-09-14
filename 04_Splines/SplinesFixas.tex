@@ -170,7 +170,7 @@ country={Brasil}}
 
     A construção de curvas de fluxo vertical multifásico para utilizar em simulação de fluxo em meios porosos pode ser uma tarefa computacionalmente custosa. Como uma tabela estática irá substituir um simulador de fluxo multifásico, é preciso um número adequado de parâmetros de entrada. A nuvem de pontos da tabela deve garantir que os valores a serem interpolados em uma simulação de fluxo em meios porosos sejam próximos dos valores reais.
 
-    Tradicionalmente os simuladores de fluxo em meio poroso utilizam interpolação linear entre os pontos tabelados. Um primeiro estudo verificou que usar splines naturais para interpolar os valores tabelados não resulta em melhora das estimativas. Um segundo estudo utilizou os dados tabelados para estimar valores para as derivadas da função $P_{wf}=f(Q)$ no extremos do domínio, e assim poder construir splines fixadas. Os resultados mostraram que as splines fixadas conseguiram resultados melhores que os da interpolação com splines naturais ou linear.
+    Tradicionalmente os simuladores de fluxo em meio poroso utilizam interpolação linear entre os pontos tabelados. Um primeiro estudo verificou que usar splines naturais para interpolar os valores tabelados não resulta em melhora das estimativas. Este segundo estudo utilizou os dados tabelados para estimar valores para as derivadas da função $P_{wf}=f(Q)$ no extremos do domínio, e assim poder construir splines fixadas. Os resultados mostraram que as splines fixadas conseguiram resultados melhores que os da interpolação com splines naturais ou linear.
     
 \end{abstract}
 
@@ -206,23 +206,23 @@ country={Brasil}}
 
     As tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Ou VLP - \emph{vertical lift performance}.}, são a abordagem mais usual para acoplar uma simulação de fluxo em meios porosos com os limites da unidade de produção.
 
-    As tabelas de VFP associam diferentes variáveis de fluxo (vazões) com as pressões nos extremos do elemento modelado\footnote{Poço, pedaço de linha de produção, \emph{manifold} etc.}. As tabelas são geradas com um número limitado de pontos, e invariavelmente o simulador de fluxo terá que buscar valores para condições de fluxo que não estão na tabela. O mais comum é realizar interpolação linear entre os pontos da tabela \cite{computer2022cmg}\cite{schlumberger2009technical}. Uma avaliação anterior avaliou o uso de splines naturais para interpolar valores em tabelas de VFP, e concluiu que, para os testes realizados, a interpolação linear é melhor \cite{relatoriosplinesnaturais}. Este relatório revisita os mesmos exemplos e avalia a interpolação com splines fixas.
+    As tabelas de VFP associam diferentes variáveis de fluxo (vazões) com as pressões nos extremos do elemento modelado\footnote{Poço, pedaço de linha de produção, \emph{manifold} etc.}. As tabelas são geradas com um número limitado de pontos, e invariavelmente o simulador de fluxo terá que buscar valores para condições de fluxo que não estão na tabela. O mais comum é realizar interpolação linear entre os pontos da tabela \cite{computer2022cmg}\cite{schlumberger2009technical}. Um estudo anterior avaliou o uso de splines naturais para interpolar valores em tabelas de VFP, e concluiu que, para os testes realizados, a interpolação linear é melhor \cite{relatoriosplinesnaturais}. Este relatório revisita os mesmos exemplos e avalia a interpolação com splines fixas.
 
 \section{Metodologia}
 
     \subsection{Tabelas de Fluxo Vertical Multifásico}
 
-        Os simuladores de fluxo em meio poroso utilizam as tabelas de VFP para poder relacionar condições de fluxo de fundo e de superfície. O comum é que a tabela de VFP relacione pressão de cabeça (WHP\footnote{WHP é \emph{Well Head Pressure}.}) com as demais variáveis associadas ao poço (e que são calculadas pelo simulador de fluxo em meios porosos): 
+        Os simuladores de fluxo em meio poroso utilizam as tabelas de VFP para poder relacionar condições de fluxo de fundo e de superfície. O usual é que a tabela de VFP relacione pressão de fundo ($P_{wf}$\footnote{Ou BHP, que é \emph{Bottom Head Pressure}.}) com as demais variáveis associadas ao poço: 
         
         \begin{itemize}
-            \item Pressão de fundo: $P_{wf}$ ou BHP\footnote{BHP é \emph{Bottom Head Pressure}.}.
+            \item Pressão de cabeça: WHP\footnote{WHP é \emph{Well Head Pressure}.}.
             \item Vazão: óleo, gás, água ou líquido\footnote{Respectivamente $Q_o$, $Q_g$, $Q_w$,$Q_{liq}$.}.
             \item Fração de água: WCUT\footnote{WCUT é \emph{Water Cut} ou corte de água ($Q_w/Q_{liq}$)} ou RAO\footnote{RAO é razão água óleo ($Q_g/Q_o$).}
             \item Fração de gás: RGL\footnote{RGL é razão gás líquido ($Q_g/Q_{liq}$).} ou RGO\footnote{RGO é razão gás óleo ($Q_g/Q_o$).}..
             \item Vazão de injeção de \emph{gas-lift}.
         \end{itemize}
 
-        No simulador de fluxo um poço terá sempre uma condição de produção especificada: vazão, pressão de fundo, pressão de cabeça ou vazão de grupo. Enquanto estiver em uma determinada condição de produção, os demais limitantes devem ser observados: pressão de fundo mínima, pressão de cabeça mínima, vazão de líquido máxima, vazão de óleo máxima, vazão de gás máxima\footnote{Para o caso de um produtor.}. Se algum limite não for satisfeito, o simulador irá mudar o controle de poço para o limite da condição violada e buscar uma nova solução para o problema. Este processo é realizado a cada passo de tempo da simulação, e a tabela de VFP será utilizada toda vez que for necessário calcular a pressão de cabeça do poço.
+        No simulador de fluxo um poço terá sempre uma condição de produção especificada: vazão, pressão de fundo, pressão de cabeça ou vazão de grupo. Enquanto estiver em uma determinada condição de produção, os demais limitantes devem ser observados: pressão de fundo mínima, pressão de cabeça mínima, vazão de líquido máxima, vazão de óleo máxima, vazão de gás máxima\footnote{Para o caso de um produtor.}. Se algum limite não for satisfeito, o simulador irá mudar o controle do poço para o limite da condição violada e buscar uma nova solução para o problema. Este processo é realizado a cada passo de tempo da simulação, e a tabela de VFP será utilizada toda vez que for necessário calcular a pressão de cabeça do poço.
 
     \subsection{Splines}
     
@@ -233,7 +233,7 @@ country={Brasil}}
             para \; x_j \le x \le x_{j+1}&
         \end{align*}
         
-        Os termos das equações são definidos de forma a garantir que os valores da função interpoladora ($S(x)$) sejam exatos nos pontos dados ($S(x_i)=y_i$), e que exista continuidade da função interpoladora, e de suas derivadas primeira e segunda. Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Splines naturais tem derivada segunda nula nos extremos do domínio ($S''(x_0)=S''(x_n)=0$). Já as splines fixadas tem as derivadas primeiras nos extremos do domínio definidas: $S'(x_0)=f'(x_0)$ e $S'(x_n)=f'(x_n)$. O código desenvolvido para as splines fixas é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines naturais é apresentada no Algoritmo \ref{alg:splines}. 
+        Os termos das equações são definidos de forma a garantir que os valores da função interpoladora ($S(x)$) sejam exatos nos pontos dados ($S(x_i)=y_i$), e que exista continuidade da função interpoladora, e de suas derivadas primeira e segunda (mais detalhes em \cite{relatoriosplinesnaturais}). Duas condições adicionais precisam ser definidas para conseguir definir todos os termos da função interpoladora. Splines naturais tem derivada segunda nula nos extremos do domínio ($S''(x_0)=S''(x_n)=0$). Já as splines fixadas tem as derivadas primeiras nos extremos do domínio definidas: $S'(x_0)=f'(x_0)$ e $S'(x_n)=f'(x_n)$. O código desenvolvido para as splines fixas é o apresentado em \cite{burden2016analise}. Uma forma simplificada do algoritmo das splines fixas é apresentada no Algoritmo \ref{alg:splines}. 
 
         \begin{algorithm}
             \caption{Splines Fixas}\label{alg:splines}
@@ -286,7 +286,7 @@ country={Brasil}}
             \item[tests\textunderscore vfp\textunderscore interpolation()] Compara o uso de interpolação linear e interpolação com splines naturais e fixas de pontos de uma tabela de VFP.
         \end{description}
 
-        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultado igual ao do livro. O exemplo mais interessante é o da função exponencial, que é aproximada por splines nos pontos $x \; \epsilon \; \{0,1, 2, 3\}$ (Figura \ref{fig:exp}). O exemplo demonstra que a aproximação com spline fixada, impondo as derivadas da função original no primeiro ponto e no último ponto, melhora a estimativa da integral no intervalo aproximado por splines (Figura \ref{fig:intexp}).
+        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultados iguais aos do livro. O exemplo mais interessante é o da função exponencial, que é aproximada por splines nos pontos $x \; \epsilon \; \{0,1, 2, 3\}$ (Figura \ref{fig:exp}). O exemplo demonstra que a aproximação com spline fixada, impondo as derivadas da função original no primeiro ponto e no último ponto, melhora a estimativa da integral no intervalo aproximado por splines (Figura \ref{fig:intexp}).
         
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
@@ -336,7 +336,7 @@ country={Brasil}}
             \label{fig:intexp}
         \end{figure}
         
-        Para realizar o teste proposto foi utilizada uma das tabela de VFP do modelo Unisim-II-H \cite{maschio2018case}. A tabela escolhida é de produção e tem os seus parâmetros descritos na Tabela \ref{table:tabvfp}.
+        Para realizar o teste proposto foi utilizada uma das tabelas de VFP do modelo Unisim-II-H \cite{maschio2018case}. A tabela escolhida é de produção e tem os seus parâmetros descritos na Tabela \ref{table:tabvfp}.
 
         \begin{table*} 
             \caption{Parâmetros da tabela de VFP utilizada nas comparações. O parâmetro principal (BHP) é em $kgf/cm^2$.}
@@ -442,6 +442,8 @@ country={Brasil}}
             \label{fig:beta0devpad}
         \end{figure}
 
+        O parâmetro $\beta_n$ tem impacto significativo apenas nos valores de LIQ=1600 e 2400 (Figura \ref{fig:betanmedia}). O valor ótimo para a média do erro de LIQ=2400 é aproximadamente 0.9, enquanto que para LIQ=1600 o ótimo é em valores menores de $\beta_n$. A Figura \ref{fig:betandevpad} mostra que apenas o desvio padrão de LIQ=2400 é sensível ao valor de $\beta_n$. Foi utilizado $\beta_n=0.9$. Com este valor o erro médio se aproxima de zero, e o desvio padrão do erro de LIQ=2400 é mínimo, ficando menor que o da interpolação linear ou com splines naturais.
+        
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
                 \begin{axis}[
@@ -495,41 +497,17 @@ country={Brasil}}
         \end{figure}
         
         
-        Como o pontos conhecidos se aproximam de uma reta para valores altos de LIQ, decidiu-se por utilizar $\beta_n=1$. Para os valores baixos de vazão a variação da derivada é mais brusca, de modo que foram testados três valores de $\beta_0$: 1, 2 e 3. Os melhores resultados foram com $\beta_0=2$ (Figura \ref{fig:errosvfpsplinefixa}). O uso de splines fixas melhorou as estimativas dos pontos excluídos tanto na região de baixas vazões como de alta vazões.
-
-
-
-
-                
+        As Figuras \ref{fig:errosvfpspline}, \ref{fig:errosvfplinear} e \ref{fig:errosvfpsplinefixa} mostram que as splines fixas com $\beta_0$ e $\beta_n$ \emph{otimizados}\footnote{$\beta_0=1.8$ e $\beta_n=0.9$.} alcançaram, em geral, resultados melhores que as splines naturais ou interpolação linear. Em comparação com a interpolação linear, o ganho foi mais significativo em LIQ=400, que é a região em que a variação da derivada da função é mais forte. Nesta região a imposição da derivada teve impacto positivo. Por outro lado, em LIQ=800 a spline fixa apresentou resultados ruins, com o erro médio \emph{longe} do zero.  
         
-        
-        As Figuras \ref{fig:errosvfpspline} e \ref{fig:errosvfplinear} mostram uma estatística simplificada dos erros das funções interpoladoras no ponto que foi excluído, para as interpolações com splines e linear, respectivamente. Algumas conclusões podem ser tiradas destes gráficos:
-
-        \begin{itemize}
-            \item Não há significativa vantagem em utilizar interpolação com splines naturais em comparação com a interpolação linear. Na faixa intermediária (LIQ=800), a interpolação linear teve resultados melhores que as splines naturais.
-            \item Os maiores erros estão associados a quando as funções interpoladoras são utilizadas para extrapolar valores baixos de vazão (LIQ=200).
-            \item Para valores altos de vazão (LIQ=1600 e LIQ=2400) as funções interpoladoras tem um menor erro associado, indicando que esta região tem uma forma mais próxima de uma reta. Até mesmo quando as funções extrapolam (LIQ=3200), os erros são relativamente baixos.
-            \item A maior dificuldade de interpolação é na região de vazões baixas (LIQ=400), notadamente associado à grande variação na derivada dos pontos, como no exemplo da Figura \ref{fig:exvfp}.
-        \end{itemize}
-
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
                 \begin{axis}
                     [
                     ytick={1,2,3,4,5,6},
-                    yticklabels={LIQ=200, LIQ=400, LIQ=800, LIQ=1600, LIQ=2400, LIQ=3200},
+                    yticklabels={LIQ=400, LIQ=800, LIQ=1600, LIQ=2400},
                     xmin=-60,
                     xmax=100,
                     ]
-                    \addplot+[
-                    boxplot prepared={
-                        median=-3.0099283075,
-                        upper quartile=34.8511285625,
-                        lower quartile=-11.661481645,
-                        upper whisker=87.37028804,
-                        lower whisker=-18.88029125,
-                    }, fill=gray, draw=black, solid
-                    ] coordinates {};
                     \addplot+[
                     boxplot prepared={
                         median=1.098113864,
@@ -566,15 +544,6 @@ country={Brasil}}
                         lower whisker=-2.678721812,
                     }, fill=gray, draw=black, solid
                     ] coordinates {};
-                    \addplot+[
-                    boxplot prepared={
-                        median=-3.1343745,
-                        upper quartile=2.18892375,
-                        lower quartile=-6.062954,
-                        upper whisker=8.848972,
-                        lower whisker=-13.206596,
-                    }, fill=gray, draw=black, solid
-                    ] coordinates {};
                 \end{axis}
             \end{tikzpicture}
         \caption{Erros na estimativa de BHP com splines naturais, em função do valor de LIQ excluído.}
@@ -586,19 +555,10 @@ country={Brasil}}
                 \begin{axis}
                     [
                     ytick={1,2,3,4,5,6},
-                    yticklabels={LIQ=200, LIQ=400, LIQ=800, LIQ=1600, LIQ=2400, LIQ=3200},
+                    yticklabels={LIQ=400, LIQ=800, LIQ=1600, LIQ=2400},
                     xmin=-60,
                     xmax=100,
                     ]
-                    \addplot+[
-                    boxplot prepared={
-                        median=-3.55133075,
-                        upper quartile=35.260269875,
-                        lower quartile=-12.593767875,
-                        upper whisker=88.392209,
-                        lower whisker=-20.082742,
-                    }, fill=gray, draw=black, solid
-                    ] coordinates {};
                     \addplot+[
                     boxplot prepared={
                         median=2.3675538335,
@@ -635,22 +595,11 @@ country={Brasil}}
                         lower whisker=-4.424486,
                     }, fill=gray, draw=black, solid
                     ] coordinates {};
-                    \addplot+[
-                    boxplot prepared={
-                        median=-3.1343745,
-                        upper quartile=2.18892375,
-                        lower quartile=-6.062954,
-                        upper whisker=8.848972,
-                        lower whisker=-13.206596,
-                    }, fill=gray, draw=black, solid
-                    ] coordinates {};
                 \end{axis}
             \end{tikzpicture}
         \caption{Erros na estimativa de BHP com interpolação linear, em função do valor de LIQ excluído.}
         \label{fig:errosvfplinear}
         \end{figure}
-
-        
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
@@ -663,43 +612,43 @@ country={Brasil}}
                     ]
                     \addplot+[
                     boxplot prepared={
-                        median=-12.14636815,
-                        upper quartile=7.41578987425,
-                        lower quartile=-16.2464021675,
-                        upper whisker=19.49765827,
-                        lower whisker=-21.90170097,
+                        median=-9.5158550825,
+                        upper quartile=3.602819047,
+                        lower quartile=-12.4230881375,
+                        upper whisker=10.53613859,
+                        lower whisker=-16.64090699,
                     }, fill=gray, draw=black, solid
                     ] coordinates {};
                     \addplot+[
                     boxplot prepared={
-                        median=11.8157386,
-                        upper quartile=17.961895225,
-                        lower quartile=8.40325290275,
-                        upper whisker=32.299858708375,
-                        lower whisker=1.631886171,
+                        median=9.8030380835,
+                        upper quartile=19.73523468,
+                        lower quartile=6.3020903365,
+                        upper whisker=39.88495119525,
+                        lower whisker=1.586584701,
                     }, fill=gray, draw=black, solid
                     ] coordinates {};
                     \addplot+[
                     boxplot prepared={
-                        median=-2.2042592405,
-                        upper quartile=-0.821767625025,
-                        lower quartile=-4.0795207445,
-                        upper whisker=2.704736438,
-                        lower whisker=-8.9661504237125,
+                        median=-6.2403972465,
+                        upper quartile=-3.74610976575,
+                        lower quartile=-7.98734292575,
+                        upper whisker=-0.4385887618,
+                        lower whisker=-13.70546997,
                     }, fill=gray, draw=black, solid
                     ] coordinates {};
                     \addplot+[
                     boxplot prepared={
-                        median=-11.627703145,
-                        upper quartile=-9.615022115,
-                        lower quartile=-13.275439205,
-                        upper whisker=-4.688102678,
-                        lower whisker=-18.76606484,
+                        median=0.2757144176,
+                        upper quartile=0.896100179675,
+                        lower quartile=-0.387540364275,
+                        upper whisker=2.632459095,
+                        lower whisker=-2.3130011802,
                     }, fill=gray, draw=black, solid
                     ] coordinates {};
                 \end{axis}
             \end{tikzpicture}
-        \caption{Erros na estimativa de BHP com splines fixas, em função do valor de LIQ excluído.}
+        \caption{Erros na estimativa de BHP com splines fixas (com $\beta_0=1.8$ e $\beta_n=0.9$), em função do valor de LIQ excluído.}
         \label{fig:errosvfpsplinefixa}
         \end{figure}
 
@@ -707,7 +656,7 @@ country={Brasil}}
 
     \section{Conclusão}
     
-        O desempenho de splines naturais para interpolar valores de pressão de fundo a partir de uma tabela de VFP foi, em geral, pior que o da interpolação linear. Ambos métodos apresentaram dificuldade em estimar corretamente valores na região de baixas vazões. Uma primeira tentativa de uso de splines fixas se mostrou promissora. Foram utilizados os próprios pontos da tabela de VFP original para estimar as derivadas nos extremos da função, gerando resultados superiores aos da interpolação linear ou com splines naturais.
+        O desempenho de splines fixas para interpolar valores de pressão de fundo a partir de uma tabela de VFP foi, em geral, melhor que o da interpolação linear. A imposição de aproximações das derivadas nos extremos do domínio teve impacto positivo na redução da variabilidade dos erros. A diferença para a interpolação linear não parece ser significativa a ponto de justificar a utilização de um método de interpolação muito mais custoso computacionalmente que a interpolação linear.
 
     % \label{}
     

@@ -1012,6 +1012,10 @@ void tests_vfp_interpolation(){
         printf("%i. Betan = %g\n", i, betan);
         test_vfp(fname, &vfp, false, true,1.8,betan);
     }
+
+    sprintf(fname,"%s%s",folder,"P1_fixed.txt");
+    test_vfp(fname, &vfp, false, true,1.8,0.9);
+
 }
 
 int main(){

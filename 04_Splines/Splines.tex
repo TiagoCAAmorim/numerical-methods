@@ -168,7 +168,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-    É uma prática comum da indústria o uso de tabelas de VFP para representar o fluxo multifásico em poços produtores e injetores, e assim conseguir associar condições de fundo (reservatório) com condições de superfície (unidade de produção). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensiva, para adequadamete representar todas as possíveis combinações de parâmetros.
+    É uma prática comum nos simuladores de fluxo em meio poroso da indústria do petróleo o uso de tabelas de VFP para representar o fluxo multifásico em poços produtores e injetores, e assim conseguir associar condições de fundo (reservatório) com condições de superfície (unidade de produção). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensiva, para adequadamete representar todas as possíveis combinações de parâmetros.
 
     Pontos intermediários entre os tabelados são usualmente estimados por interpolação linear. Foi comparado o desempenho da interpolação linear contra interpolação com splines naturais para alguns exemplos de tabela de VFP. Os resultados mostraram que a interpolação com splines naturais teve pior desempenho que a interpolação linear. 
 
@@ -204,19 +204,19 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-    A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). Apesar de ser possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}, o método mais utilizado de realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}.
+    A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). Apesar de ser possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}, o método mais utilizado para realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}.
 
-    As tabelas de VFP representam o comportamento em um poço associando diferentes variáveis de fluxo (vazões) com as pressões nos extremos deste elemento (pressões de fundo e de superfície). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensa, pois é preciso gerar um significativo número de combinações de parâmetros. A interpolação de valores intermediários é usualmente linear \cite{computer2022cmg}\cite{schlumberger2009technical}. Este relatório compara os resultados de interpolação linear com interpolação com splines naturais.
+    As tabelas de VFP representam o comportamento em um poço associando diferentes variáveis de fluxo (vazões) com as pressões nos extremos deste elemento (pressões de fundo e de superfície). A construção das tabelas de VFP pode ser uma tarefa computacionalmente intensa, pois é preciso gerar um significativo número de combinações de parâmetros. A interpolação de valores intermediários é usualmente linear \cite{computer2022cmg}\cite{schlumberger2009technical}. Este relatório compara os resultados de interpolação linear e interpolação com splines naturais.
 
 \section{Metodologia}
 
     \subsection{Tabelas de Fluxo Vertical Multifásico}
 
-        Do \emph{ponto de vista} do reservatório, diversos parâmetros irão influenciar o potencial de produção (ou injeção de um poço):
+        Do \emph{ponto de vista} do reservatório, diversos parâmetros irão influenciar o potencial de produção (ou injeção) de um poço:
 
         \begin{itemize}
-            \item Características do reservatório: espessura, permeabilidade absoluta, profundidade etc.
-            \item Características dos fluidos presentes: viscosidade, permeabilidade relativa, fator volume de formação\footnote{O fator volume de formação ($B$) é a razão entre o volume de fuido em condição de reservatório ($P_{res}$ e $T_{res}$) e o volume deste mesmo fluido em condição de superfície ($P_{std}=1 \, atm$ e $T_{std}=60^oF$).} etc.
+            \item Características do reservatório: espessura, permeabilidade absoluta, profundidade, presença de fraturas etc.
+            \item Características dos fluidos presentes: viscosidade, interação rocha-fluido, fator volume de formação\footnote{O fator volume de formação ($B$) é a razão entre o volume de fuido em condição de reservatório ($P_{res}$ e $T_{res}$) e o volume deste mesmo fluido em condição de superfície ($P_{std}=1 \, atm$ e $T_{std}=60^oF$).} etc.
             \item Geometria do poço no reservatório: diâmetro, extensão aberta ao fluxo, inclinação do poço, dano à formação etc.
             \item Condição inicial de reservatório: pressão estática, temperatura, saturações (óleo, água e gás).
         \end{itemize}
@@ -310,7 +310,7 @@ country={Brasil}}
             \label{fig:ipr}
         \end{figure}
 
-        No simulador de fluxo este ponto de operação é reavaliado a cada iteração de cada passo de tempo. Para acelerar a resolução do problema, não é feita uma simulação do fluxo dentro do poço. Esta simulação é substituída por uma tabela com múltiplas variáveis. Para os dois simuladores mais utilizados na indústria o formato desta tabela é o mesmo, com a pressão de fundo ($P_{wf}$) em função de:
+        No simulador de fluxo este ponto de operação é reavaliado a cada iteração de cada passo de tempo. Para acelerar a resolução do problema, não é feita uma simulação do fluxo dentro do poço. Esta simulação é substituída por uma tabela com múltiplas variáveis. Para os dois simuladores mais utilizados na indústria o formato desta tabela é o mesmo \cite{computer2022cmg}\cite{schlumberger2009technical}, com a pressão de fundo ($P_{wf}$) em função de:
 
         \begin{itemize}
             \item Pressão de cabeça: WHP\footnote{WHP é \emph{Well Head Pressure}.}.
@@ -320,7 +320,7 @@ country={Brasil}}
             \item Vazão de injeção de \emph{gas-lift}.
         \end{itemize}
 
-        Para cada variável de entrada são definidos alguns valores representativos. Estas tabelas de VFP são completas, ou seja, são fornecidos valores de BHP ($P_{wf}$) para todas as combinações possíveis dos valores representativos dos dados de entrada.    
+        Para cada variável de entrada são definidos alguns valores representativos. E para todas as combinações dos dados de entrada são fornecidos valores de BHP ($P_{wf}$).    
 
     \subsection{Splines}
     
@@ -392,12 +392,12 @@ country={Brasil}}
         Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
 
         \begin{description}
-            \item[tests\textunderscore splines()] Testa as implementações de splines naturais e splines fixadas em dois exemplos: conjunto de 3 pontos e aproximação da integral da função exponencial (exemplos 1 e 2 do capítulo 3.5 de \cite{burden2016analise}).
+            \item[tests\textunderscore splines()] Testa as implementações de splines naturais e splines fixadas em dois exemplos: conjunto de 3 pontos e aproximação da integral da função exponencial (exemplos 1 a 4 do capítulo 3.5 de \cite{burden2016analise}).
             
             \item[tests\textunderscore vfp\textunderscore interpolation()] Compara o uso de interpolação linear e interpolação com splines naturais e fixas de pontos de uma tabela de VFP.
         \end{description}
 
-        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultado igual ao do livro. Na Figura \ref{fig:trespts} fica evidenciada a derivada segunda nula nos extremos. A Figura \ref{fig:exp} mostra um bom ajuste da função exponencial com as splines naturais. A integral da função exponencial ente 0 e 3 foi aproximada com as splines, com um erro de 2.45\% (Figura \ref{fig:intexp}).
+        Os testes que utilizam os exemplos de \cite{burden2016analise} tiveram resultados iguais aos do livro. Na Figura \ref{fig:trespts} fica evidenciada a derivada segunda nula nos extremos. A Figura \ref{fig:exp} mostra um bom ajuste da função exponencial com as splines naturais. A integral da função exponencial entre 0 e 3 foi aproximada com as splines, com um erro de 2.45\% (Figura \ref{fig:intexp}).
         
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
@@ -477,7 +477,7 @@ country={Brasil}}
             \end{tabular}
         \end{table*}
 
-        A proposta do teste realizado foi de verificar se uma interpolação com splines pode ser mais eficiente para estimar valores intermediários que uma interpolação linear, que é o método usualmente utilizado pelo simuladores de fluxo em meios porosos. Para cada uma das 432 combinações de GLR, WCUT, LFG e WHP foram construídas 6 funções interpoladoras dos pontos (LIQ, BHP). A diferença entre estas 6 variações é o ponto que é excluído. Posteriormente o valor de BHP do ponto excluído é estimado com a função interpoladora e comparado com o valor original (Figura \ref{fig:exvfp}). Em todos os testes foram utilizadas splines naturais, pois não há informação sobre a derivada das funções que geraram as tabelas de VFP. 
+        A proposta do teste realizado foi de verificar se uma interpolação com splines pode ser mais eficiente para estimar valores intermediários que uma interpolação linear, que é o método usualmente utilizado pelo simuladores de fluxo em meios porosos. Para cada uma das 432 combinações de GLR, WCUT, LFG e WHP foram construídas seis funções interpoladoras dos pontos (LIQ, BHP). A diferença entre estas seis variações é o ponto que é excluído. Posteriormente o valor de BHP do ponto excluído é estimado com a função interpoladora e comparado com o valor original (Figura \ref{fig:exvfp}). Em todos os testes foram utilizadas splines naturais, pois não há informação sobre a derivada das funções que geraram as tabelas de VFP. 
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
@@ -495,11 +495,11 @@ country={Brasil}}
                     \legend{Spline, Incluídos, Excluído};
                 \end{axis}
             \end{tikzpicture}
-            \caption{Spline construída com 5 dos 6 valores de (LIQ,BHP) para uma das combinações de GLR, WCUT, LFG e WHP da tabela de VFP P1.}
+            \caption{Spline construída com cinco dos seis valores de (LIQ,BHP) para uma das combinações de GLR, WCUT, LFG e WHP da tabela de VFP P1.}
             \label{fig:exvfp}
         \end{figure}
                 
-        Dos 6 testes realizados, 2 foram de extrapolações (quando os pontos extremos foram os excluídos). Esta não é uma boa prática. Usualmente o simulador de fluxo irá avisar ao usuário quando estiver extrapolando valores da tabela de VFP, mas não irá parar a simulação. Deste modo, não é incomum acontecer alguma extrapolação dos dados da tabela de VFP durante uma simulação.
+        Dos seis testes realizados, dois foram de extrapolações (quando os pontos extremos foram os excluídos). Esta não é uma boa prática. Usualmente o simulador de fluxo irá avisar ao usuário quando estiver extrapolando valores da tabela de VFP, mas não irá parar a simulação. Dito isto, não é incomum acontecer alguma extrapolação dos dados de uma tabela de VFP durante uma simulação.
         
         As Figuras \ref{fig:errosvfpspline}, \ref{fig:errosvfplinear} e \ref{fig:desvpadvfp} mostram uma estatística simplificada dos erros das funções interpoladoras no ponto que foi excluído, para as interpolações com splines e linear, respectivamente. Algumas conclusões podem ser tiradas destes gráficos:
 
@@ -510,7 +510,7 @@ country={Brasil}}
             \item A maior dificuldade de interpolação é na região de vazões baixas (LIQ=400), notadamente associado à grande variação na derivada da função original, como no exemplo da Figura \ref{fig:exvfp}.
         \end{itemize}
 
-        Os testes foram aplicados a todas as tabelas de VFP do modelo Unisim-II-H, e os resultados foram todos similares.
+        Os testes foram aplicados a todas as dez tabelas de VFP do modelo Unisim-II-H, e os resultados foram similares.
 
         \begin{figure}[hbt!] 
             \begin{tikzpicture}
