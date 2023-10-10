@@ -17,6 +17,7 @@ class IVP{
         void set_t_end(double t);
         void set_time_steps(int n);
         void set_relative_error(bool relative);
+        void set_number_max_error_search_points(int n);
         
         void set_Lipschitz_L(double L);
         void estimate_Lipschitz(double y_min, double y_max, int n_points_y, int n_points_t);
@@ -26,13 +27,12 @@ class IVP{
         double get_delfdely(double t, double y) const;
         double get_exact(double t) const;
         double get_Lipschitz() const;
-
-        bool has_Lipschitz() const;
+        
+        void calculate_exact_error();
+        void print_solution();
 
         void solve_euler();
-        void calculate_exact_error();
-
-        void print_solution();
+        void estimate_error_euler();
     private:
         double (*f_pointer)(double, double);
         double (*exact_pointer)(double);
@@ -46,18 +46,24 @@ class IVP{
         double *y_pointer;
         double *y_exact_pointer;
         double *y_error_pointer;
+        double *y_error_upper_pointer;
+        double *y_error_lower_pointer;
+        int n_max_error_points;
         bool relative_error;
         double Lipschitz;
         bool calculated_L;
 
         void reset_results();
+        void reset_error_estimate();
 
         bool has_f() const;
         bool has_exact() const;
         bool has_solution() const;
         bool has_exact_error() const;
+        bool has_estimated_error() const;
         bool has_dfdt() const;
         bool has_delfdely() const;
+        bool has_Lipschitz() const;
 };
 
 IVP::IVP(): f_pointer(nullptr), exact_pointer(nullptr),
@@ -67,15 +73,21 @@ IVP::IVP(): f_pointer(nullptr), exact_pointer(nullptr),
             t_end(1), time_steps(100), 
             t_pointer(nullptr), y_pointer(nullptr), 
             y_exact_pointer(nullptr), y_error_pointer(nullptr), 
-            relative_error(false),
+            n_max_error_points(20), relative_error(false),
+            y_error_upper_pointer(nullptr), y_error_lower_pointer(nullptr),
             Lipschitz(0), calculated_L(false) {
 };
 void IVP::reset_results(){
     t_pointer = nullptr;
     y_pointer = nullptr; 
+    calculated_L = false;
+    reset_error_estimate();
+}
+void IVP::reset_error_estimate(){
     y_exact_pointer = nullptr;
     y_error_pointer = nullptr;
-    calculated_L = false;
+    y_error_lower_pointer = nullptr;
+    y_error_upper_pointer = nullptr;
 }
 void IVP::set_f(double (*f)(double, double)){
     f_pointer = f;
@@ -131,6 +143,13 @@ void IVP::set_Lipschitz_L(double L){
     } else{
         Lipschitz = L;
         calculated_L = true;
+    }
+}
+void IVP::set_number_max_error_search_points(int n){
+    if (n<2){
+        printf("Cannot set less than 2 points. Keeping previous value: %g\n", n_max_error_points);
+    } else{
+        n_max_error_points = n;
     }
 }
 
@@ -210,6 +229,9 @@ bool IVP::has_solution() const{
 bool IVP::has_exact_error() const{
     return y_exact_pointer != nullptr && y_error_pointer != nullptr;
 }
+bool IVP::has_estimated_error() const{
+    return y_error_lower_pointer != nullptr && y_error_upper_pointer != nullptr;
+}
 bool IVP::has_dfdt() const{
     return dfdt_pointer != nullptr;
 }
@@ -247,6 +269,35 @@ void IVP::calculate_exact_error(){
     y_error_pointer = y_error;
 }
 
+
+void IVP::print_solution(){
+    if (!has_solution()){
+        printf("There is no solution to print.\n");
+        return;
+    }
+
+    printf("%5s\t%16s\t%16s","#","t","y_aprox");
+    if (has_estimated_error()){
+        printf("\t%16s\t%16s","error_lower","error_upper");
+    }
+    if (has_exact_error()){
+        printf("\t%16s\t%16s","y_exact","exact_error");
+    }
+    printf("\n");
+                
+    for (int i=0; i<time_steps+1; i++){
+        printf("%5i\t%16.10g\t%16.10g", i, t_pointer[i], y_pointer[i]);
+        if (has_estimated_error()){
+            printf("\t%16.10g\t%16.10g", y_error_lower_pointer[i],y_error_upper_pointer[i]);
+        }
+        if (has_exact_error()){
+            printf("\t%16.10g\t%16.10g", y_exact_pointer[i],y_error_pointer[i]);
+        }
+        printf("\n");
+    }
+}
+
+
 void IVP::solve_euler(){
     if (!has_f()){
         printf("Function f(t,y) not defined. Cannot continue.\n");
@@ -266,27 +317,19 @@ void IVP::solve_euler(){
 
     t_pointer = t;
     y_pointer = y;
-    y_exact_pointer = nullptr;
-    y_error_pointer = nullptr;
+    reset_error_estimate();
 }
 
-void IVP::print_solution(){
+void IVP::estimate_error_euler(){
     if (!has_solution()){
-        printf("There is no solution to print.\n");
+        printf("No solution found. Cannot continue.\n");
         return;
     }
-    if (!has_exact_error()){
-        printf("%5s\t%16s\t%16s\n","#","t","y_aprox");
-        for (int i=0; i<time_steps+1; i++){
-            printf("%5i\t%16.10g\t%16.10g\n", i, t_pointer[i], y_pointer[i]);
-        }
-    } else{
-        printf("%5s\t%16s\t%16s\t%16s\t%16s\n","#","t","y_aprox","y_exact","y_error");
-        for (int i=0; i<time_steps+1; i++){
-            printf("%5i\t%16.10g\t%16.10g\t%16.10g\t%16.10g\n", i, t_pointer[i], y_pointer[i],y_exact_pointer[i],y_error_pointer[i]);
-        }
-    }
+
 }
+
+
+
 
 double f_test_1(double t, double y){
     return y - t*t + 1;
