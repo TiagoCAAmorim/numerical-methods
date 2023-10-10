@@ -17,16 +17,20 @@ class IVP{
         void set_t_end(double t);
         void set_time_steps(int n);
         void set_relative_error(bool relative);
-        void set_number_max_error_search_points(int n);
+        void set_extra_search_points(int n);
         
         void set_Lipschitz_L(double L);
-        void estimate_Lipschitz(double y_min, double y_max, int n_points_y, int n_points_t);
+        void estimate_Lipschitz();
+
+        void set_max_dfdt(double M);
+        void estimate_max_dfdt();
 
         double get_f(double t, double y) const;
         double get_dfdt(double t, double y) const;
         double get_delfdely(double t, double y) const;
         double get_exact(double t) const;
         double get_Lipschitz() const;
+        double get_max_dfdt() const;
         
         void calculate_exact_error();
         void print_solution();
@@ -46,12 +50,13 @@ class IVP{
         double *y_pointer;
         double *y_exact_pointer;
         double *y_error_pointer;
-        double *y_error_upper_pointer;
-        double *y_error_lower_pointer;
-        int n_max_error_points;
+        double *y_error_limit_pointer;
+        int extra_search_points;
         bool relative_error;
         double Lipschitz;
         bool calculated_L;
+        double max_dfdt;
+        bool calculated_M;
 
         void reset_results();
         void reset_error_estimate();
@@ -64,6 +69,7 @@ class IVP{
         bool has_dfdt() const;
         bool has_delfdely() const;
         bool has_Lipschitz() const;
+        bool has_max_dfdt() const;
 };
 
 IVP::IVP(): f_pointer(nullptr), exact_pointer(nullptr),
@@ -73,21 +79,22 @@ IVP::IVP(): f_pointer(nullptr), exact_pointer(nullptr),
             t_end(1), time_steps(100), 
             t_pointer(nullptr), y_pointer(nullptr), 
             y_exact_pointer(nullptr), y_error_pointer(nullptr), 
-            n_max_error_points(20), relative_error(false),
-            y_error_upper_pointer(nullptr), y_error_lower_pointer(nullptr),
-            Lipschitz(0), calculated_L(false) {
+            extra_search_points(20), relative_error(false),
+            y_error_limit_pointer(nullptr),
+            Lipschitz(0), calculated_L(false),
+            max_dfdt(0), calculated_M(false) {
 };
 void IVP::reset_results(){
     t_pointer = nullptr;
     y_pointer = nullptr; 
     calculated_L = false;
+    calculated_M = false;
     reset_error_estimate();
 }
 void IVP::reset_error_estimate(){
     y_exact_pointer = nullptr;
     y_error_pointer = nullptr;
-    y_error_lower_pointer = nullptr;
-    y_error_upper_pointer = nullptr;
+    y_error_limit_pointer = nullptr;
 }
 void IVP::set_f(double (*f)(double, double)){
     f_pointer = f;
@@ -95,6 +102,7 @@ void IVP::set_f(double (*f)(double, double)){
 }
 void IVP::set_dfdt(double (*f)(double, double)){
     dfdt_pointer = f;
+    calculated_M = false;
 }
 void IVP::set_delfdely(double (*f)(double, double)){
     delfdely_pointer = f;
@@ -145,11 +153,22 @@ void IVP::set_Lipschitz_L(double L){
         calculated_L = true;
     }
 }
-void IVP::set_number_max_error_search_points(int n){
-    if (n<2){
-        printf("Cannot set less than 2 points. Keeping previous value: %g\n", n_max_error_points);
+void IVP::set_max_dfdt(double M){
+    if (M<=0){
+        printf("Cannot set a non-positive value.\n");
+        calculated_M = false;
     } else{
-        n_max_error_points = n;
+        max_dfdt = M;
+        calculated_M = true;
+    }
+}
+
+void IVP::set_extra_search_points(int n){
+    if (n<0){
+        printf("Cannot set a negative value. Assigning zero.");
+        extra_search_points = 0;
+    } else{
+        extra_search_points = n;
     }
 }
 
@@ -188,9 +207,9 @@ double IVP::get_Lipschitz() const{
     }
     return Lipschitz;
 }
-void IVP::estimate_Lipschitz(double y_min, double y_max, int n_points_y, int n_points_t){
-    if (n_points_y < 2 || n_points_t < 2){
-        printf("Define at least 2 points per variable. Cannot continue.\n");
+void IVP::estimate_Lipschitz(){
+    if (!has_solution()){
+        printf("No solutions found. Cannot continue.\n");
         return;
     }
     if (!has_delfdely()){
@@ -199,14 +218,25 @@ void IVP::estimate_Lipschitz(double y_min, double y_max, int n_points_y, int n_p
     }
     
     double L=0;
-    double Lmax=0;
+    double Lmax=abs(get_delfdely(t_pointer[0], y_pointer[0]));
     double y;
     double t;
 
-    for (int i=0; i<n_points_y; i++){
-        y = y_min + (y_max - y_min) * (i-1) / (n_points_y-1);
-        for (int j=0; j<n_points_t; j++){
-            t = t_initial + (t_end - t_initial) * (j-1) / (n_points_t-1);
+    if (extra_search_points > 0){
+        //build spline
+    }
+
+    for (int i=1; i<time_steps+1; i++){
+        t = t_pointer[i];
+        y = y_pointer[i];
+        L = abs(get_delfdely(t, y));
+        if (L>Lmax){
+            Lmax = L;
+        }
+
+        for (int j=0; j<extra_search_points; j++){
+            t = t_pointer[i-1] + (t_pointer[i] - t_pointer[i-1]) * (j+1) / (extra_search_points+1);
+            // y = spl.get_value(t);
             L = abs(get_delfdely(t, y));
             if (L>Lmax){
                 Lmax = L;
@@ -215,6 +245,53 @@ void IVP::estimate_Lipschitz(double y_min, double y_max, int n_points_y, int n_p
     }
     Lipschitz = Lmax;
     calculated_L = true;
+}
+
+double IVP::get_max_dfdt() const{
+    if (!calculated_M){
+        printf("Max(df/dt) was neither provided nor estimated.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return max_dfdt;
+}
+void IVP::estimate_max_dfdt(){
+    if (!has_solution()){
+        printf("No solutions found. Cannot continue.\n");
+        return;
+    }
+    if (!has_dfdt()){
+        printf("Function df/dt is not defined. Cannot continue.\n");
+        return;
+    }
+    
+    double M=0;
+    double Mmax=abs(get_dfdt(t_pointer[0], y_pointer[0]));
+    double y;
+    double t;
+
+    if (extra_search_points > 0){
+        //build spline
+    }
+
+    for (int i=1; i<time_steps+1; i++){
+        t = t_pointer[i];
+        y = y_pointer[i];
+        M = abs(get_dfdt(t, y));
+        if (M>Mmax){
+            Mmax = M;
+        }
+
+        for (int j=0; j<extra_search_points; j++){
+            t = t_pointer[i-1] + (t_pointer[i] - t_pointer[i-1]) * (j+1) / (extra_search_points+1);
+            // y = spl.get_value(t);
+            M = abs(get_dfdt(t, y));
+            if (M>Mmax){
+                Mmax = M;
+            }
+        }
+    }
+    max_dfdt = Mmax;
+    calculated_M = true;
 }
 
 bool IVP::has_f() const{
@@ -230,7 +307,7 @@ bool IVP::has_exact_error() const{
     return y_exact_pointer != nullptr && y_error_pointer != nullptr;
 }
 bool IVP::has_estimated_error() const{
-    return y_error_lower_pointer != nullptr && y_error_upper_pointer != nullptr;
+    return y_error_limit_pointer != nullptr;
 }
 bool IVP::has_dfdt() const{
     return dfdt_pointer != nullptr;
@@ -240,6 +317,9 @@ bool IVP::has_delfdely() const{
 }
 bool IVP::has_Lipschitz() const{
     return calculated_L;
+}
+bool IVP::has_max_dfdt() const{
+    return calculated_M;
 }
 
 void IVP::calculate_exact_error(){
@@ -269,7 +349,6 @@ void IVP::calculate_exact_error(){
     y_error_pointer = y_error;
 }
 
-
 void IVP::print_solution(){
     if (!has_solution()){
         printf("There is no solution to print.\n");
@@ -278,7 +357,7 @@ void IVP::print_solution(){
 
     printf("%5s\t%16s\t%16s","#","t","y_aprox");
     if (has_estimated_error()){
-        printf("\t%16s\t%16s","error_lower","error_upper");
+        printf("\t%16s","error_limit");
     }
     if (has_exact_error()){
         printf("\t%16s\t%16s","y_exact","exact_error");
@@ -288,7 +367,7 @@ void IVP::print_solution(){
     for (int i=0; i<time_steps+1; i++){
         printf("%5i\t%16.10g\t%16.10g", i, t_pointer[i], y_pointer[i]);
         if (has_estimated_error()){
-            printf("\t%16.10g\t%16.10g", y_error_lower_pointer[i],y_error_upper_pointer[i]);
+            printf("\t%16.10g", y_error_limit_pointer[i]);
         }
         if (has_exact_error()){
             printf("\t%16.10g\t%16.10g", y_exact_pointer[i],y_error_pointer[i]);
@@ -325,7 +404,28 @@ void IVP::estimate_error_euler(){
         printf("No solution found. Cannot continue.\n");
         return;
     }
+    if (!has_Lipschitz()){
+        printf("Lipschitz L neither provided nor estimated. Cannot continue.\n");
+        return;
+    }
+    if (!has_max_dfdt()){
+        printf("Max(df/dt) neither provided nor estimated. Cannot continue.\n");
+        return;
+    }
 
+    double L = get_Lipschitz();
+    double M = get_max_dfdt();
+    double h = (t_end - t_initial) / time_steps;
+
+    double* error_limit = new double[time_steps+1];
+
+    error_limit[0] = 0;
+
+    for (int i=1; i<time_steps+1; i++){
+        error_limit[i] = h*M/(2*L)*(exp(L*(t_pointer[i] - t_pointer[0])) - 1);
+    }
+
+    y_error_limit_pointer = error_limit;
 }
 
 
@@ -352,8 +452,7 @@ void tests_euler(){
     test_errors.get_dfdt(0,1);
     test_errors.get_delfdely(0,1);
     test_errors.get_Lipschitz();
-    test_errors.estimate_Lipschitz(0,1,2,1);
-    test_errors.estimate_Lipschitz(0,1,2,2);
+    test_errors.estimate_Lipschitz();
     test_errors.solve_euler();
     test_errors.set_t_end(0.);
     test_errors.set_t_initial(1.);
@@ -371,8 +470,23 @@ void tests_euler(){
     test1.set_exact(exact_test_1);
     test1.solve_euler();
     test1.calculate_exact_error();
+
+    printf("  With aproximate L and M\n");
+    test1.set_delfdely(delfdely_test_1);
+    test1.estimate_Lipschitz();
+    test1.set_dfdt(dfdt_test_1);
+    test1.estimate_max_dfdt();
+    printf("L = %g\n",test1.get_Lipschitz());
+    printf("M = %g\n",test1.get_max_dfdt());
+    test1.estimate_error_euler();
     test1.print_solution();
-    printf("\n");
+    printf("  With exact L and M\n");
+    test1.set_Lipschitz_L(1);
+    test1.set_max_dfdt(0.5*exp(2)-2);
+    printf("L = %g\n",test1.get_Lipschitz());
+    printf("M = %g\n",test1.get_max_dfdt());
+    test1.estimate_error_euler();
+    test1.print_solution();
 
 }
 
