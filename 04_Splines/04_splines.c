@@ -159,7 +159,6 @@ double evaluate_spline(struct tspline spline, double x){
     double y=0;
     double h;
     double dx=1;
-    double coef[4];
     int j;
 
     j = find_interval(spline.npoints, spline.x, x);
@@ -203,7 +202,7 @@ double evaluate_spline_prime2(struct tspline spline, double x){
     j = find_interval(spline.npoints, spline.x, x);
     h = x - spline.x[j];
 
-    y += spline.c[j] * dx * 2.;
+    y += spline.c[j] * 2.;
     dx *= h;
     y += spline.d[j] * dx * 6.;
     
