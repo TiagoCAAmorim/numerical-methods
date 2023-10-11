@@ -69,3 +69,4 @@ texput.pdf
 *.*(busy)
 
 **/no_sync/
+**/.vscode/
