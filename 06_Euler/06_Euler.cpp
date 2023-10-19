@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cmath> 
+#include <cmath>
 #include <limits>
 #include <cstdio>
 #include <string>
@@ -155,7 +155,7 @@ void Spline::build_natural(){
             return;
         }
         m[i] = h[i] / r[i];
-        z[i] = (alpha[i] - h[i-1] * z[i-1]) / r[i];  
+        z[i] = (alpha[i] - h[i-1] * z[i-1]) / r[i];
     }
 
     r[n] = 1.;
@@ -176,7 +176,7 @@ void Spline::build_natural(){
     b_pointer = b;
     c_pointer = c;
     d_pointer = d;
-    
+
     if (fabs(get_y_prime2(x_pointer[0])) > eps){
         printf("Natural spline calculation failed: y''[0] != 0. Check code. Cannot continue.\n");
         reset_spline();
@@ -213,7 +213,7 @@ void Spline::build_fixed(){
     for(int i=0; i<n; i++){
         h[i] = x_pointer[i+1] - x_pointer[i];
     }
-    
+
     alpha[0] = 3. / h[0] * (a_pointer[1] - a_pointer[0]) - 3. * y_prime_pointer[0];
     alpha[n] = 3. * y_prime_pointer[n] - 3. / h[n-1] * (a_pointer[n] - a_pointer[n-1]);
     for(int i=1; i<n; i++){
@@ -230,7 +230,7 @@ void Spline::build_fixed(){
             return;
         }
         m[i] = h[i] / r[i];
-        z[i] = (alpha[i] - h[i-1] * z[i-1]) / r[i];  
+        z[i] = (alpha[i] - h[i-1] * z[i-1]) / r[i];
     }
 
     r[n] = h[n-1] * (2 - m[n-1]);
@@ -251,7 +251,7 @@ void Spline::build_fixed(){
     b_pointer = b;
     c_pointer = c;
     d_pointer = d;
-    
+
     if (fabs(get_y_prime(x_pointer[n_points-1]) - y_prime_pointer[n]) > eps){
         printf("Fixed spline calculation failed: y'[n] != y_prime_end. Check code. Cannot continue.\n");
         reset_spline();
@@ -300,7 +300,7 @@ double Spline::get_y(double x) const{
     y += c_pointer[j] * dx;
     dx *= h;
     y += d_pointer[j] * dx;
-    
+
     return y;
 }
 double Spline::get_y_prime(double x) const{
@@ -319,7 +319,7 @@ double Spline::get_y_prime(double x) const{
     y += c_pointer[j] * dx * 2.;
     dx *= h;
     y += d_pointer[j] * dx * 3.;
-    
+
     return y;
 }
 double Spline::get_y_prime2(double x) const{
@@ -335,7 +335,7 @@ double Spline::get_y_prime2(double x) const{
 
     double y = c_pointer[j] * 2.;
     y += d_pointer[j] * h * 6.;
-    
+
     return y;
 }
 
@@ -351,7 +351,7 @@ double Spline::get_int_y_point(double x, int interval) const{
     y += c_pointer[j] * dx / 3.;
     dx *= h;
     y += d_pointer[j] * dx / 4.;
-    
+
     return y;
 }
 double Spline::get_int_y(double x) const{
@@ -402,7 +402,7 @@ class IVP{
         void set_time_steps(int n);
         void set_relative_error(bool relative);
         void set_extra_search_points(int n);
-        
+
         void set_Lipschitz_L(double L);
         void estimate_Lipschitz();
 
@@ -415,7 +415,7 @@ class IVP{
         double get_exact(double t) const;
         double get_Lipschitz() const;
         double get_max_dfdt() const;
-        
+
         void calculate_exact_error();
         void print_solution();
         void print_solution(string filename);
@@ -460,12 +460,12 @@ class IVP{
 
 IVP::IVP():
     f_pointer(nullptr), exact_pointer(nullptr),
-    dfdt_pointer(nullptr), 
-    delfdely_pointer(nullptr), 
-    y_initial(0), t_initial(0), 
-    t_end(1), time_steps(100), 
-    t_pointer(nullptr), y_pointer(nullptr), 
-    y_exact_pointer(nullptr), y_error_pointer(nullptr), 
+    dfdt_pointer(nullptr),
+    delfdely_pointer(nullptr),
+    y_initial(0), t_initial(0),
+    t_end(1), time_steps(100),
+    t_pointer(nullptr), y_pointer(nullptr),
+    y_exact_pointer(nullptr), y_error_pointer(nullptr),
     y_error_limit_pointer(nullptr),
     extra_search_points(20), relative_error(false),
     Lipschitz(0), calculated_L(false),
@@ -474,7 +474,7 @@ IVP::IVP():
 
 void IVP::reset_results(){
     t_pointer = nullptr;
-    y_pointer = nullptr; 
+    y_pointer = nullptr;
     calculated_L = false;
     calculated_M = false;
     reset_error_estimate();
@@ -604,7 +604,7 @@ void IVP::estimate_Lipschitz(){
         printf("Function del_f/del_y is not defined. Cannot continue.\n");
         return;
     }
-    
+
     double L=0;
     double Lmax=abs(get_delfdely(t_pointer[0], y_pointer[0]));
     double y;
@@ -658,7 +658,7 @@ void IVP::estimate_max_dfdt(){
         printf("Function df/dt is not defined. Cannot continue.\n");
         return;
     }
-    
+
     double M=0;
     double Mmax=abs(get_dfdt(t_pointer[0], y_pointer[0]));
     double y;
@@ -760,7 +760,7 @@ void IVP::print_solution(){
         printf("\t%16s\t%16s","y_exact","exact_error");
     }
     printf("\n");
-                
+
     for (int i=0; i<time_steps+1; i++){
         printf("%5i\t%16.10g\t%16.10g", i, t_pointer[i], y_pointer[i]);
         if (has_estimated_error()){
@@ -784,7 +784,7 @@ void IVP::print_solution(string filename){
 
     FILE* outFile = fopen(filename.c_str(), "w");
     if (outFile == nullptr) {
-        printf("Coud not create file: %s\n",filename);
+        printf("Coud not create file: %s\n",filename.c_str());
         return;
     }
 
@@ -796,7 +796,7 @@ void IVP::print_solution(string filename){
         fprintf(outFile,"\t%16s\t%16s","y_exact","exact_error");
     }
     fprintf(outFile,"\n");
-                
+
     for (int i=0; i<time_steps+1; i++){
         fprintf(outFile,"%5i\t%16.10g\t%16.10g", i, t_pointer[i], y_pointer[i]);
         if (has_estimated_error()){
@@ -818,10 +818,10 @@ void IVP::solve_euler(){
     double h = (t_end - t_initial) / time_steps;
     double* t = new double[time_steps+1];
     double* y = new double[time_steps+1];
-    
+
     t[0] = t_initial;
     y[0] = y_initial;
-    
+
     for (int i=1; i<time_steps+1; i++){
         y[i] = y[i-1] + h * f_pointer(t[i-1], y[i-1]);
         t[i] = t[0] + i*h;
@@ -976,7 +976,337 @@ void tests_euler(){
 
 }
 
+class Fetkovich{
+    public:
+        Fetkovich();
+        void set_aquifer_productivity_index(double value); // m3/d / bar
+        void set_aquifer_initial_pressure(double value);   // bar
+        void set_aquifer_initial_pore_volume(double value);  // m3
+        void set_aquifer_total_compressibility(double value);  // 1/bar
+
+        void set_reservoir_initial_pressure(double value);   // bar
+        void set_reservoir_pressure_function(double (*f)(double, double)); // f(We, t)
+        void set_exact_water_flow_function(double (*f)(double)); // f(t)
+
+        double get_aquifer_flow_rate(double t, double pr) const;  // m3/d
+        double get_aquifer_delta_cumulative_flow(double dt, double paq_avg, double pr_avg) const;  // m3
+
+        void solve_aquifer_flow(double t_end, int steps);
+        double* get_result_times() const; // d
+        double* get_result_water_flow() const; // m3/d
+        double* get_result_cumulative_flow_rate() const; // m3
+        double* get_result_aquifer_pressure() const; // bar
+        double* get_result_reservoir_pressure() const; // bar
+
+        void print_solution(string filename);
+    private:
+        double get_aquifer_pressure(double We) const;   // bar
+
+        bool has_f_pr() const;
+        double get_f_pr(double We, double t) const;
+
+        bool has_exact() const;
+        double get_exact(double t) const;
+
+        bool has_solution() const;
+
+        double J;
+        double pi;
+        double Wi;
+        double ct;
+        double pr_0;
+
+        double (*f_pr_pointer)(double, double);
+
+        int time_steps;
+        double *t_pointer;
+        double *Qw_pointer;
+        double *We_pointer;
+        double *p_aquifer_pointer;
+        double *p_reservoir_pointer;
+
+        double (*f_exact_pointer)(double);
+
+        // double Qw;
+        // double We;
+        // double Pa;
+};
+
+Fetkovich::Fetkovich():
+    J(0.), pi(0.), Wi(0.), ct(0.), pr_0(0.),
+    f_pr_pointer(nullptr),
+    time_steps(0),
+    t_pointer(nullptr),
+    Qw_pointer(nullptr),
+    We_pointer(nullptr),
+    p_aquifer_pointer(nullptr),
+    p_reservoir_pointer(nullptr),
+    f_exact_pointer(nullptr)
+    {};
+
+void Fetkovich::set_aquifer_productivity_index(double value){
+    J = value;
+}
+void Fetkovich::set_aquifer_initial_pressure(double value){
+    pi = value;
+}
+void Fetkovich::set_aquifer_initial_pore_volume(double value){
+    Wi = value;
+}
+void Fetkovich::set_aquifer_total_compressibility(double value){
+    ct = value;
+}
+void Fetkovich::set_reservoir_initial_pressure(double value){
+    pr_0 = value;
+}
+
+double Fetkovich::get_aquifer_flow_rate(double t, double pr) const{
+    return exp(-J * t / (ct * Wi)) * J * (pi - pr);
+}
+double Fetkovich::get_aquifer_delta_cumulative_flow(double dt, double paq_avg, double pr_avg) const{
+    return (1 - exp(-J * dt / (ct * Wi))) * ct * Wi * (paq_avg - pr_avg);
+}
+double Fetkovich::get_aquifer_pressure(double We) const{
+    return pi - We / (ct * Wi);
+}
+
+void Fetkovich::set_reservoir_pressure_function(double (*f)(double, double)){
+    f_pr_pointer = f;
+}
+bool Fetkovich::has_f_pr() const{
+    return f_pr_pointer != nullptr;
+}
+double Fetkovich::get_f_pr(double We, double t) const{
+    if (!has_f_pr()){
+        printf("Reservoir pressure function not defined.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return f_pr_pointer(We,t);
+}
+
+void Fetkovich::set_exact_water_flow_function(double (*f)(double)){
+    f_exact_pointer = f;
+}
+bool Fetkovich::has_exact() const{
+    return f_exact_pointer != nullptr;
+}
+double Fetkovich::get_exact(double t) const{
+    if (!has_exact()){
+        printf("Exact function not defined.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return f_exact_pointer(t);
+}
+
+bool Fetkovich::has_solution() const{
+    return t_pointer != nullptr;
+}
+void Fetkovich::solve_aquifer_flow(double t_end, int steps){
+    time_steps = steps+1;
+    double* t = new double[steps+1];
+    double* Qw = new double[steps+1];
+    double* We = new double[steps+1];
+    double* p_aq = new double[steps+1];
+    double* p_res = new double[steps+1];
+
+    t[0] = 0;
+    Qw[0] = J * (pi - pr_0);
+    We[0] = 0;
+    p_aq[0] = pi;
+    p_res[0] = pr_0;
+
+    double dWe = 0;
+    double pr_avg = pr_0;
+    double pr_avg_old;
+    double count;
+    double dt = t_end / steps;
+
+    for (int i = 1; i < steps+1; i++) {
+        t[i] = i * dt;
+
+        pr_avg_old = 0;
+        count = 0;
+        while (abs(pr_avg_old - pr_avg) > eps && count<=20){
+            pr_avg_old = pr_avg;
+            dWe = get_aquifer_delta_cumulative_flow(dt, p_aq[i-1], pr_avg);
+            We[i] = We[i-1] + dWe;
+            p_res[i] = get_f_pr(We[i], t[i]);
+            pr_avg = (p_res[i] + p_res[i-1])/2;
+            count++;
+        }
+        p_aq[i] = get_aquifer_pressure(We[i]);
+        Qw[i] = J * (p_aq[i] - p_res[i]);
+    }
+
+    t_pointer = t;
+    Qw_pointer = Qw;
+    We_pointer = We;
+    p_aquifer_pointer = p_aq;
+    p_reservoir_pointer = p_res;
+}
+double* Fetkovich::get_result_times() const{
+    return t_pointer;
+}
+double* Fetkovich::get_result_water_flow() const{
+    return Qw_pointer;
+}
+double* Fetkovich::get_result_cumulative_flow_rate() const{
+    return We_pointer;
+}
+double* Fetkovich::get_result_aquifer_pressure() const{
+    return p_aquifer_pointer;
+}
+double* Fetkovich::get_result_reservoir_pressure() const{
+    return p_reservoir_pointer;
+}
+
+void Fetkovich::print_solution(string filename){
+    if (!has_solution()){
+        printf("There is no solution to print.\n");
+        return;
+    }
+
+    FILE* outFile = fopen(filename.c_str(), "w");
+    if (outFile == nullptr) {
+        printf("Coud not create file: %s\n",filename.c_str());
+        return;
+    }
+
+    fprintf(outFile,"%5s\t%16s","#","Time");
+    fprintf(outFile,"\t%16s","Res.Pres.");
+    fprintf(outFile,"\t%16s","Aq.Pres.");
+    fprintf(outFile,"\t%16s","Wat.Flow");
+    fprintf(outFile,"\t%16s","Cumulative");
+    if (has_exact()){
+        fprintf(outFile,"\t%16s","ExactQw");
+        fprintf(outFile,"\t%16s","Error");
+    }
+    fprintf(outFile,"\n");
+
+    for (int i=0; i<time_steps; i++){
+        fprintf(outFile,"%5i\t%16.10g", i, t_pointer[i]);
+        fprintf(outFile,"\t%16.10g", p_reservoir_pointer[i]);
+        fprintf(outFile,"\t%16.10g", p_aquifer_pointer[i]);
+        fprintf(outFile,"\t%16.10g", Qw_pointer[i]);
+        fprintf(outFile,"\t%16.10g", We_pointer[i]);
+        if (has_exact()){
+            fprintf(outFile,"\t%16.10g", get_exact(t_pointer[i]));
+            fprintf(outFile,"\t%16.10g", abs(get_exact(t_pointer[i])-Qw_pointer[i]));
+        }
+        fprintf(outFile,"\n");
+    }
+    fclose(outFile);
+}
+
+
+
+double Newmam_Consolidated_Sandstone(double por){
+    if (por >= 1.){
+        por = por / 100.;
+    }
+    return 97.32E-6 / (1 + 55.8721 * pow(por, 1.428586) ) * 14.50377; // 1/bar
+}
+double Newmam_Limestone(double por){
+    if (por >= 1.){
+        por = por / 100.;
+    }
+    return 0.8535 / (1 + 2.367E6 * pow(por, 0.93023) ) * 14.50377; // 1/bar
+}
+
+// double Standing_Rs(double api, double dg, double gor, double p, double t){
+//     double x = 0.0125 * api - 0.00091 * (1.8 * t + 32);
+//     double y = p * pow(10, x);
+//     double z = 0.1373 * dg * pow(y, 1.205);
+//     return min(z, gor);
+// }
+double Standing_p_bubble(double api, double dg, double gor, double t){
+    double x = 0.0125 * api - 0.00091 * (1.8 * t + 32);
+    double y = gor / dg / 0.1373;
+    return pow(y, 1/1.205) * pow(10, -x);
+}
+double Standing_co_bubble(double api, double dg, double gor, double t){
+    double x = -1433. + 5 * 5.615 * gor;
+    double y = 17.2*(1.8 * t + 491.67);
+    double z = -1180. * dg + 12.61 * api;
+    double w = 1E5 * Standing_p_bubble(api, dg, gor, t);
+    return (x + y + z) / w;
+}
+double Standing_bo_bubble(double api, double dg, double gor, double t){
+    double d_o = 141.5 / (131.5 + api);
+    double x = 5.615 * gor * pow(dg / d_o, 0.5);
+    double y = 1.25 * (1.8 * t + 32);
+    return 0.9759 +  12E-5 * pow(x + y, 1.2);
+}
+
+
+double f_pr_cte_230(double We, double t){
+    return 230. + 0*We + 0*t;
+}
+double f_qw_pr_cte_230(double t){
+    Fetkovich aq1;
+    aq1.set_aquifer_initial_pore_volume(10*1E6);
+    aq1.set_aquifer_initial_pressure(250.);
+    aq1.set_aquifer_productivity_index(200.);
+    aq1.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
+    aq1.set_reservoir_initial_pressure(230.);
+
+    return aq1.get_aquifer_flow_rate(t, 230.);
+}
+
+double f_pr_instant_res(double We, double t){
+    double api = 25.;
+    double dg = 0.6;
+    double rgo = 60.;
+    double temp = 65.;
+    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
+    double Cob = Standing_co_bubble(api, dg, rgo, temp);
+    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
+    double Cpor = Newmam_Consolidated_Sandstone(0.2);
+    double Bw = 1.;
+    double Voil = 0.8 * 1*1E6;
+    double Vwat = 0.2 * 1*1E6;
+    double p_ini = 230.;
+
+    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
+    double VwatIP_0 = Vwat * Bw;
+    double Vpor_0 = VoilIP_0 + VwatIP_0;
+
+    return (Voil * Bob * (1 + Cob*Pb) + (Vwat + We) * Bw - Vpor_0 * (1 - Cpor*(p_ini)) ) / (Vpor_0*Cpor + Voil * Bob * Cob) + 0*t;
+}
+
+void Fetkovich_tests(){
+    Fetkovich aq1;
+    aq1.set_aquifer_initial_pore_volume(1*1E6);
+    aq1.set_aquifer_initial_pressure(250.);
+    aq1.set_aquifer_productivity_index(20.);
+    aq1.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
+    aq1.set_reservoir_initial_pressure(230.);
+    aq1.set_reservoir_pressure_function(f_pr_cte_230);
+    aq1.set_exact_water_flow_function(f_qw_pr_cte_230);
+
+    aq1.solve_aquifer_flow(300., 10);
+    aq1.print_solution("aq1.txt");
+
+    Fetkovich aq2;
+    aq2.set_aquifer_initial_pore_volume(1*1E6);
+    aq2.set_aquifer_initial_pressure(250.);
+    aq2.set_aquifer_productivity_index(20.);
+    aq2.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
+    aq2.set_reservoir_initial_pressure(230.);
+    aq2.set_reservoir_pressure_function(f_pr_instant_res);
+    // aq2.set_exact_water_flow_function(f_cte_230_exact);
+
+    aq2.solve_aquifer_flow(300., 10);
+    aq2.print_solution("aq2.txt");
+
+}
+
+
+
+
+
 int main(){
     // tests_splines();
-    tests_euler();
+    // tests_euler();
+    Fetkovich_tests();
 }
