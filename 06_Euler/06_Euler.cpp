@@ -1180,9 +1180,12 @@ void Fetkovich::print_solution(string filename){
     if (has_exact()){
         fprintf(outFile,"\t%16s","ExactQw");
         fprintf(outFile,"\t%16s","Error");
+        fprintf(outFile,"\t%16s","ErrorRel");
     }
     fprintf(outFile,"\n");
 
+    double exact;
+    double error;
     for (int i=0; i<time_steps; i++){
         fprintf(outFile,"%5i\t%16.10g", i, t_pointer[i]);
         fprintf(outFile,"\t%16.10g", p_reservoir_pointer[i]);
@@ -1190,8 +1193,15 @@ void Fetkovich::print_solution(string filename){
         fprintf(outFile,"\t%16.10g", Qw_pointer[i]);
         fprintf(outFile,"\t%16.10g", We_pointer[i]);
         if (has_exact()){
-            fprintf(outFile,"\t%16.10g", get_exact(t_pointer[i]));
-            fprintf(outFile,"\t%16.10g", abs(get_exact(t_pointer[i])-Qw_pointer[i]));
+            exact = get_exact(t_pointer[i]);
+            fprintf(outFile,"\t%16.10g", exact);
+            error = abs(exact - Qw_pointer[i]);
+            fprintf(outFile,"\t%16.10g", error);
+            if (abs(exact) > eps){
+                fprintf(outFile,"\t%16.10g", error/abs(exact));
+            } else{
+                fprintf(outFile,"\t%16.10g", std::numeric_limits<double>::quiet_NaN());
+            }
         }
         fprintf(outFile,"\n");
     }
@@ -1213,12 +1223,6 @@ double Newmam_Limestone(double por){
     return 0.8535 / (1 + 2.367E6 * pow(por, 0.93023) ) * 14.50377; // 1/bar
 }
 
-// double Standing_Rs(double api, double dg, double gor, double p, double t){
-//     double x = 0.0125 * api - 0.00091 * (1.8 * t + 32);
-//     double y = p * pow(10, x);
-//     double z = 0.1373 * dg * pow(y, 1.205);
-//     return min(z, gor);
-// }
 double Standing_p_bubble(double api, double dg, double gor, double t){
     double x = 0.0125 * api - 0.00091 * (1.8 * t + 32);
     double y = gor / dg / 0.1373;
@@ -1244,9 +1248,9 @@ double f_pr_cte_230(double We, double t){
 }
 double f_qw_pr_cte_230(double t){
     Fetkovich aq1;
-    aq1.set_aquifer_initial_pore_volume(10*1E6);
+    aq1.set_aquifer_initial_pore_volume(1*1E6);
     aq1.set_aquifer_initial_pressure(250.);
-    aq1.set_aquifer_productivity_index(200.);
+    aq1.set_aquifer_productivity_index(20.);
     aq1.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
     aq1.set_reservoir_initial_pressure(230.);
 
@@ -1273,6 +1277,32 @@ double f_pr_instant_res(double We, double t){
 
     return (Voil * Bob * (1 + Cob*Pb) + (Vwat + We) * Bw - Vpor_0 * (1 - Cpor*(p_ini)) ) / (Vpor_0*Cpor + Voil * Bob * Cob) + 0*t;
 }
+double f_qw_instant_res(double t){
+    double api = 25.;
+    double dg = 0.6;
+    double rgo = 60.;
+    double temp = 65.;
+    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
+    double Cob = Standing_co_bubble(api, dg, rgo, temp);
+    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
+    double Cpor = Newmam_Consolidated_Sandstone(0.2);
+    double Bw = 1.;
+    double Voil = 0.8 * 1*1E6;
+    double Vwat = 0.2 * 1*1E6;
+    double p_ini = 230.;
+
+    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
+    double VwatIP_0 = Vwat * Bw;
+    double Vpor_0 = VoilIP_0 + VwatIP_0;
+
+    double J = 20.;
+    double ct = Newmam_Consolidated_Sandstone(0.03);
+    double Wi = 1*1E6;
+    double pi = 250.;
+    double pr = 230.;
+
+    return exp(-J * t *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor))) * J * (pi - pr);
+}
 
 void Fetkovich_tests(){
     Fetkovich aq1;
@@ -1294,11 +1324,10 @@ void Fetkovich_tests(){
     aq2.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
     aq2.set_reservoir_initial_pressure(230.);
     aq2.set_reservoir_pressure_function(f_pr_instant_res);
-    // aq2.set_exact_water_flow_function(f_cte_230_exact);
+    aq2.set_exact_water_flow_function(f_qw_instant_res);
 
     aq2.solve_aquifer_flow(300., 10);
     aq2.print_solution("aq2.txt");
-
 }
 
 
