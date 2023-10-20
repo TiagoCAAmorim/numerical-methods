@@ -422,6 +422,8 @@ class IVP{
 
         void solve_euler();
         void estimate_error_euler();
+
+        void solve_euler_aitken();
     private:
         void reset_results();
         void reset_error_estimate();
@@ -435,6 +437,8 @@ class IVP{
         bool has_delfdely() const;
         bool has_Lipschitz() const;
         bool has_max_dfdt() const;
+
+        double* copy_array(double *original, int number_points) const;
 
         double (*f_pointer)(double, double);
         double (*exact_pointer)(double);
@@ -868,6 +872,34 @@ void IVP::estimate_error_euler(){
     y_error_limit_pointer = error_limit;
 }
 
+double* IVP::copy_array(double *original, int number_points) const{
+    double* out = new double[number_points];
+    for(int i=0; i<number_points; i++){
+        out[i] = original[i];
+    }
+    return out;
+}
+
+void IVP::solve_euler_aitken(){
+    int time_steps_original = time_steps;
+
+    set_time_steps(3 * time_steps_original);
+    solve_euler();
+    double* y2 = copy_array(y_pointer, time_steps+1);
+
+    set_time_steps(2 * time_steps_original);
+    solve_euler();
+    double* y1 = copy_array(y_pointer, time_steps+1);
+
+    set_time_steps(time_steps_original);
+    solve_euler();
+    double* y0 = copy_array(y_pointer, time_steps+1);
+
+    for (int i=1; i<time_steps+1; i++){
+        y_pointer[i] = y0[i] - pow(y1[2*i] - y0[i], 2) / (y2[3*i] - 2*y1[2*i] + y0[i]);
+    }
+}
+
 // ############# Tests #############
 
 void tests_splines(){
@@ -917,13 +949,45 @@ double f_test_1(double t, double y){
     return y - t*t + 1;
 }
 double dfdt_test_1(double t, double y){
-    return y - t*t + 1 - 2*t;
+    return y - t*t + 1 - 2*t; // or delf_dely * f + delf_delt
 }
 double delfdely_test_1(double t, double y){
     return 1 + t*0 + y*0; // zero multiplication to avoid compilation warnings
 }
 double exact_test_1(double t){
-    return (t+1)*(t+1) - 0.5 * exp(t);
+    return pow(t+1, 2) - 0.5 * exp(t); // y(0)=0.5
+}
+
+double f_test_2(double t, double y){
+    return -2.*y + 3.*exp(t);
+}
+double delfdely_test_2(double t, double y){
+    return -2.;
+}
+double delfdelt_test_2(double t, double y){
+    return 3.*exp(t);
+}
+double dfdt_test_2(double t, double y){
+    return delfdely_test_2(t,y) * f_test_2(t,y) + delfdelt_test_2(t,y);
+}
+double exact_test_2(double t){
+    return 2. * exp(-2.*t) + exp(t);  // y(0)=3
+}
+
+double f_test_3(double t, double y){
+    return 4*cos(t) - 8*sin(t) + 2*y;
+}
+double delfdely_test_3(double t, double y){
+    return 2.;
+}
+double delfdelt_test_3(double t, double y){
+    return -4*sin(t) - 8*cos(t);
+}
+double dfdt_test_3(double t, double y){
+    return delfdely_test_3(t,y) * f_test_3(t,y) + delfdelt_test_3(t,y);
+}
+double exact_test_3(double t){
+    return 4*sin(t) + 3*exp(2*t);  // y(0)=3
 }
 
 void tests_euler(){
@@ -974,6 +1038,78 @@ void tests_euler(){
     test1.estimate_error_euler();
     test1.print_solution();
 
+    printf("### Problem #1 - Increase Convergence ###\n");
+    test1.solve_euler_aitken();
+    test1.calculate_exact_error();
+
+    test1.estimate_Lipschitz();
+    test1.estimate_max_dfdt();
+    printf("L = %g\n",test1.get_Lipschitz());
+    printf("M = %g\n",test1.get_max_dfdt());
+    test1.estimate_error_euler();
+    test1.print_solution();
+    test1.print_solution("test1_aitken.txt");
+
+
+    printf("### Problem #2 ###\n");
+    IVP test2;
+    test2.set_f(f_test_2);
+    test2.set_y_initial(3.);
+    test2.set_t_initial(0.);
+    test2.set_t_end(2.);
+    test2.set_time_steps(10);
+    test2.set_exact(exact_test_2);
+    test2.set_relative_error(false);
+    test2.solve_euler();
+    test2.calculate_exact_error();
+
+    test2.set_extra_search_points(3);
+    test2.set_delfdely(delfdely_test_2);
+    test2.estimate_Lipschitz();
+    test2.set_dfdt(dfdt_test_2);
+    test2.estimate_max_dfdt();
+    test2.estimate_error_euler();
+    test2.print_solution();
+    test2.print_solution("test2.txt");
+
+    printf("   With Aitken\n");
+    test2.solve_euler_aitken();
+    test2.calculate_exact_error();
+    test2.estimate_Lipschitz();
+    test2.estimate_max_dfdt();
+    test2.estimate_error_euler();
+    test2.print_solution();
+    test2.print_solution("test2_aitken.txt");
+
+    printf("### Problem #3 ###\n");
+    IVP test3;
+    test3.set_f(f_test_3);
+    test3.set_y_initial(3.);
+    test3.set_t_initial(0.);
+    test3.set_t_end(2.);
+    test3.set_time_steps(10);
+    test3.set_exact(exact_test_3);
+    test3.set_relative_error(false);
+
+    test3.solve_euler();
+    test3.calculate_exact_error();
+    test3.set_extra_search_points(3);
+    test3.set_delfdely(delfdely_test_3);
+    test3.estimate_Lipschitz();
+    test3.set_dfdt(dfdt_test_3);
+    test3.estimate_max_dfdt();
+    test3.estimate_error_euler();
+    test3.print_solution();
+    test3.print_solution("test3.txt");
+
+    printf("   With Aitken\n");
+    test3.solve_euler_aitken();
+    test3.calculate_exact_error();
+    test3.estimate_Lipschitz();
+    test3.estimate_max_dfdt();
+    test3.estimate_error_euler();
+    test3.print_solution();
+    test3.print_solution("test3_aitken.txt");
 }
 
 class Fetkovich{
@@ -1341,6 +1477,6 @@ void Fetkovich_tests(){
 
 int main(){
     // tests_splines();
-    // tests_euler();
-    Fetkovich_tests();
+    tests_euler();
+    // Fetkovich_tests();
 }
