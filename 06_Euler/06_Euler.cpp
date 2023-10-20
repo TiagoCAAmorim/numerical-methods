@@ -1136,7 +1136,7 @@ void tests_euler(){
     test4.set_t_end(2.);
     test4.set_time_steps(10);
     test4.set_exact(exact_test_4);
-    test4.set_relative_error(false);
+    test4.set_relative_error(true);
 
     test4.solve_euler();
     test4.calculate_exact_error();
@@ -1398,13 +1398,13 @@ void Fetkovich::print_solution(string filename){
 
 
 
-double Newmam_Consolidated_Sandstone(double por){
+double Newman_Consolidated_Sandstone(double por){
     if (por >= 1.){
         por = por / 100.;
     }
     return 97.32E-6 / (1 + 55.8721 * pow(por, 1.428586) ) * 14.50377; // 1/bar
 }
-double Newmam_Limestone(double por){
+double Newman_Limestone(double por){
     if (por >= 1.){
         por = por / 100.;
     }
@@ -1439,7 +1439,7 @@ double f_qw_pr_cte_230(double t){
     aq1.set_aquifer_initial_pore_volume(1*1E6);
     aq1.set_aquifer_initial_pressure(250.);
     aq1.set_aquifer_productivity_index(20.);
-    aq1.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
+    aq1.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
     aq1.set_reservoir_initial_pressure(230.);
 
     return aq1.get_aquifer_flow_rate(t, 230.);
@@ -1453,7 +1453,7 @@ double f_pr_instant_res(double We, double t){
     double Bob = Standing_bo_bubble(api, dg, rgo, temp);
     double Cob = Standing_co_bubble(api, dg, rgo, temp);
     double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newmam_Consolidated_Sandstone(0.2);
+    double Cpor = Newman_Consolidated_Sandstone(0.2);
     double Bw = 1.;
     double Voil = 0.8 * 1*1E6;
     double Vwat = 0.2 * 1*1E6;
@@ -1473,7 +1473,7 @@ double f_qw_instant_res(double t){
     double Bob = Standing_bo_bubble(api, dg, rgo, temp);
     double Cob = Standing_co_bubble(api, dg, rgo, temp);
     double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newmam_Consolidated_Sandstone(0.2);
+    double Cpor = Newman_Consolidated_Sandstone(0.2);
     double Bw = 1.;
     double Voil = 0.8 * 1*1E6;
     double Vwat = 0.2 * 1*1E6;
@@ -1484,7 +1484,7 @@ double f_qw_instant_res(double t){
     double Vpor_0 = VoilIP_0 + VwatIP_0;
 
     double J = 20.;
-    double ct = Newmam_Consolidated_Sandstone(0.03);
+    double ct = Newman_Consolidated_Sandstone(0.03);
     double Wi = 1*1E6;
     double pi = 250.;
     double pr = 230.;
@@ -1499,7 +1499,7 @@ double f_instant_res(double t, double qw){
     double Bob = Standing_bo_bubble(api, dg, rgo, temp);
     double Cob = Standing_co_bubble(api, dg, rgo, temp);
     double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newmam_Consolidated_Sandstone(0.2);
+    double Cpor = Newman_Consolidated_Sandstone(0.2);
     double Bw = 1.;
     double Voil = 0.8 * 1*1E6;
     double Vwat = 0.2 * 1*1E6;
@@ -1510,7 +1510,7 @@ double f_instant_res(double t, double qw){
     double Vpor_0 = VoilIP_0 + VwatIP_0;
 
     double J = 20.;
-    double ct = Newmam_Consolidated_Sandstone(0.03);
+    double ct = Newman_Consolidated_Sandstone(0.03);
     double Wi = 1*1E6;
     double pi = 250.;
     double pr = 230.;
@@ -1524,7 +1524,7 @@ void Fetkovich_tests(){
     aq1.set_aquifer_initial_pore_volume(1*1E6);
     aq1.set_aquifer_initial_pressure(250.);
     aq1.set_aquifer_productivity_index(20.);
-    aq1.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
+    aq1.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
     aq1.set_reservoir_initial_pressure(230.);
     aq1.set_reservoir_pressure_function(f_pr_cte_230);
     aq1.set_exact_water_flow_function(f_qw_pr_cte_230);
@@ -1537,7 +1537,7 @@ void Fetkovich_tests(){
     aq2.set_aquifer_initial_pore_volume(1*1E6);
     aq2.set_aquifer_initial_pressure(250.);
     aq2.set_aquifer_productivity_index(20.);
-    aq2.set_aquifer_total_compressibility(Newmam_Consolidated_Sandstone(0.03));
+    aq2.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
     aq2.set_reservoir_initial_pressure(230.);
     aq2.set_reservoir_pressure_function(f_pr_instant_res);
     aq2.set_exact_water_flow_function(f_qw_instant_res);
@@ -1553,7 +1553,7 @@ void Fetkovich_tests(){
     aq3.set_t_end(300.);
     aq3.set_time_steps(10);
     aq3.set_exact(f_qw_instant_res);
-    aq3.set_relative_error(false);
+    aq3.set_relative_error(true);
 
     aq3.solve_euler();
     aq3.calculate_exact_error();
@@ -1567,12 +1567,8 @@ void Fetkovich_tests(){
     aq3.print_solution("aq3_aitken.txt");
 }
 
-
-
-
-
 int main(){
     // tests_splines();
     tests_euler();
-    // Fetkovich_tests();
+    Fetkovich_tests();
 }
