@@ -1000,6 +1000,8 @@ class Fetkovich{
 
         void print_solution(string filename);
     private:
+        double We_max() const;
+
         double get_aquifer_pressure(double We) const;   // bar
 
         bool has_f_pr() const;
@@ -1059,15 +1061,18 @@ void Fetkovich::set_aquifer_total_compressibility(double value){
 void Fetkovich::set_reservoir_initial_pressure(double value){
     pr_0 = value;
 }
+double Fetkovich::We_max() const{
+    return Wi * ct * pi;
+}
 
 double Fetkovich::get_aquifer_flow_rate(double t, double pr) const{
-    return exp(-J * t / (ct * Wi)) * J * (pi - pr);
+    return exp(-J * t * pi / We_max()) * J * (pi - pr);
 }
 double Fetkovich::get_aquifer_delta_cumulative_flow(double dt, double paq_avg, double pr_avg) const{
-    return (1 - exp(-J * dt / (ct * Wi))) * ct * Wi * (paq_avg - pr_avg);
+    return (1 - exp(-J * dt * pi/ We_max())) * ct * Wi * (paq_avg - pr_avg);
 }
 double Fetkovich::get_aquifer_pressure(double We) const{
-    return pi - We / (ct * Wi);
+    return pi *( 1 - We / We_max());
 }
 
 void Fetkovich::set_reservoir_pressure_function(double (*f)(double, double)){
