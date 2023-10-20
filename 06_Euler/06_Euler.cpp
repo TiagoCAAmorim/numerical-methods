@@ -756,7 +756,7 @@ void IVP::print_solution(){
         return;
     }
 
-    printf("%5s\t%16s\t%16s","#","t","y_aprox");
+    printf("%5s\t%16s\t%16s","i","t","y_aprox");
     if (has_estimated_error()){
         printf("\t%16s","error_limit");
     }
@@ -792,7 +792,7 @@ void IVP::print_solution(string filename){
         return;
     }
 
-    fprintf(outFile,"%5s\t%16s\t%16s","#","t","y_aprox");
+    fprintf(outFile,"%5s\t%16s\t%16s","i","t","y_aprox");
     if (has_estimated_error()){
         fprintf(outFile,"\t%16s","error_limit");
     }
@@ -1054,6 +1054,7 @@ void tests_euler(){
     printf("M = %g\n",test1.get_max_dfdt());
     test1.estimate_error_euler();
     test1.print_solution();
+    test1.print_solution("test1_LM_exact.txt");
 
     printf("### Problem #1 - Increase Convergence ###\n");
     test1.solve_euler_aitken();
@@ -1136,7 +1137,7 @@ void tests_euler(){
     test4.set_t_end(2.);
     test4.set_time_steps(10);
     test4.set_exact(exact_test_4);
-    test4.set_relative_error(true);
+    test4.set_relative_error(false);
 
     test4.solve_euler();
     test4.calculate_exact_error();
@@ -1360,7 +1361,7 @@ void Fetkovich::print_solution(string filename){
         return;
     }
 
-    fprintf(outFile,"%5s\t%16s","#","Time");
+    fprintf(outFile,"%5s\t%16s","i","Time");
     fprintf(outFile,"\t%16s","Res.Pres.");
     fprintf(outFile,"\t%16s","Aq.Pres.");
     fprintf(outFile,"\t%16s","Wat.Flow");
@@ -1529,7 +1530,7 @@ void Fetkovich_tests(){
     aq1.set_reservoir_pressure_function(f_pr_cte_230);
     aq1.set_exact_water_flow_function(f_qw_pr_cte_230);
 
-    aq1.solve_aquifer_flow(300., 10);
+    aq1.solve_aquifer_flow(200., 10);
     aq1.print_solution("aq1.txt");
 
     printf("Instant Pressure Equilibrium Reservoir\n");
@@ -1542,7 +1543,7 @@ void Fetkovich_tests(){
     aq2.set_reservoir_pressure_function(f_pr_instant_res);
     aq2.set_exact_water_flow_function(f_qw_instant_res);
 
-    aq2.solve_aquifer_flow(300., 10);
+    aq2.solve_aquifer_flow(200., 10);
     aq2.print_solution("aq2.txt");
 
     printf("Instant Pressure Equilibrium Reservoir with Euler\n");
@@ -1550,10 +1551,10 @@ void Fetkovich_tests(){
     aq3.set_f(f_instant_res);
     aq3.set_y_initial(400.);
     aq3.set_t_initial(0.);
-    aq3.set_t_end(300.);
+    aq3.set_t_end(200.);
     aq3.set_time_steps(10);
     aq3.set_exact(f_qw_instant_res);
-    aq3.set_relative_error(true);
+    aq3.set_relative_error(false);
 
     aq3.solve_euler();
     aq3.calculate_exact_error();

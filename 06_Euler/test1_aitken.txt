@@ -1,4 +1,4 @@
-    #	               t	         y_aprox	     error_limit	         y_exact	     exact_error
+    i	               t	         y_aprox	     error_limit	         y_exact	     exact_error
     0	               0	             0.5	               0	             0.5	               0
     1	             0.2	    0.8216412214	    0.0401989885	    0.8292986209	  0.007657399546
     2	             0.4	      1.19779461	   0.08929814393	     1.214087651	   0.01629304112

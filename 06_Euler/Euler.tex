@@ -168,7 +168,9 @@ country={Brasil}}
 
 \begin{abstract}
 
-
+    Fetkovich desenvolveu sua proposta de modelagem de aquífero analítico a partir de uma equação diferencial ordinária. Uma simplificação proposta leva o problema para uma EDO de 1$^o$ grau que é resolvida analiticamente. Para aplicação no caso mais geral, Fetkovich propôs um método interativo.
+    Este trabalho se propôs a não realizar a simplificação proposta por Fetkovich e resolver a EDO com o método de Euler. Os testes realizados mostraram que o limitante dos erros do método de Euler é \emph{significativamente} maior que o erro real da aproximação. A aplicação do método de Aitken com 3 diferentes aproximações com o método de Euler gerou bons resultados.
+    Na aplicação do problema proposto o método de Fetkovich se mostrou mais estável e com resultados melhores que o método de Euler associado ao método de Aitken.
 
 \end{abstract}
 
@@ -202,15 +204,15 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-    % A simulação numérica tridimensional é uma das principais ferramentas no estudo da explotação de acumulações de hidrocarbonetos \cite{ReservoirSimulationErtekin}. Um simulador de fluxo em meio poroso é focado na resolução das variáveis de reservatório (pressão e saturações). Apesar de ser possível realizar simulações integradas de simuladores de fluxo em meio poroso com simuladores de fluxo multifásico \cite{10.2118/195477-MS}, o método mais utilizado para realizar o acoplamento das condições de fluxo de fundo de um poço com os limites operacionais das facilidades de produção são as tabelas de fluxo vertical multifásico, mais comumente conhecidas pela sigla do termo em inglês: VFP - \emph{vertical flow performance}\footnote{Também é comum encontrar o termo VLP - \emph{vertical lift performance}.}.
+    O método proposto por Fetkovich para descrever o influxo de um aquífero conectado a um reservatório parte de um modelo de aquífero simples e se desenvolve em uma equação diferencial ordinária (EDO). No método de Fetkovich é feita uma suposição forte, de que a pressão na interface entre o aquífero e o reservatório é constante, o que reduz o problema a uma EDO de 1$^o$ grau. Para aplicação no caso mais geral é proposto um processo iterativo.
 
-    % , desenvolveu um método analítico para descrever o influxo de um aquífero conectado ao um reservatório
+    Este trabalho se propõe a não realizar a simplificação feita por Fetkovich e tentar resolver o mesmo problema utilizando o método de Euler para resolver a EDO.
 
 \section{Metodologia}
 
     \subsection{Método de Fetkovich}
 
-        Um dos modelos de aquífero analítico mais difundidos é o de Fetkovich \cite{schlumberger2009technical} \cite{computer2022cmg}. O método de Fetkovich se baseia em um modelo transiente, e em muitos casos se aproxima das respostas do mais sofisticado método de van Everdingen-Hurst \cite{VanEverdingen-Hurst}. A vantagem do método de Fetkovich é a simplicidade de sua aplicação, pois não depende de técnicas de superposição.
+        Um dos modelos de aquífero analítico mais difundidos é o de Fetkovich \cite{schlumberger2009technical} \cite{computer2022cmg} \cite{rosa2006engenharia}. O método de Fetkovich se baseia em um modelo transiente, e em muitos casos se aproxima das respostas do mais sofisticado método de van Everdingen-Hurst \cite{VanEverdingen-Hurst}. A vantagem do método de Fetkovich é a simplicidade de sua aplicação, pois não depende de técnicas de superposição.
 
         O modelo de Fetkovich assume que a contribuição de um aquífero pode ser adequadamente modelada por um índice de produtividade, ou seja, que o influxo de água do aquífero para o reservatório é diretamente proporcional à diferença entre a pressão média do aquífero e a pressão na fronteira entre o reservatório e o aquífero \cite{fetkovich1971simplified}. O método negligencia quaisquer efeitos transientes no aquífero. O efeito desta premissa será maior em casos onde existe uma \emph{rápida} variação na pressão na interface entre o reservatório e o aquífero, fazendo com que os resultados do método de Fetkovich se desviem dos resultados mais rigorosos do método de van Everdingen-Hurst \cite{AHMED2019663}. Para problemas em que a variação desta pressão é mais gradual, o método de Fetkovich apresenta bons resultados.
 
@@ -381,7 +383,7 @@ country={Brasil}}
             \frac{dW_e}{dt} &= J (p_{i,aq} - p_{res}) e^{J \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  t} \label{eq:dwedtres}
         \end{align}
 
-\section{Implementação}
+\section{Implementação} \label{sec:implementacao}
 
         Todo o código utilizado nesta análise foi desenvolvido em C++. Foram criados objetos próprios para cada elemento integrante do problema proposto:
 
@@ -391,8 +393,13 @@ country={Brasil}}
                 \item O usuário precisa especificar $f(t,y)$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y(a)$.
                 \item Opcionalmente o usuário pode prover $\frac{\partial f}{\partial y}$ e $\frac{df}{dt}$ para que seja estimado o limitante do erro de aproximação. O usuário também pode prover diretamente os valores de $L$ e $M$.
                 \item O usuário também pode especificar a função exata, para calcular o erro de aproximação do método de Euler.
-                \item Além do método de Euler \emph{tradicional}, foi implementada uma rotina que tenta melhorar as respostas utilizando o método de Aitken. Nesta última opção o método de Euler é feito com 3 diferentes passos de tempo: $n$, $2 n$ e $3 n$.
+                \item Além do método de Euler \emph{tradicional}, foi implementada uma rotina que tenta melhorar as respostas utilizando o método de Aitken. Nesta última opção o método de Euler é feito com 3 diferentes passos de tempo: $n$, $2 n$ e $3 n$. Nos passos de tempo comuns entre as 3 resoluções é aplicado o método de Aitken\footnote{$w^{(n)}_j$ é a aproximação de $y(t_j)$ de uma aplicação do método de Euler com $n$ passos.}:
             \end{itemize}
+
+                \begin{align}
+                    \widehat{w}_j = w^{(n)}_j - \frac{\left(w^{(2n)}_{2j} - w^{(n)}_j\right) ^2}{w^{(3n)}_{3j}-2w^{(2n)}_{2j}+w^{(n)}_j} \label{eq:aitken}
+                \end{align}
+
             \item[Spline] Classe que constrói uma função interpoladora do tipo Spline natural a um conjunto de pontos $(x,y)$ \cite{relatoriosplinesnaturais}.
             \begin{itemize}
                 \item Os valores das funções que definem $L$ e $M$ dependem de $y(t)$ (que é aproximado por $w$). Estas funções só podem ser avaliadas nos $n$ valores de $w_i$ que são calculados pelo método de Euler.
@@ -407,23 +414,180 @@ country={Brasil}}
         Para facilitar a estimativa de parâmetros de aquífero e reservatório foram implementadas algumas correlações \emph{clássicas}:
 
         \begin{itemize}
-            \item Compressibilidade de rocha por Newman
-            \item
+            \item Newman \cite{10.2118/3835-PA}: Compressibilidade de rocha.
+            \item Standing \cite{standing1952volumetric}: Pressão de bolha, compressibilidade do óleo na pressão de bolha e fator volume de formação do óleo na pressão de bolha.
         \end{itemize}
 
 
 \section{Resultados}
 
-        Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
+        Antes de aplicar o método de Euler ao problema proposto, foram avaliados alguns problemas de valor inicial com resposta exata conhecida:
 
+        \begin{enumerate}
+            \item $y' = y - t^2 + 1, \quad 0 \leq t \leq  2, \quad y(0) = 0.5$ \label{item:pvi1}
+            \item $y' = -2y + 3 e^t, \quad 0 \leq t \leq  2, \quad y(0) = 3.0$ \label{item:pvi2}
+            \item $y' = 4 cos(t) - 8 sin(t) + 2 y, \quad 0 \leq t \leq  2, \quad y(0) = 3.0$ \label{item:pvi3}
+        \end{enumerate}
 
+        Os resultados exatos de cada problema são, respectivamente:
+
+        \begin{enumerate}
+            \item $y = (t+1)^2 - 0.5 e^t$
+            \item $y = 2 e^{-2 t} + e^t$
+            \item $y = 4 sin(t) + 3 e^{2 t}$
+        \end{enumerate}
+
+        Todos os problemas foram resolvidos com 10 passos de tempo. As figuras \ref{fig:teste1}, \ref{fig:teste2} e \ref{fig:teste3} mostram que o erro do método de Euler pode ser significativo. As figuras também mostram que o uso do método de Aitken teve um impacto positivo na qualidade das respostas.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$y(t)$},
+                    legend style={at={(0.55,0.85)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=y_exact] {test1.txt};
+                    \addplot[color=black, solid, smooth, mark=o] table [x=t, y=y_aprox] {test1.txt};
+                    \addplot[color=black, solid, smooth, mark=*] table [x=t, y=y_aprox] {test1_aitken.txt};
+                    \legend{$Exato$, $Euler$, $Euler+Aitken$};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Aproximação com o método de Euler do PVI número \ref{item:pvi1}.}
+            \label{fig:teste1}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$y(t)$},
+                    legend style={at={(0.55,0.85)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=y_exact] {test2.txt};
+                    \addplot[color=black, solid, smooth, mark=o] table [x=t, y=y_aprox] {test2.txt};
+                    \addplot[color=black, solid, smooth, mark=*] table [x=t, y=y_aprox] {test2_aitken.txt};
+                    \legend{$Exato$, $Euler$, $Euler+Aitken$};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Aproximação com o método de Euler do PVI número \ref{item:pvi2}.}
+            \label{fig:teste2}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$y(t)$},
+                    legend style={at={(0.55,0.85)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=y_exact] {test3.txt};
+                    \addplot[color=black, solid, smooth, mark=o] table [x=t, y=y_aprox] {test3.txt};
+                    \addplot[color=black, solid, smooth, mark=*] table [x=t, y=y_aprox] {test3_aitken.txt};
+                    \legend{$Exato$, $Euler$, $Euler+Aitken$};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Aproximação com o método de Euler do PVI número \ref{item:pvi3}.}
+            \label{fig:teste3}
+        \end{figure}
+
+        A figura \ref{fig:teste1erros} mostra a diferença entre o erro real das aproximações feitas com o método de Euler e o limitante do erro. Observa-se que o limitante do erro é \emph{significativamente} maior que o erro real. O limitante se mostrou uma pobre estimativa do erro.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|y(t) - w|$},
+                    legend style={at={(0.70,0.80)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth] table [x=t, y=exact_error] {test1.txt};
+                    \addplot[color=black, solid, smooth, mark=o] table [x=t, y=error_limit] {test1.txt};
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test1_aitken.txt};
+                    \addplot[color=black, solid, smooth, thick, mark=o] table [x=t, y=error_limit] {test1_aitken.txt};
+                    \legend{$|y-w_{Euler}|$, $Limitante_{Euler}$, $|y-w_{Euler+Aitken}|$, $Limitante_{Euler+Aitken}$};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Estimativa do erro de aproximação com o método de Euler para o PVI número \ref{item:pvi1}.}
+            \label{fig:teste1erros}
+        \end{figure}
+
+        Em função dos resultados dos testes iniciais o problema proposto foi resolvido utilizando o método de Euler com o método de Aitken. Foram utilizados os seguintes parâmetros de reservatório junto com as correlações listadas final da seção \ref{sec:implementacao}:
+
+        \begin{itemize}
+            \item Fluidos
+            \begin{itemize}
+                \item $API = 25^oapi$
+                \item $d_g = 0.6$
+                \item $RGO = 60 \, m^3/m^3$
+                \item $T_{res} = 60^oC$
+                \item $Bw = 1$
+            \end{itemize}
+            \item Parâmetros de reservatório
+            \begin{itemize}
+                \item $N = 0.8 \, 10^6 \, m^3$
+                \item $W_{i,res} = 0.2 \, 10^6 \, m^3$
+                \item $p_{i,res} = 230 \, bar$
+                \item $\phi = 20\%$ (para cálculo da compressibilidade de rocha)
+            \end{itemize}
+            \item Parâmetros do aquífero
+            \begin{itemize}
+                \item $J = 20 \, m^3/d/bar$
+                \item $\phi = 3\%$ (para cálculo da compressibilidade de rocha)
+                \item $W_{i,aq} = 1.0 \, 10^6 \, m^3$
+                \item $p_{i,aq} = 250 \, bar$
+            \end{itemize}
+        \end{itemize}
+
+        Foi avaliado o comportamento do aquífero até 200 dias, em 10 passos de tempo. As figuras \ref{fig:testeaquifero} e \ref{fig:testeaquiferoerro} mostram que o melhor resultado foi com o método de Fetkovich. O método de Euler teve um resultado muito ruim. O procedimento do Método de Euler associado ao método de Aitken teve resultados comparáveis ao método de Fetkovich até \emph{metade} do período avaliado, quando começou a divergir do resultado exato e depois estimou valores de vazão negativos.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$Qw (m3/d)$},
+                    legend style={at={(0.55,0.25)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Time, y=ExactQw] {aq2.txt};
+                    \addplot[color=black, solid, smooth, mark=diamond] table [x=Time, y=Wat.Flow] {aq2.txt};
+                    \addplot[color=black, solid, smooth, mark=o] table [x=t, y=y_aprox] {aq3.txt};
+                    \addplot[color=black, solid, smooth, mark=*] table [x=t, y=y_aprox] {aq3_aitken.txt};
+                    \legend{$Exato$, $Fetkovich$, $Euler$, $Euler+Aitken$};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Aproximação com o método de Fetkovich e com o método de Euler de um aquífero conectado a um reservatório de óleo.}
+            \label{fig:testeaquifero}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|Qw - w| (m3/d)$},
+                    legend style={at={(0.95,0.75)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, mark=diamond] table [x=Time, y=Error] {aq2.txt};
+                    \addplot[color=black, solid, smooth, mark=o] table [x=t, y=exact_error] {aq3.txt};
+                    \addplot[color=black, solid, smooth, mark=*] table [x=t, y=exact_error] {aq3_aitken.txt};
+                    \legend{$Fetkovich$, $Euler$, $Euler+Aitken$};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Erro das aproximações com o método de Fetkovich e com o método de Euler de um aquífero conectado a um reservatório de óleo.}
+            \label{fig:testeaquiferoerro}
+        \end{figure}
 
 
         O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/06_Euler/06_Euler.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
 
     \section{Conclusão}
 
-        O desempenho de splines naturais para interpolar valores de pressão de fundo a partir de uma tabela de VFP foi, em geral, pior que o da interpolação linear. Ambos métodos apresentaram dificuldade em estimar valores na região de baixas vazões.
+        Os resultados indicaram que o método de Euler fornece resultados pobres e com pouco controle da qualidade das respostas. Os limitantes dos erros se mostraram muito grandes e de pouca utilidade. Os erros do método de Euler se mostraram significativos para o número de passos utilizado. O método de Aitken se mostrou efetivo na melhora das respostas estimadas com o método de Euler.
+
+        Para um mesmo número de passos de tempo, os resultados do método de Fetkovich se mostraram muito melhores que os resultados do método de Euler. O método de Fetkovivh tem a vantagem de utizar relações constitutivas entre as variáveis do problema para melhorar as suas estimativas.
 
     % \label{}
 
@@ -461,6 +625,7 @@ country={Brasil}}
     \item[$(\Delta W_e)_j$:]Influxo de água entre os tempos $t_{j-1}$ e $t_j$ ($m^3$).
     \item[$W_{i,aq}$:]Volume inicial do aquífero ($m^3$).
     \item[$W_{res}$:]Volume de água no reservatório ($m^3$).
+    \item[$W_{i,res}$:]Volume inicial de água no reservatório ($m^3$).
 \end{description}
 
 
