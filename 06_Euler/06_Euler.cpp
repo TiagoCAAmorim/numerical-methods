@@ -990,6 +990,23 @@ double exact_test_3(double t){
     return 4*sin(t) + 3*exp(2*t);  // y(0)=3
 }
 
+double a = 3.;
+double f_test_4(double t, double y){
+    return -a*y;
+}
+double delfdely_test_4(double t, double y){
+    return -a;
+}
+double delfdelt_test_4(double t, double y){
+    return 0.;
+}
+double dfdt_test_4(double t, double y){
+    return delfdely_test_4(t,y) * f_test_4(t,y) + delfdelt_test_4(t,y);
+}
+double exact_test_4(double t){
+    return 3.*exp(-a*t);  // y(0)=3
+}
+
 void tests_euler(){
     printf("### Verify error catching ###\n");
     IVP test_errors;
@@ -1110,6 +1127,36 @@ void tests_euler(){
     test3.estimate_error_euler();
     test3.print_solution();
     test3.print_solution("test3_aitken.txt");
+
+    printf("### Problem #4 ###\n");
+    IVP test4;
+    test4.set_f(f_test_4);
+    test4.set_y_initial(3.);
+    test4.set_t_initial(0.);
+    test4.set_t_end(2.);
+    test4.set_time_steps(10);
+    test4.set_exact(exact_test_4);
+    test4.set_relative_error(false);
+
+    test4.solve_euler();
+    test4.calculate_exact_error();
+    test4.set_extra_search_points(3);
+    test4.set_delfdely(delfdely_test_4);
+    test4.estimate_Lipschitz();
+    test4.set_dfdt(dfdt_test_4);
+    test4.estimate_max_dfdt();
+    test4.estimate_error_euler();
+    test4.print_solution();
+    test4.print_solution("test4.txt");
+
+    printf("   With Aitken\n");
+    test4.solve_euler_aitken();
+    test4.calculate_exact_error();
+    test4.estimate_Lipschitz();
+    test4.estimate_max_dfdt();
+    test4.estimate_error_euler();
+    test4.print_solution();
+    test4.print_solution("test4_aitken.txt");
 }
 
 class Fetkovich{
@@ -1526,6 +1573,6 @@ void Fetkovich_tests(){
 
 int main(){
     // tests_splines();
-    // tests_euler();
-    Fetkovich_tests();
+    tests_euler();
+    // Fetkovich_tests();
 }
