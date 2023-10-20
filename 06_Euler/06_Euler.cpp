@@ -1444,8 +1444,35 @@ double f_qw_instant_res(double t){
 
     return exp(-J * t *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor))) * J * (pi - pr);
 }
+double f_instant_res(double t, double qw){
+    double api = 25.;
+    double dg = 0.6;
+    double rgo = 60.;
+    double temp = 65.;
+    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
+    double Cob = Standing_co_bubble(api, dg, rgo, temp);
+    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
+    double Cpor = Newmam_Consolidated_Sandstone(0.2);
+    double Bw = 1.;
+    double Voil = 0.8 * 1*1E6;
+    double Vwat = 0.2 * 1*1E6;
+    double p_ini = 230.;
+
+    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
+    double VwatIP_0 = Vwat * Bw;
+    double Vpor_0 = VoilIP_0 + VwatIP_0;
+
+    double J = 20.;
+    double ct = Newmam_Consolidated_Sandstone(0.03);
+    double Wi = 1*1E6;
+    double pi = 250.;
+    double pr = 230.;
+
+    return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw;
+}
 
 void Fetkovich_tests(){
+    printf("Constant Pressure Reservoir\n");
     Fetkovich aq1;
     aq1.set_aquifer_initial_pore_volume(1*1E6);
     aq1.set_aquifer_initial_pressure(250.);
@@ -1458,6 +1485,7 @@ void Fetkovich_tests(){
     aq1.solve_aquifer_flow(300., 10);
     aq1.print_solution("aq1.txt");
 
+    printf("Instant Pressure Equilibrium Reservoir\n");
     Fetkovich aq2;
     aq2.set_aquifer_initial_pore_volume(1*1E6);
     aq2.set_aquifer_initial_pressure(250.);
@@ -1469,6 +1497,27 @@ void Fetkovich_tests(){
 
     aq2.solve_aquifer_flow(300., 10);
     aq2.print_solution("aq2.txt");
+
+    printf("Instant Pressure Equilibrium Reservoir with Euler\n");
+    IVP aq3;
+    aq3.set_f(f_instant_res);
+    aq3.set_y_initial(400.);
+    aq3.set_t_initial(0.);
+    aq3.set_t_end(300.);
+    aq3.set_time_steps(10);
+    aq3.set_exact(f_qw_instant_res);
+    aq3.set_relative_error(false);
+
+    aq3.solve_euler();
+    aq3.calculate_exact_error();
+    aq3.print_solution();
+    aq3.print_solution("aq3.txt");
+
+    printf("   With Aitken\n");
+    aq3.solve_euler_aitken();
+    aq3.calculate_exact_error();
+    aq3.print_solution();
+    aq3.print_solution("aq3_aitken.txt");
 }
 
 
@@ -1477,6 +1526,6 @@ void Fetkovich_tests(){
 
 int main(){
     // tests_splines();
-    tests_euler();
-    // Fetkovich_tests();
+    // tests_euler();
+    Fetkovich_tests();
 }
