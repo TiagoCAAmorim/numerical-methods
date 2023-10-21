@@ -204,17 +204,17 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-    O método proposto por Fetkovich para descrever o influxo de um aquífero conectado a um reservatório parte de um modelo de aquífero simples e se desenvolve em uma equação diferencial ordinária (EDO). No método de Fetkovich é feita uma suposição forte, de que a pressão na interface entre o aquífero e o reservatório é constante, o que reduz o problema a uma EDO de 1$^o$ grau. Para aplicação no caso mais geral é proposto um processo iterativo.
+    O método proposto por Fetkovich para descrever o influxo de um aquífero conectado a um reservatório parte de um modelo de aquífero simples e se desenvolve em uma equação diferencial ordinária (EDO). No método de Fetkovich é feita uma suposição forte, de que a pressão na interface entre o aquífero e o reservatório é constante, o que reduz o problema a uma EDO de 1$^o$ grau. Para aplicação no caso mais geral é proposto um processo interativo.
 
-    Este trabalho se propõe a não realizar a simplificação feita por Fetkovich e tentar resolver o mesmo problema utilizando o método de Euler para resolver a EDO.
+    Este trabalho se propõe a não realizar a simplificação feita por Fetkovich e aplicar o Método de Euler para resolver a EDO.
 
 \section{Metodologia}
 
     \subsection{Método de Fetkovich}
 
-        Um dos modelos de aquífero analítico mais difundidos é o de Fetkovich \cite{schlumberger2009technical} \cite{computer2022cmg} \cite{rosa2006engenharia}. O método de Fetkovich se baseia em um modelo transiente, e em muitos casos se aproxima das respostas do mais sofisticado método de van Everdingen-Hurst \cite{VanEverdingen-Hurst}. A vantagem do método de Fetkovich é a simplicidade de sua aplicação, pois não depende de técnicas de superposição.
+        Um dos modelos de aquífero analítico mais difundidos é o de Fetkovich \cite{schlumberger2009technical} \cite{computer2022cmg} \cite{rosa2006engenharia}. O método de Fetkovich se baseia em um modelo transiente, e em muitos casos se aproxima das respostas do método de van Everdingen-Hurst \cite{VanEverdingen-Hurst}. A vantagem do método de Fetkovich é a simplicidade de sua aplicação, pois não depende de técnicas de superposição.
 
-        O modelo de Fetkovich assume que a contribuição de um aquífero pode ser adequadamente modelada por um índice de produtividade, ou seja, que o influxo de água do aquífero para o reservatório é diretamente proporcional à diferença entre a pressão média do aquífero e a pressão na fronteira entre o reservatório e o aquífero \cite{fetkovich1971simplified}. O método negligencia quaisquer efeitos transientes no aquífero. O efeito desta premissa será maior em casos onde existe uma \emph{rápida} variação na pressão na interface entre o reservatório e o aquífero, fazendo com que os resultados do método de Fetkovich se desviem dos resultados mais rigorosos do método de van Everdingen-Hurst \cite{AHMED2019663}. Para problemas em que a variação desta pressão é mais gradual, o método de Fetkovich apresenta bons resultados.
+        O modelo de Fetkovich assume que a contribuição de um aquífero pode ser adequadamente modelada por um índice de produtividade, ou seja, que o influxo de água do aquífero para o reservatório é diretamente proporcional à diferença entre a pressão média do aquífero e a pressão na interface entre o reservatório e o aquífero \cite{fetkovich1971simplified}. O método negligencia quaisquer efeitos transientes no aquífero. O efeito desta premissa será maior em casos onde existe uma \emph{rápida} variação na pressão na interface entre o reservatório e o aquífero, fazendo com que os resultados do método de Fetkovich se desviem dos resultados mais rigorosos do método de van Everdingen-Hurst \cite{AHMED2019663}. Para problemas em que a variação desta pressão é mais gradual, o método de Fetkovich apresenta bons resultados.
 
         O método primeiramente assume um índice de produtividade constante para o aquífero:
 
@@ -383,6 +383,9 @@ country={Brasil}}
             \frac{dW_e}{dt} &= J (p_{i,aq} - p_{res}) e^{J \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  t} \label{eq:dwedtres}
         \end{align}
 
+        Desta forma será possível comparar a resposta exata (\ref{eq:dwedtres}) com as aproximações do método de Fetkovich (\ref{eq:deltawe}) e do método de Euler (\ref{eq:dwe2dt2res}).
+
+
 \section{Implementação} \label{sec:implementacao}
 
         Todo o código utilizado nesta análise foi desenvolvido em C++. Foram criados objetos próprios para cada elemento integrante do problema proposto:
@@ -390,10 +393,10 @@ country={Brasil}}
         \begin{description}
             \item[IVP] Classe que define um problema de valor inicial na forma \ref{eq:pvi}.
             \begin{itemize}
-                \item O usuário precisa especificar $f(t,y)$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y(a)$.
+                \item O usuário precisa especificar $f(t,y)$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y(a)$ (valor inicial).
                 \item Opcionalmente o usuário pode prover $\frac{\partial f}{\partial y}$ e $\frac{df}{dt}$ para que seja estimado o limitante do erro de aproximação. O usuário também pode prover diretamente os valores de $L$ e $M$.
                 \item O usuário também pode especificar a função exata, para calcular o erro de aproximação do método de Euler.
-                \item Além do método de Euler \emph{tradicional}, foi implementada uma rotina que tenta melhorar as respostas utilizando o método de Aitken. Nesta última opção o método de Euler é feito com 3 diferentes passos de tempo: $n$, $2 n$ e $3 n$. Nos passos de tempo comuns entre as 3 resoluções é aplicado o método de Aitken\footnote{$w^{(n)}_j$ é a aproximação de $y(t_j)$ de uma aplicação do método de Euler com $n$ passos.}:
+                \item Além do método de Euler \emph{tradicional}, foi implementada uma rotina que tenta melhorar as respostas utilizando o método de Aitken. Nesta opção o método de Euler é feito com 3 diferentes passos de tempo: $n$, $2 n$ e $3 n$. Nos passos de tempo comuns entre as 3 resoluções é aplicado o método de Aitken\footnote{$w^{(n)}_j$ é a aproximação de $y(t_j)$ de uma aplicação do método de Euler com $n$ passos.}:
             \end{itemize}
 
                 \begin{align}
@@ -405,7 +408,7 @@ country={Brasil}}
                 \item Os valores das funções que definem $L$ e $M$ dependem de $y(t)$ (que é aproximado por $w$). Estas funções só podem ser avaliadas nos $n$ valores de $w_i$ que são calculados pelo método de Euler.
                 \item Esta classe foi incluída no código para incrementar a busca pelos valores de $L$ e $M$. São criadas splines a partir dos valores calculados de cada função, de modo que um número maior de pontos podem ser avaliados.
             \end{itemize}
-            \item[Fetkovich] Classe resolve o comportamento de um aquífero como proposto por Fetkovich.
+            \item[Fetkovich] Classe que resolve o comportamento de um aquífero como proposto por Fetkovich.
             \begin{itemize}
                 \item O usuário precisa definir as características do aquífero e prover uma função que retorne a pressão na interface do aquífero com o reservatório. Esta função depende do tempo e do influxo acumulado de água do aquífero para o reservatório ($W_e$).
             \end{itemize}
@@ -414,8 +417,8 @@ country={Brasil}}
         Para facilitar a estimativa de parâmetros de aquífero e reservatório foram implementadas algumas correlações \emph{clássicas}:
 
         \begin{itemize}
-            \item Newman \cite{10.2118/3835-PA}: Compressibilidade de rocha.
-            \item Standing \cite{standing1952volumetric}: Pressão de bolha, compressibilidade do óleo na pressão de bolha e fator volume de formação do óleo na pressão de bolha.
+            \item Newman: Compressibilidade de rocha \cite{10.2118/3835-PA}.
+            \item Standing: Pressão de bolha, compressibilidade do óleo na pressão de bolha e fator volume de formação do óleo na pressão de bolha \cite{standing1952volumetric}.
         \end{itemize}
 
 
@@ -437,7 +440,7 @@ country={Brasil}}
             \item $y = 4 sin(t) + 3 e^{2 t}$
         \end{enumerate}
 
-        Todos os problemas foram resolvidos com 10 passos de tempo. As figuras \ref{fig:teste1}, \ref{fig:teste2} e \ref{fig:teste3} mostram que o erro do método de Euler pode ser significativo. As figuras também mostram que o uso do método de Aitken teve um impacto positivo na qualidade das respostas.
+        Todos os problemas de valor inicial foram resolvidos com 10 passos de tempo. As figuras \ref{fig:teste1}, \ref{fig:teste2} e \ref{fig:teste3} mostram que o erro do método de Euler pode ser significativo. As figuras também mostram que o uso do método de Aitken teve um impacto positivo na qualidade das respostas.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -514,7 +517,7 @@ country={Brasil}}
             \label{fig:teste1erros}
         \end{figure}
 
-        Em função dos resultados dos testes iniciais o problema proposto foi resolvido utilizando o método de Euler com o método de Aitken. Foram utilizados os seguintes parâmetros de reservatório junto com as correlações listadas final da seção \ref{sec:implementacao}:
+        Em função dos resultados dos testes iniciais o problema proposto foi resolvido utilizando tanto o método de Euler como o método de Euler em conjunto com o método de Aitken. Foram utilizados os seguintes parâmetros de reservatório, junto com as correlações listadas final da seção \ref{sec:implementacao}:
 
         \begin{itemize}
             \item Fluidos
@@ -541,7 +544,7 @@ country={Brasil}}
             \end{itemize}
         \end{itemize}
 
-        Foi avaliado o comportamento do aquífero até 200 dias, em 10 passos de tempo. As figuras \ref{fig:testeaquifero} e \ref{fig:testeaquiferoerro} mostram que o melhor resultado foi com o método de Fetkovich. O método de Euler teve um resultado muito ruim. O procedimento do Método de Euler associado ao método de Aitken teve resultados comparáveis ao método de Fetkovich até \emph{metade} do período avaliado, quando começou a divergir do resultado exato e depois estimou valores de vazão negativos.
+        Foi avaliado o comportamento do aquífero até 200 dias, em 10 passos de tempo. As figuras \ref{fig:testeaquifero} e \ref{fig:testeaquiferoerro} mostram que o melhor resultado foi com o método de Fetkovich. O método de Euler teve um resultado ruim. O procedimento do Método de Euler associado ao método de Aitken teve resultados comparáveis ao método de Fetkovich até \emph{metade} do período avaliado, quando começou a divergir do resultado exato e depois estimou valores de vazão negativos.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
