@@ -15,6 +15,14 @@ double* copy_array(double *original, int number_points){
     return out;
 }
 
+void Sprintf(FILE* file, const char* message){
+    if (file == nullptr){
+        fprintf(file, "%s", message);
+    } else{
+        printf("%s", message);
+    }
+}
+
 class Spline{
     public:
         Spline();
@@ -1159,10 +1167,11 @@ double exact_test_4(double t){
 }
 
 void test_rungekutta(IVP ivp, string problemname, string filename){
-    ivp.set_relative_error(false);
     const char* name = problemname.c_str();
+    ivp.set_relative_error(false);
+
     printf(" Problem %s: Euler\n", name);
-    ivp.set_time_steps(60);
+    ivp.set_time_steps(240);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
@@ -1171,34 +1180,34 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.print_solution(filename+"_euler.txt");
 
     printf(" Problem %s: Euler 1/2 Time-Steps\n", name);
-    ivp.set_time_steps(30);
+    ivp.set_time_steps(120);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_euler_n0.5.txt");
+    ivp.print_solution(filename+"_euler_n0.500.txt");
 
-    printf(" Problem %s: Euler 1/4 Time-Steps\n", name);
-    ivp.set_time_steps(20);
+    printf(" Problem %s: Euler 1/3 Time-Steps\n", name);
+    ivp.set_time_steps(80);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_euler_n0.25.txt");
+    ivp.print_solution(filename+"_euler_n0.333.txt");
 
-    printf(" Problem %s: Euler 1/8 Time-Steps\n", name);
-    ivp.set_time_steps(10);
+    printf(" Problem %s: Euler 1/6 Time-Steps\n", name);
+    ivp.set_time_steps(40);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_euler_n0.125.txt");
+    ivp.print_solution(filename+"_euler_n0.167.txt");
 
     printf(" Problem %s: Euler+Aitken\n", name);
-    ivp.set_time_steps(10);
+    ivp.set_time_steps(40);
     ivp.reset_f_evaluations();
     ivp.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
@@ -1206,14 +1215,50 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.print_solution();
     ivp.print_solution(filename+"_euler_aitken.txt");
 
-    printf(" Problem %s: RungeKutta\n", name);
-    ivp.set_time_steps(15);
+    printf(" Problem %s: Runge-Kutta\n", name);
+    ivp.set_time_steps(60);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta.txt");
+
+    printf(" Problem %s: Runge-Kutta 1/2 Time-Steps\n", name);
+    ivp.set_time_steps(30);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_rungekutta_n0.500.txt");
+
+    printf(" Problem %s: Runge-Kutta 1/3 Time-Steps\n", name);
+    ivp.set_time_steps(20);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_rungekutta_n0.333.txt");
+
+    printf(" Problem %s: Runge-Kutta 1/6 Time-Steps\n", name);
+    ivp.set_time_steps(10);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_rungekutta_n0.167.txt");
+
+    printf(" Problem %s: Runge-Kutta + Aikten\n", name);
+    ivp.set_time_steps(10);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta_aitken();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_rungekutta_aitken.txt");
 }
 
 void tests_rungekutta(){
@@ -1272,12 +1317,16 @@ class Fetkovich{
         void solve_aquifer_flow(double t_end, int steps);
         double* get_result_times() const; // d
         double* get_result_water_flow() const; // m3/d
-        double* get_result_cumulative_flow_rate() const; // m3
+        double* get_result_cumulative_flow() const; // m3
         double* get_result_aquifer_pressure() const; // bar
         double* get_result_reservoir_pressure() const; // bar
 
         void print_solution(string filename);
+
+        int get_f_evaluations() const;
     private:
+        void reset_f_evaluations();
+
         double We_max() const;
 
         double get_aquifer_pressure(double We) const;   // bar
@@ -1307,6 +1356,8 @@ class Fetkovich{
 
         double (*f_exact_pointer)(double);
 
+        int f_evaluations;
+
         // double Qw;
         // double We;
         // double Pa;
@@ -1321,7 +1372,8 @@ Fetkovich::Fetkovich():
     We_pointer(nullptr),
     p_aquifer_pointer(nullptr),
     p_reservoir_pointer(nullptr),
-    f_exact_pointer(nullptr)
+    f_exact_pointer(nullptr),
+    f_evaluations(0)
     {};
 
 void Fetkovich::set_aquifer_productivity_index(double value){
@@ -1381,6 +1433,13 @@ double Fetkovich::get_exact(double t) const{
     return f_exact_pointer(t);
 }
 
+int Fetkovich::get_f_evaluations() const{
+    return f_evaluations;
+}
+void Fetkovich::reset_f_evaluations(){
+    f_evaluations = 0;
+}
+
 bool Fetkovich::has_solution() const{
     return t_pointer != nullptr;
 }
@@ -1412,6 +1471,7 @@ void Fetkovich::solve_aquifer_flow(double t_end, int steps){
         while (abs(pr_avg_old - pr_avg) > eps && count<=20){
             pr_avg_old = pr_avg;
             dWe = get_aquifer_delta_cumulative_flow(dt, p_aq[i-1], pr_avg);
+            f_evaluations++;
             We[i] = We[i-1] + dWe;
             p_res[i] = get_f_pr(We[i], t[i]);
             pr_avg = (p_res[i] + p_res[i-1])/2;
@@ -1433,7 +1493,7 @@ double* Fetkovich::get_result_times() const{
 double* Fetkovich::get_result_water_flow() const{
     return Qw_pointer;
 }
-double* Fetkovich::get_result_cumulative_flow_rate() const{
+double* Fetkovich::get_result_cumulative_flow() const{
     return We_pointer;
 }
 double* Fetkovich::get_result_aquifer_pressure() const{
@@ -1443,16 +1503,19 @@ double* Fetkovich::get_result_reservoir_pressure() const{
     return p_reservoir_pointer;
 }
 
-void Fetkovich::print_solution(string filename){
+void Fetkovich::print_solution(string filename=""){
     if (!has_solution()){
         printf("There is no solution to print.\n");
         return;
     }
 
-    FILE* outFile = fopen(filename.c_str(), "w");
-    if (outFile == nullptr) {
-        printf("Coud not create file: %s\n",filename.c_str());
-        return;
+    FILE* outFile = nullptr;
+    if (filename != ""){
+        outFile = fopen(filename.c_str(), "w");
+        if (outFile == nullptr) {
+            printf("Coud not create file: %s\n",filename.c_str());
+            return;
+        }
     }
 
     fprintf(outFile,"%5s\t%16s","i","Time");
@@ -1624,6 +1687,7 @@ void Fetkovich_tests(){
     aqFet.set_exact_water_flow_function(f_qw_instant_res);
 
     aqFet.solve_aquifer_flow(200., 40);
+    aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
     printf("Instant Pressure Equilibrium Reservoir with Euler\n");
@@ -1632,34 +1696,37 @@ void Fetkovich_tests(){
     aqIVP1.set_y_initial(400.);
     aqIVP1.set_t_initial(0.);
     aqIVP1.set_t_end(200.);
-    aqIVP1.set_time_steps(40);
     aqIVP1.set_exact(f_qw_instant_res);
-    aqIVP1.set_time_steps(10);
-    aqIVP1.set_relative_error(false);
+    test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
 
-    aqIVP1.solve_euler();
-    aqIVP1.calculate_exact_error();
-    aqIVP1.print_solution();
-    aqIVP1.print_solution("aq1_euler.txt");
 
-    printf("   With Aitken\n");
-    aqIVP1.solve_euler_aitken();
-    aqIVP1.calculate_exact_error();
-    aqIVP1.print_solution();
-    aqIVP1.print_solution("aq1_euler_aitken.txt");
+    // aqIVP1.set_time_steps(40);
+    // aqIVP1.set_time_steps(10);
 
-    aqIVP1.set_time_steps(10);
-    printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta\n");
-    aqIVP1.solve_rungekutta();
-    aqIVP1.calculate_exact_error();
-    aqIVP1.print_solution();
-    aqIVP1.print_solution("aq1_rungekutta.txt");
+    // aqIVP1.set_relative_error(false);
+    // aqIVP1.solve_euler();
+    // aqIVP1.calculate_exact_error();
+    // aqIVP1.print_solution();
+    // aqIVP1.print_solution("aq1_euler.txt");
 
-    printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta + Aitken\n");
-    aqIVP1.solve_rungekutta_aitken();
-    aqIVP1.calculate_exact_error();
-    aqIVP1.print_solution();
-    aqIVP1.print_solution("aq1_rungekutta_aitken.txt");
+    // printf("   With Aitken\n");
+    // aqIVP1.solve_euler_aitken();
+    // aqIVP1.calculate_exact_error();
+    // aqIVP1.print_solution();
+    // aqIVP1.print_solution("aq1_euler_aitken.txt");
+
+    // aqIVP1.set_time_steps(10);
+    // printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta\n");
+    // aqIVP1.solve_rungekutta();
+    // aqIVP1.calculate_exact_error();
+    // aqIVP1.print_solution();
+    // aqIVP1.print_solution("aq1_rungekutta.txt");
+
+    // printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta + Aitken\n");
+    // aqIVP1.solve_rungekutta_aitken();
+    // aqIVP1.calculate_exact_error();
+    // aqIVP1.print_solution();
+    // aqIVP1.print_solution("aq1_rungekutta_aitken.txt");
 }
 
 int main(){
