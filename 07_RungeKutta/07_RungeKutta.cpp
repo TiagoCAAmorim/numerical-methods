@@ -7,6 +7,14 @@ using namespace std;
 
 const double eps = 1E-12;
 
+double* copy_array(double *original, int number_points){
+    double* out = new double[number_points];
+    for(int i=0; i<number_points; i++){
+        out[i] = original[i];
+    }
+    return out;
+}
+
 class Spline{
     public:
         Spline();
@@ -29,13 +37,9 @@ class Spline{
         void reset_data();
         void reset_spline();
 
-        // void copy_array(double *original, double *new_vector, int number_points) const;
-        double* copy_array(double *original, int number_points) const;
-
         bool is_extrapolation(double x) const;
         int find_interval(double x) const;
         double get_int_y_point(double x, int interval) const;
-
 
         int n_points;
         double *x_pointer;
@@ -66,14 +70,6 @@ void Spline::reset_spline(){
     b_pointer = nullptr;
     c_pointer = nullptr;
     d_pointer = nullptr;
-}
-
-double* Spline::copy_array(double *original, int number_points) const{
-    double* out = new double[number_points];
-    for(int i=0; i<number_points; i++){
-        out[i] = original[i];
-    }
-    return out;
 }
 
 void Spline::add_points(double *x, double *y, int number_points){
@@ -388,6 +384,95 @@ double Spline::get_int_y(double x_initial, double x_end) const{
     return y;
 }
 
+class Integration{
+    public:
+        Integration();
+        void add_points(double *x, double *y, int number_points);
+        double solve_Simpson() const;
+        double solve_Trapezoidal() const;
+
+    private:
+        bool has_data() const;
+
+        int n_points;
+        double *x_pointer;
+        double *y_pointer;
+};
+
+Integration::Integration():
+    n_points(0),
+    x_pointer(nullptr), y_pointer(nullptr)
+    {};
+
+void Integration::add_points(double *x, double *y, int number_points){
+    if (number_points<2){
+        printf("At least 2 points are needed to compute an integral.\n");
+        return;
+    }
+    for(int i=0; i<number_points-1; i++){
+        if (x[i+1] <= x[i]){
+            printf("X values must be in ascending order. Cannot continue.\n");
+            return;
+        };
+    }
+    x_pointer = copy_array(x, number_points);
+    y_pointer = copy_array(y, number_points);
+    n_points = number_points;
+}
+
+bool Integration::has_data() const{
+    return x_pointer != nullptr && y_pointer != nullptr && n_points > 2;
+}
+
+double Integration::solve_Simpson() const{
+    if (!has_data()){
+        printf("No data defined yet.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    if (n_points % 2 == 0){
+        printf("Simpson only works with an odd number of points.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    double h = (x_pointer[n_points-1] - x_pointer[0]) / (n_points+1);
+    for (int i=1; i<n_points; i++){
+        if (abs(h - (x_pointer[i] - x_pointer[i-1])) > eps){
+            printf("Simpson only works with a constant step.\n");
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+    }
+    double s0 = y_pointer[n_points-1] + y_pointer[0];
+    double s1 = 0;
+    double s2 = 0;
+    for (int i=1; i<n_points-1; i++){
+        if (i % 2 == 0){
+            s2 += y_pointer[i];
+        } else{
+            s1 += y_pointer[i];
+        }
+    }
+    return h/3. * (s0 + 2*s2 + 4*s1);
+}
+
+double Integration::solve_Trapezoidal() const{
+    if (!has_data()){
+        printf("No data defined yet.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    double h = (x_pointer[n_points-1] - x_pointer[0]) / (n_points+1);
+    for (int i=1; i<n_points; i++){
+        if (abs(h - (x_pointer[i] - x_pointer[i-1])) > eps){
+            printf("Trapezoidal rule integration only works with a constant step.\n");
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+    }
+    double s0 = y_pointer[n_points-1] + y_pointer[0];
+    double s1 = 0;
+    for (int i=1; i<n_points-1; i++){
+        s1 += y_pointer[i];
+    }
+    return h/2. * (s0 + 2*s1);
+}
+
 
 class IVP{
     public:
@@ -440,8 +525,6 @@ class IVP{
         bool has_delfdely() const;
         bool has_Lipschitz() const;
         bool has_max_dfdt() const;
-
-        double* copy_array(double *original, int number_points) const;
 
         double (*f_pointer)(double, double);
         double (*exact_pointer)(double);
@@ -873,14 +956,6 @@ void IVP::estimate_error_euler(){
     }
 
     y_error_limit_pointer = error_limit;
-}
-
-double* IVP::copy_array(double *original, int number_points) const{
-    double* out = new double[number_points];
-    for(int i=0; i<number_points; i++){
-        out[i] = original[i];
-    }
-    return out;
 }
 
 void IVP::solve_euler_aitken(){
@@ -1449,14 +1524,14 @@ double f_pr_cte_230(double We, double t){
     return 230. + 0*We + 0*t;
 }
 double f_qw_pr_cte_230(double t){
-    Fetkovich aq1;
-    aq1.set_aquifer_initial_pore_volume(1*1E6);
-    aq1.set_aquifer_initial_pressure(250.);
-    aq1.set_aquifer_productivity_index(20.);
-    aq1.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
-    aq1.set_reservoir_initial_pressure(230.);
+    Fetkovich aqIVP1;
+    aqIVP1.set_aquifer_initial_pore_volume(1*1E6);
+    aqIVP1.set_aquifer_initial_pressure(250.);
+    aqIVP1.set_aquifer_productivity_index(20.);
+    aqIVP1.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
+    aqIVP1.set_reservoir_initial_pressure(230.);
 
-    return aq1.get_aquifer_flow_rate(t, 230.);
+    return aqIVP1.get_aquifer_flow_rate(t, 230.);
 }
 
 double f_pr_instant_res(double We, double t){
@@ -1533,65 +1608,53 @@ double f_instant_res(double t, double qw){
 }
 
 void Fetkovich_tests(){
-    printf("Constant Pressure Reservoir\n");
-    Fetkovich aq1;
-    aq1.set_aquifer_initial_pore_volume(1*1E6);
-    aq1.set_aquifer_initial_pressure(250.);
-    aq1.set_aquifer_productivity_index(20.);
-    aq1.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
-    aq1.set_reservoir_initial_pressure(230.);
-    aq1.set_reservoir_pressure_function(f_pr_cte_230);
-    aq1.set_exact_water_flow_function(f_qw_pr_cte_230);
+    printf("Instant Pressure Equilibrium Reservoir with Fetkovich\n");
+    Fetkovich aqFet;
+    aqFet.set_aquifer_initial_pore_volume(1*1E6);
+    aqFet.set_aquifer_initial_pressure(250.);
+    aqFet.set_aquifer_productivity_index(20.);
+    aqFet.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
+    aqFet.set_reservoir_initial_pressure(230.);
+    aqFet.set_reservoir_pressure_function(f_pr_instant_res);
+    aqFet.set_exact_water_flow_function(f_qw_instant_res);
 
-    aq1.solve_aquifer_flow(200., 10);
-    aq1.print_solution("aq1.txt");
-
-    printf("Instant Pressure Equilibrium Reservoir\n");
-    Fetkovich aq2;
-    aq2.set_aquifer_initial_pore_volume(1*1E6);
-    aq2.set_aquifer_initial_pressure(250.);
-    aq2.set_aquifer_productivity_index(20.);
-    aq2.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
-    aq2.set_reservoir_initial_pressure(230.);
-    aq2.set_reservoir_pressure_function(f_pr_instant_res);
-    aq2.set_exact_water_flow_function(f_qw_instant_res);
-
-    aq2.solve_aquifer_flow(200., 10);
-    aq2.print_solution("aq2.txt");
+    aqFet.solve_aquifer_flow(200., 40);
+    aqFet.print_solution("aq1_fetkovich.txt");
 
     printf("Instant Pressure Equilibrium Reservoir with Euler\n");
-    IVP aq3;
-    aq3.set_f(f_instant_res);
-    aq3.set_y_initial(400.);
-    aq3.set_t_initial(0.);
-    aq3.set_t_end(200.);
-    aq3.set_time_steps(10);
-    aq3.set_exact(f_qw_instant_res);
-    aq3.set_relative_error(false);
+    IVP aqIVP1;
+    aqIVP1.set_f(f_instant_res);
+    aqIVP1.set_y_initial(400.);
+    aqIVP1.set_t_initial(0.);
+    aqIVP1.set_t_end(200.);
+    aqIVP1.set_time_steps(40);
+    aqIVP1.set_exact(f_qw_instant_res);
+    aqIVP1.set_time_steps(10);
+    aqIVP1.set_relative_error(false);
 
-    aq3.solve_euler();
-    aq3.calculate_exact_error();
-    aq3.print_solution();
-    aq3.print_solution("aq3_euler.txt");
+    aqIVP1.solve_euler();
+    aqIVP1.calculate_exact_error();
+    aqIVP1.print_solution();
+    aqIVP1.print_solution("aq1_euler.txt");
 
     printf("   With Aitken\n");
-    aq3.solve_euler_aitken();
-    aq3.calculate_exact_error();
-    aq3.print_solution();
-    aq3.print_solution("aq3_euler_aitken.txt");
+    aqIVP1.solve_euler_aitken();
+    aqIVP1.calculate_exact_error();
+    aqIVP1.print_solution();
+    aqIVP1.print_solution("aq1_euler_aitken.txt");
 
+    aqIVP1.set_time_steps(10);
     printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta\n");
-    aq3.solve_rungekutta();
-    aq3.calculate_exact_error();
-    aq3.print_solution();
-    aq3.print_solution("aq3_rungekutta.txt");
+    aqIVP1.solve_rungekutta();
+    aqIVP1.calculate_exact_error();
+    aqIVP1.print_solution();
+    aqIVP1.print_solution("aq1_rungekutta.txt");
 
     printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta + Aitken\n");
-    aq3.solve_rungekutta_aitken();
-    aq3.calculate_exact_error();
-    aq3.print_solution();
-    aq3.print_solution("aq3_rungekutta_aitken.txt");
-
+    aqIVP1.solve_rungekutta_aitken();
+    aqIVP1.calculate_exact_error();
+    aqIVP1.print_solution();
+    aqIVP1.print_solution("aq1_rungekutta_aitken.txt");
 }
 
 int main(){
