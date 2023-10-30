@@ -1158,6 +1158,64 @@ double exact_test_4(double t){
     return 3.*exp(-a*t);  // y(0)=3
 }
 
+void test_rungekutta(IVP ivp, string problemname, string filename){
+    ivp.set_relative_error(false);
+    const char* name = problemname.c_str();
+    printf(" Problem %s: Euler\n", name);
+    ivp.set_time_steps(60);
+    ivp.reset_f_evaluations();
+    ivp.solve_euler();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_euler.txt");
+
+    printf(" Problem %s: Euler 1/2 Time-Steps\n", name);
+    ivp.set_time_steps(30);
+    ivp.reset_f_evaluations();
+    ivp.solve_euler();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_euler_n0.5.txt");
+
+    printf(" Problem %s: Euler 1/4 Time-Steps\n", name);
+    ivp.set_time_steps(20);
+    ivp.reset_f_evaluations();
+    ivp.solve_euler();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_euler_n0.25.txt");
+
+    printf(" Problem %s: Euler 1/8 Time-Steps\n", name);
+    ivp.set_time_steps(10);
+    ivp.reset_f_evaluations();
+    ivp.solve_euler();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_euler_n0.125.txt");
+
+    printf(" Problem %s: Euler+Aitken\n", name);
+    ivp.set_time_steps(10);
+    ivp.reset_f_evaluations();
+    ivp.solve_euler_aitken();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_euler_aitken.txt");
+
+    printf(" Problem %s: RungeKutta\n", name);
+    ivp.set_time_steps(15);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_rungekutta.txt");
+}
+
 void tests_rungekutta(){
     printf("### Problem #1 ###\n");
     IVP test1;
@@ -1166,35 +1224,7 @@ void tests_rungekutta(){
     test1.set_t_initial(0.);
     test1.set_t_end(2.);
     test1.set_exact(exact_test_1);
-    test1.set_relative_error(false);
-
-    printf(" Problem #1: Euler\n");
-    test1.set_time_steps(60);
-    test1.reset_f_evaluations();
-    test1.solve_euler();
-    printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
-    test1.calculate_exact_error();
-    test1.print_solution();
-    test1.print_solution("test1_euler.txt");
-
-    printf(" Problem #1: Euler+Aitken\n");
-    test1.set_time_steps(10);
-    test1.reset_f_evaluations();
-    test1.solve_euler_aitken();
-    printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
-    test1.calculate_exact_error();
-    test1.print_solution();
-    test1.print_solution("test1_euler_aitken.txt");
-
-    printf(" Problem #1: RungeKutta\n");
-    test1.set_time_steps(15);
-    test1.reset_f_evaluations();
-    test1.solve_rungekutta();
-    printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
-    test1.calculate_exact_error();
-    test1.print_solution();
-    test1.print_solution("test1_rungekutta.txt");
-
+    test_rungekutta(test1, "#1", "test1");
 
     printf("### Problem #2 ###\n");
     IVP test2;
@@ -1203,34 +1233,7 @@ void tests_rungekutta(){
     test2.set_t_initial(0.);
     test2.set_t_end(2.);
     test2.set_exact(exact_test_2);
-    test2.set_relative_error(false);
-
-    printf(" Problem #2: Euler\n");
-    test2.set_time_steps(60);
-    test2.reset_f_evaluations();
-    test2.solve_euler();
-    printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
-    test2.calculate_exact_error();
-    test2.print_solution();
-    test2.print_solution("test2_euler.txt");
-
-    printf(" Problem #2: Euler+Aitken\n");
-    test2.set_time_steps(10);
-    test2.reset_f_evaluations();
-    test2.solve_euler_aitken();
-    printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
-    test2.calculate_exact_error();
-    test2.print_solution();
-    test2.print_solution("test2_euler_aitken.txt");
-
-    printf(" Problem #2: RungeKutta\n");
-    test2.set_time_steps(15);
-    test2.reset_f_evaluations();
-    test2.solve_rungekutta();
-    printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
-    test2.calculate_exact_error();
-    test2.print_solution();
-    test2.print_solution("test2_rungekutta.txt");
+    test_rungekutta(test2, "#2", "test2");
 
     printf("### Problem #3 ###\n");
     IVP test3;
@@ -1239,34 +1242,7 @@ void tests_rungekutta(){
     test3.set_t_initial(0.);
     test3.set_t_end(2.);
     test3.set_exact(exact_test_3);
-    test3.set_relative_error(false);
-
-    printf(" Problem #3: Euler\n");
-    test3.set_time_steps(60);
-    test3.reset_f_evaluations();
-    test3.solve_euler();
-    printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
-    test3.calculate_exact_error();
-    test3.print_solution();
-    test3.print_solution("test3_euler.txt");
-
-    printf(" Problem #3: Euler+Aitken\n");
-    test3.set_time_steps(10);
-    test3.reset_f_evaluations();
-    test3.solve_euler_aitken();
-    printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
-    test3.calculate_exact_error();
-    test3.print_solution();
-    test3.print_solution("test3_euler_aitken.txt");
-
-    printf(" Problem #3: RungeKutta\n");
-    test3.set_time_steps(15);
-    test3.reset_f_evaluations();
-    test3.solve_rungekutta();
-    printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
-    test3.calculate_exact_error();
-    test3.print_solution();
-    test3.print_solution("test3_rungekutta.txt");
+    test_rungekutta(test3, "#3", "test3");
 
     printf("### Problem #4 ###\n");
     IVP test4;
@@ -1275,34 +1251,7 @@ void tests_rungekutta(){
     test4.set_t_initial(0.);
     test4.set_t_end(2.);
     test4.set_exact(exact_test_4);
-    test4.set_relative_error(false);
-
-    printf(" Problem #4: Euler\n");
-    test4.set_time_steps(60);
-    test4.reset_f_evaluations();
-    test4.solve_euler();
-    printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
-    test4.calculate_exact_error();
-    test4.print_solution();
-    test4.print_solution("test4_euler.txt");
-
-    printf(" Problem #4: Euler+Aitken\n");
-    test4.set_time_steps(10);
-    test4.reset_f_evaluations();
-    test4.solve_euler_aitken();
-    printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
-    test4.calculate_exact_error();
-    test4.print_solution();
-    test4.print_solution("test4_euler_aitken.txt");
-
-    printf(" Problem #4: RungeKutta\n");
-    test4.set_time_steps(15);
-    test4.reset_f_evaluations();
-    test4.solve_rungekutta();
-    printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
-    test4.calculate_exact_error();
-    test4.print_solution();
-    test4.print_solution("test4_rungekutta.txt");
+    test_rungekutta(test4, "#4", "test4");
 }
 
 class Fetkovich{
