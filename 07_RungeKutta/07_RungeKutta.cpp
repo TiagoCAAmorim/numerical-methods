@@ -573,8 +573,7 @@ void IVP::reset_results(){
     y_pointer = nullptr;
     calculated_L = false;
     calculated_M = false;
-    f_evaluations = 0;
-    reset_f_evaluations();
+    // reset_f_evaluations();
     reset_error_estimate();
 }
 void IVP::reset_f_evaluations(){
@@ -1166,11 +1165,11 @@ void tests_rungekutta(){
     test1.set_y_initial(0.5);
     test1.set_t_initial(0.);
     test1.set_t_end(2.);
-    test1.set_time_steps(10);
     test1.set_exact(exact_test_1);
     test1.set_relative_error(false);
 
     printf(" Problem #1: Euler\n");
+    test1.set_time_steps(60);
     test1.reset_f_evaluations();
     test1.solve_euler();
     printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
@@ -1179,6 +1178,7 @@ void tests_rungekutta(){
     test1.print_solution("test1_euler.txt");
 
     printf(" Problem #1: Euler+Aitken\n");
+    test1.set_time_steps(10);
     test1.reset_f_evaluations();
     test1.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
@@ -1187,6 +1187,7 @@ void tests_rungekutta(){
     test1.print_solution("test1_euler_aitken.txt");
 
     printf(" Problem #1: RungeKutta\n");
+    test1.set_time_steps(15);
     test1.reset_f_evaluations();
     test1.solve_rungekutta();
     printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
@@ -1201,11 +1202,11 @@ void tests_rungekutta(){
     test2.set_y_initial(3.);
     test2.set_t_initial(0.);
     test2.set_t_end(2.);
-    test2.set_time_steps(10);
     test2.set_exact(exact_test_2);
     test2.set_relative_error(false);
 
     printf(" Problem #2: Euler\n");
+    test2.set_time_steps(60);
     test2.reset_f_evaluations();
     test2.solve_euler();
     printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
@@ -1214,6 +1215,7 @@ void tests_rungekutta(){
     test2.print_solution("test2_euler.txt");
 
     printf(" Problem #2: Euler+Aitken\n");
+    test2.set_time_steps(10);
     test2.reset_f_evaluations();
     test2.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
@@ -1222,6 +1224,7 @@ void tests_rungekutta(){
     test2.print_solution("test2_euler_aitken.txt");
 
     printf(" Problem #2: RungeKutta\n");
+    test2.set_time_steps(15);
     test2.reset_f_evaluations();
     test2.solve_rungekutta();
     printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
@@ -1235,11 +1238,11 @@ void tests_rungekutta(){
     test3.set_y_initial(3.);
     test3.set_t_initial(0.);
     test3.set_t_end(2.);
-    test3.set_time_steps(10);
     test3.set_exact(exact_test_3);
     test3.set_relative_error(false);
 
     printf(" Problem #3: Euler\n");
+    test3.set_time_steps(60);
     test3.reset_f_evaluations();
     test3.solve_euler();
     printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
@@ -1248,6 +1251,7 @@ void tests_rungekutta(){
     test3.print_solution("test3_euler.txt");
 
     printf(" Problem #3: Euler+Aitken\n");
+    test3.set_time_steps(10);
     test3.reset_f_evaluations();
     test3.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
@@ -1256,6 +1260,7 @@ void tests_rungekutta(){
     test3.print_solution("test3_euler_aitken.txt");
 
     printf(" Problem #3: RungeKutta\n");
+    test3.set_time_steps(15);
     test3.reset_f_evaluations();
     test3.solve_rungekutta();
     printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
@@ -1269,11 +1274,11 @@ void tests_rungekutta(){
     test4.set_y_initial(3.);
     test4.set_t_initial(0.);
     test4.set_t_end(2.);
-    test4.set_time_steps(10);
     test4.set_exact(exact_test_4);
     test4.set_relative_error(false);
 
     printf(" Problem #4: Euler\n");
+    test4.set_time_steps(60);
     test4.reset_f_evaluations();
     test4.solve_euler();
     printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
@@ -1282,6 +1287,7 @@ void tests_rungekutta(){
     test4.print_solution("test4_euler.txt");
 
     printf(" Problem #4: Euler+Aitken\n");
+    test4.set_time_steps(10);
     test4.reset_f_evaluations();
     test4.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
@@ -1290,6 +1296,7 @@ void tests_rungekutta(){
     test4.print_solution("test4_euler_aitken.txt");
 
     printf(" Problem #4: RungeKutta\n");
+    test4.set_time_steps(15);
     test4.reset_f_evaluations();
     test4.solve_rungekutta();
     printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
