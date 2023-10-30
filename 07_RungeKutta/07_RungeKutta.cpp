@@ -15,14 +15,6 @@ double* copy_array(double *original, int number_points){
     return out;
 }
 
-void Sprintf(FILE* file, const char* message){
-    if (file == nullptr){
-        fprintf(file, "%s", message);
-    } else{
-        printf("%s", message);
-    }
-}
-
 class Spline{
     public:
         Spline();
@@ -1310,6 +1302,7 @@ class Fetkovich{
         void set_reservoir_initial_pressure(double value);   // bar
         void set_reservoir_pressure_function(double (*f)(double, double)); // f(We, t)
         void set_exact_water_flow_function(double (*f)(double)); // f(t)
+        void set_exact_water_cumulative_function(double (*f)(double)); // f(t)
 
         double get_aquifer_flow_rate(double t, double pr) const;  // m3/d
         double get_aquifer_delta_cumulative_flow(double dt, double paq_avg, double pr_avg) const;  // m3
@@ -1321,6 +1314,7 @@ class Fetkovich{
         double* get_result_aquifer_pressure() const; // bar
         double* get_result_reservoir_pressure() const; // bar
 
+        void print_solution();
         void print_solution(string filename);
 
         int get_f_evaluations() const;
@@ -1336,6 +1330,8 @@ class Fetkovich{
 
         bool has_exact() const;
         double get_exact(double t) const;
+        bool has_exact_cumulative() const;
+        double get_exact_cumulative(double t) const;
 
         bool has_solution() const;
 
@@ -1355,6 +1351,7 @@ class Fetkovich{
         double *p_reservoir_pointer;
 
         double (*f_exact_pointer)(double);
+        double (*f_exact_cum_pointer)(double);
 
         int f_evaluations;
 
@@ -1373,6 +1370,7 @@ Fetkovich::Fetkovich():
     p_aquifer_pointer(nullptr),
     p_reservoir_pointer(nullptr),
     f_exact_pointer(nullptr),
+    f_exact_cum_pointer(nullptr),
     f_evaluations(0)
     {};
 
@@ -1433,6 +1431,20 @@ double Fetkovich::get_exact(double t) const{
     return f_exact_pointer(t);
 }
 
+void Fetkovich::set_exact_water_cumulative_function(double (*f)(double)){
+    f_exact_cum_pointer = f;
+}
+bool Fetkovich::has_exact_cumulative() const{
+    return f_exact_pointer != nullptr;
+}
+double Fetkovich::get_exact_cumulative(double t) const{
+    if (!has_exact_cumulative()){
+        printf("Exact cumulative function not defined.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return f_exact_cum_pointer(t);
+}
+
 int Fetkovich::get_f_evaluations() const{
     return f_evaluations;
 }
@@ -1468,7 +1480,7 @@ void Fetkovich::solve_aquifer_flow(double t_end, int steps){
 
         pr_avg_old = 0;
         count = 0;
-        while (abs(pr_avg_old - pr_avg) > eps && count<=20){
+        while (abs(pr_avg_old - pr_avg) > 1E-1 && count<=20){
             pr_avg_old = pr_avg;
             dWe = get_aquifer_delta_cumulative_flow(dt, p_aq[i-1], pr_avg);
             f_evaluations++;
@@ -1503,19 +1515,73 @@ double* Fetkovich::get_result_reservoir_pressure() const{
     return p_reservoir_pointer;
 }
 
-void Fetkovich::print_solution(string filename=""){
+void Fetkovich::print_solution(){
     if (!has_solution()){
         printf("There is no solution to print.\n");
         return;
     }
 
-    FILE* outFile = nullptr;
-    if (filename != ""){
-        outFile = fopen(filename.c_str(), "w");
-        if (outFile == nullptr) {
-            printf("Coud not create file: %s\n",filename.c_str());
-            return;
+    printf("%5s\t%16s","i","Time");
+    printf("\t%16s","Res.Pres.");
+    printf("\t%16s","Aq.Pres.");
+    printf("\t%16s","Wat.Flow");
+    printf("\t%16s","Cumulative");
+    if (has_exact()){
+        printf("\t%16s","ExactQw");
+        printf("\t%16s","Error");
+        printf("\t%16s","ErrorRel");
+    }
+    if (has_exact_cumulative()){
+        printf("\t%16s","ExactWe");
+        printf("\t%16s","ErrorWe");
+        printf("\t%16s","ErrorRelWe");
+    }
+    printf("\n");
+
+    double exact;
+    double error;
+    for (int i=0; i<time_steps; i++){
+        printf("%5i\t%16.10g", i, t_pointer[i]);
+        printf("\t%16.10g", p_reservoir_pointer[i]);
+        printf("\t%16.10g", p_aquifer_pointer[i]);
+        printf("\t%16.10g", Qw_pointer[i]);
+        printf("\t%16.10g", We_pointer[i]);
+        if (has_exact()){
+            exact = get_exact(t_pointer[i]);
+            printf("\t%16.10g", exact);
+            error = abs(exact - Qw_pointer[i]);
+            printf("\t%16.10g", error);
+            if (abs(exact) > eps){
+                printf("\t%16.10g", error/abs(exact));
+            } else{
+                printf("\t%16.10g", std::numeric_limits<double>::quiet_NaN());
+            }
         }
+        if (has_exact_cumulative()){
+            exact = get_exact_cumulative(t_pointer[i]);
+            printf("\t%16.10g", exact);
+            error = abs(exact - We_pointer[i]);
+            printf("\t%16.10g", error);
+            if (abs(exact) > eps){
+                printf("\t%16.10g", error/abs(exact));
+            } else{
+                printf("\t%16.10g", std::numeric_limits<double>::quiet_NaN());
+            }
+        }
+        printf("\n");
+    }
+}
+
+void Fetkovich::print_solution(string filename){
+    if (!has_solution()){
+        printf("There is no solution to print.\n");
+        return;
+    }
+
+    FILE* outFile = fopen(filename.c_str(), "w");
+    if (outFile == nullptr) {
+        printf("Coud not create file: %s\n",filename.c_str());
+        return;
     }
 
     fprintf(outFile,"%5s\t%16s","i","Time");
@@ -1527,6 +1593,11 @@ void Fetkovich::print_solution(string filename=""){
         fprintf(outFile,"\t%16s","ExactQw");
         fprintf(outFile,"\t%16s","Error");
         fprintf(outFile,"\t%16s","ErrorRel");
+    }
+    if (has_exact_cumulative()){
+        fprintf(outFile,"\t%16s","ExactWe");
+        fprintf(outFile,"\t%16s","ErrorWe");
+        fprintf(outFile,"\t%16s","ErrorRelWe");
     }
     fprintf(outFile,"\n");
 
@@ -1549,11 +1620,21 @@ void Fetkovich::print_solution(string filename=""){
                 fprintf(outFile,"\t%16.10g", std::numeric_limits<double>::quiet_NaN());
             }
         }
+        if (has_exact_cumulative()){
+            exact = get_exact_cumulative(t_pointer[i]);
+            fprintf(outFile,"\t%16.10g", exact);
+            error = abs(exact - We_pointer[i]);
+            fprintf(outFile,"\t%16.10g", error);
+            if (abs(exact) > eps){
+                fprintf(outFile,"\t%16.10g", error/abs(exact));
+            } else{
+                fprintf(outFile,"\t%16.10g", std::numeric_limits<double>::quiet_NaN());
+            }
+        }
         fprintf(outFile,"\n");
     }
     fclose(outFile);
 }
-
 
 double Newman_Consolidated_Sandstone(double por){
     if (por >= 1.){
@@ -1648,6 +1729,33 @@ double f_qw_instant_res(double t){
 
     return exp(-J * t *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor))) * J * (pi - pr);
 }
+double f_qw_cumulative_res(double t){
+    double api = 25.;
+    double dg = 0.6;
+    double rgo = 60.;
+    double temp = 65.;
+    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
+    double Cob = Standing_co_bubble(api, dg, rgo, temp);
+    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
+    double Cpor = Newman_Consolidated_Sandstone(0.2);
+    double Bw = 1.;
+    double Voil = 0.8 * 1*1E6;
+    double Vwat = 0.2 * 1*1E6;
+    double p_ini = 230.;
+
+    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
+    double VwatIP_0 = Vwat * Bw;
+    double Vpor_0 = VoilIP_0 + VwatIP_0;
+
+    double J = 20.;
+    double ct = Newman_Consolidated_Sandstone(0.03);
+    double Wi = 1*1E6;
+    double pi = 250.;
+    double pr = 230.;
+
+    double alpha = ( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor));
+    return (1 - exp(-J * t *alpha)) * (pi - pr) / alpha;
+}
 double f_instant_res(double t, double qw){
     double api = 25.;
     double dg = 0.6;
@@ -1685,8 +1793,10 @@ void Fetkovich_tests(){
     aqFet.set_reservoir_initial_pressure(230.);
     aqFet.set_reservoir_pressure_function(f_pr_instant_res);
     aqFet.set_exact_water_flow_function(f_qw_instant_res);
+    aqFet.set_exact_water_cumulative_function(f_qw_cumulative_res);
 
-    aqFet.solve_aquifer_flow(200., 40);
+    aqFet.solve_aquifer_flow(200., 100);
+    printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
     aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
@@ -1698,39 +1808,10 @@ void Fetkovich_tests(){
     aqIVP1.set_t_end(200.);
     aqIVP1.set_exact(f_qw_instant_res);
     test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
-
-
-    // aqIVP1.set_time_steps(40);
-    // aqIVP1.set_time_steps(10);
-
-    // aqIVP1.set_relative_error(false);
-    // aqIVP1.solve_euler();
-    // aqIVP1.calculate_exact_error();
-    // aqIVP1.print_solution();
-    // aqIVP1.print_solution("aq1_euler.txt");
-
-    // printf("   With Aitken\n");
-    // aqIVP1.solve_euler_aitken();
-    // aqIVP1.calculate_exact_error();
-    // aqIVP1.print_solution();
-    // aqIVP1.print_solution("aq1_euler_aitken.txt");
-
-    // aqIVP1.set_time_steps(10);
-    // printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta\n");
-    // aqIVP1.solve_rungekutta();
-    // aqIVP1.calculate_exact_error();
-    // aqIVP1.print_solution();
-    // aqIVP1.print_solution("aq1_rungekutta.txt");
-
-    // printf("Instant Pressure Equilibrium Reservoir with Runge-Kutta + Aitken\n");
-    // aqIVP1.solve_rungekutta_aitken();
-    // aqIVP1.calculate_exact_error();
-    // aqIVP1.print_solution();
-    // aqIVP1.print_solution("aq1_rungekutta_aitken.txt");
 }
 
 int main(){
     // tests_splines();
-    tests_rungekutta();
-    // Fetkovich_tests();
+    // tests_rungekutta();
+    Fetkovich_tests();
 }
