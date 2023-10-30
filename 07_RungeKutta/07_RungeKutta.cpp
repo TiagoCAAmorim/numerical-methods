@@ -494,13 +494,18 @@ class IVP{
         void set_max_dfdt(double M);
         void estimate_max_dfdt();
 
-        double get_f(double t, double y) const;
+        double get_f(double t, double y);
         double get_dfdt(double t, double y) const;
         double get_delfdely(double t, double y) const;
         double get_exact(double t) const;
         double get_Lipschitz() const;
         double get_max_dfdt() const;
 
+        double* get_t() const;
+        double* get_y() const;
+        int get_f_evaluations() const;
+
+        void reset_f_evaluations();
         void calculate_exact_error();
         void print_solution();
         void print_solution(string filename);
@@ -545,7 +550,7 @@ class IVP{
         bool calculated_L;
         double max_dfdt;
         bool calculated_M;
-
+        int f_evaluations;
 };
 
 IVP::IVP():
@@ -559,7 +564,8 @@ IVP::IVP():
     y_error_limit_pointer(nullptr),
     extra_search_points(20), relative_error(false),
     Lipschitz(0), calculated_L(false),
-    max_dfdt(0), calculated_M(false)
+    max_dfdt(0), calculated_M(false),
+    f_evaluations(0)
     {};
 
 void IVP::reset_results(){
@@ -567,7 +573,12 @@ void IVP::reset_results(){
     y_pointer = nullptr;
     calculated_L = false;
     calculated_M = false;
+    f_evaluations = 0;
+    reset_f_evaluations();
     reset_error_estimate();
+}
+void IVP::reset_f_evaluations(){
+    f_evaluations = 0;
 }
 void IVP::reset_error_estimate(){
     y_exact_pointer = nullptr;
@@ -650,11 +661,12 @@ void IVP::set_extra_search_points(int n){
     }
 }
 
-double IVP::get_f(double t, double y) const{
+double IVP::get_f(double t, double y){
     if (!has_f()){
         printf("Function f not defined.\n");
         return std::numeric_limits<double>::quiet_NaN();
     }
+    f_evaluations++;
     return f_pointer(t,y);
 }
 double IVP::get_dfdt(double t, double y) const{
@@ -810,6 +822,18 @@ bool IVP::has_max_dfdt() const{
     return calculated_M;
 }
 
+double* IVP::get_t() const{
+    return copy_array(t_pointer, time_steps+1);
+}
+double* IVP::get_y() const{
+    return copy_array(y_pointer, time_steps+1);
+}
+
+int IVP::get_f_evaluations() const{
+    return f_evaluations;
+}
+
+
 void IVP::calculate_exact_error(){
     if (!has_solution()){
         printf("No solutions found. Cannot continue.\n");
@@ -915,6 +939,7 @@ void IVP::solve_euler(){
     for (int i=1; i<time_steps+1; i++){
         y[i] = y[i-1] + h * f_pointer(t[i-1], y[i-1]);
         t[i] = t[0] + i*h;
+        f_evaluations++;
     }
 
     t_pointer = t;
@@ -998,6 +1023,7 @@ void IVP::solve_rungekutta(){
         k2 = h * f_pointer(t[i]+h/2, y[i]+k1/2);
         k3 = h * f_pointer(t[i]+h/2, y[i]+k2/2);
         k4 = h * f_pointer(t[i+1], y[i]+k3);
+        f_evaluations += 4;
 
         y[i+1] = y[i] + 1/6. * (k1 + 2*k2 + 2*k3 + k4);
     }
@@ -1088,10 +1114,10 @@ double f_test_2(double t, double y){
     return -2.*y + 3.*exp(t);
 }
 double delfdely_test_2(double t, double y){
-    return -2.;
+    return -2. + 0*t + 0*y;
 }
 double delfdelt_test_2(double t, double y){
-    return 3.*exp(t);
+    return 3.*exp(t) + 0*y;
 }
 double dfdt_test_2(double t, double y){
     return delfdely_test_2(t,y) * f_test_2(t,y) + delfdelt_test_2(t,y);
@@ -1104,10 +1130,10 @@ double f_test_3(double t, double y){
     return 4*cos(t) - 8*sin(t) + 2*y;
 }
 double delfdely_test_3(double t, double y){
-    return 2.;
+    return 2. + 0*t + 0*y;
 }
 double delfdelt_test_3(double t, double y){
-    return -4*sin(t) - 8*cos(t);
+    return -4*sin(t) - 8*cos(t) + 0*y;
 }
 double dfdt_test_3(double t, double y){
     return delfdely_test_3(t,y) * f_test_3(t,y) + delfdelt_test_3(t,y);
@@ -1118,13 +1144,13 @@ double exact_test_3(double t){
 
 double a = 3.;
 double f_test_4(double t, double y){
-    return -a*y;
+    return -a*y + 0*t;
 }
 double delfdely_test_4(double t, double y){
-    return -a;
+    return -a + 0*t + 0*y;
 }
 double delfdelt_test_4(double t, double y){
-    return 0.;
+    return 0. + 0*t + 0*y;
 }
 double dfdt_test_4(double t, double y){
     return delfdely_test_4(t,y) * f_test_4(t,y) + delfdelt_test_4(t,y);
@@ -1145,19 +1171,25 @@ void tests_rungekutta(){
     test1.set_relative_error(false);
 
     printf(" Problem #1: Euler\n");
+    test1.reset_f_evaluations();
     test1.solve_euler();
+    printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
     test1.calculate_exact_error();
     test1.print_solution();
     test1.print_solution("test1_euler.txt");
 
     printf(" Problem #1: Euler+Aitken\n");
+    test1.reset_f_evaluations();
     test1.solve_euler_aitken();
+    printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
     test1.calculate_exact_error();
     test1.print_solution();
     test1.print_solution("test1_euler_aitken.txt");
 
     printf(" Problem #1: RungeKutta\n");
+    test1.reset_f_evaluations();
     test1.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", test1.get_f_evaluations());
     test1.calculate_exact_error();
     test1.print_solution();
     test1.print_solution("test1_rungekutta.txt");
@@ -1174,19 +1206,25 @@ void tests_rungekutta(){
     test2.set_relative_error(false);
 
     printf(" Problem #2: Euler\n");
+    test2.reset_f_evaluations();
     test2.solve_euler();
+    printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
     test2.calculate_exact_error();
     test2.print_solution();
     test2.print_solution("test2_euler.txt");
 
     printf(" Problem #2: Euler+Aitken\n");
+    test2.reset_f_evaluations();
     test2.solve_euler_aitken();
+    printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
     test2.calculate_exact_error();
     test2.print_solution();
     test2.print_solution("test2_euler_aitken.txt");
 
     printf(" Problem #2: RungeKutta\n");
+    test2.reset_f_evaluations();
     test2.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", test2.get_f_evaluations());
     test2.calculate_exact_error();
     test2.print_solution();
     test2.print_solution("test2_rungekutta.txt");
@@ -1202,19 +1240,25 @@ void tests_rungekutta(){
     test3.set_relative_error(false);
 
     printf(" Problem #3: Euler\n");
+    test3.reset_f_evaluations();
     test3.solve_euler();
+    printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
     test3.calculate_exact_error();
     test3.print_solution();
     test3.print_solution("test3_euler.txt");
 
     printf(" Problem #3: Euler+Aitken\n");
+    test3.reset_f_evaluations();
     test3.solve_euler_aitken();
+    printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
     test3.calculate_exact_error();
     test3.print_solution();
     test3.print_solution("test3_euler_aitken.txt");
 
     printf(" Problem #3: RungeKutta\n");
+    test3.reset_f_evaluations();
     test3.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", test3.get_f_evaluations());
     test3.calculate_exact_error();
     test3.print_solution();
     test3.print_solution("test3_rungekutta.txt");
@@ -1230,19 +1274,25 @@ void tests_rungekutta(){
     test4.set_relative_error(false);
 
     printf(" Problem #4: Euler\n");
+    test4.reset_f_evaluations();
     test4.solve_euler();
+    printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
     test4.calculate_exact_error();
     test4.print_solution();
     test4.print_solution("test4_euler.txt");
 
     printf(" Problem #4: Euler+Aitken\n");
+    test4.reset_f_evaluations();
     test4.solve_euler_aitken();
+    printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
     test4.calculate_exact_error();
     test4.print_solution();
     test4.print_solution("test4_euler_aitken.txt");
 
     printf(" Problem #4: RungeKutta\n");
+    test4.reset_f_evaluations();
     test4.solve_rungekutta();
+    printf("    'f' evaluations: %d\n", test4.get_f_evaluations());
     test4.calculate_exact_error();
     test4.print_solution();
     test4.print_solution("test4_rungekutta.txt");
@@ -1486,7 +1536,6 @@ void Fetkovich::print_solution(string filename){
 }
 
 
-
 double Newman_Consolidated_Sandstone(double por){
     if (por >= 1.){
         por = por / 100.;
@@ -1601,10 +1650,10 @@ double f_instant_res(double t, double qw){
     double J = 20.;
     double ct = Newman_Consolidated_Sandstone(0.03);
     double Wi = 1*1E6;
-    double pi = 250.;
-    double pr = 230.;
+    // double pi = 250.;
+    // double pr = 230.;
 
-    return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw;
+    return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw + 0*t;
 }
 
 void Fetkovich_tests(){
@@ -1659,6 +1708,6 @@ void Fetkovich_tests(){
 
 int main(){
     // tests_splines();
-    // tests_rungekutta();
-    Fetkovich_tests();
+    tests_rungekutta();
+    // Fetkovich_tests();
 }
