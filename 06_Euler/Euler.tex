@@ -256,19 +256,19 @@ country={Brasil}}
         Assumindo uma pressão constante na interface entre o aquífero e o reservatório ($\frac{dp_{res}}{dt} = 0$) e lembrando que $p_{aq}(t=0)=p_{i,aq}$, é possível resolver a EDO \ref{eq:dwe2dt2}:
 
         \begin{align}
-            \frac{dW_e}{dt} &= J (p_{i,aq} - p_{res}) e^{\frac{J p_{i,aq}}{W_{e,max}} t} \label{eq:dwedt}
+            \frac{dW_e}{dt} &= J (p_{i,aq} - p_{res}) e^{-\frac{J p_{i,aq}}{W_{e,max}} t} \label{eq:dwedt}
         \end{align}
 
         Integrando \ref{eq:dwedt} no tempo com $W_e(t=0)=0$:
 
         \begin{align}
-            W_e &= \frac{W_{e,max}}{p_{i,aq}} (p_{i,aq} - p_{res}) \left( 1- e^{\frac{J p_{i,aq}}{W_{e,max}} t} \right) \label{eq:we}
+            W_e &= \frac{W_{e,max}}{p_{i,aq}} (p_{i,aq} - p_{res}) \left( 1- e^{-\frac{J p_{i,aq}}{W_{e,max}} t} \right) \label{eq:we}
         \end{align}
 
         Como a suposição de pressão constante na interface entre o aquífero e o reservatório é muito forte, Fetkovich propõe aplicar \ref{eq:we} de maneira incremental. Para um tempo $t_j$ com $j=1,2,\ldots,n$:
 
         \begin{align}
-            (\Delta W_e)_j &= \frac{W_{e,max}}{p_{i,aq}} ((\overline{p}_{i,aq})_{j-1} - (\overline{p}_{res})_j) \left( 1- e^{\frac{J p_{i,aq}}{W_{e,max}} \Delta t_j} \right) \label{eq:deltawe}
+            (\Delta W_e)_j &= \frac{W_{e,max}}{p_{i,aq}} ((\overline{p}_{i,aq})_{j-1} - (\overline{p}_{res})_j) \left( 1- e^{-\frac{J p_{i,aq}}{W_{e,max}} \Delta t_j} \right) \label{eq:deltawe}
         \end{align}
 
         \noindent
@@ -380,7 +380,7 @@ country={Brasil}}
         Como a condição inicial de $p_{aq}(t=0)=p_{i,aq}$ se mantém, a EDO \ref{eq:dwe2dt2res} tem solução analítica análoga a \ref{eq:dwedt}:
 
         \begin{align}
-            \frac{dW_e}{dt} &= J (p_{i,aq} - p_{res}) e^{J \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  t} \label{eq:dwedtres}
+            \frac{dW_e}{dt} &= J (p_{i,aq} - p_{res}) e^{-J \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  t} \label{eq:dwedtres}
         \end{align}
 
 \section{Implementação} \label{sec:implementacao}
