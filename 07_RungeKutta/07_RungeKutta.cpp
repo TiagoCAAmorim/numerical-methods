@@ -2065,25 +2065,68 @@ void Fetkovich_tests(){
     aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
     // test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
 
-    printf("We Error Sensibility with Fetkovich\n");
-    double* error_list = new double;
 
     int n_tests = 11;
     int* steps = new int[n_tests]{5, 10, 20, 50, 80, 100, 150, 200, 250, 500, 1000};
 
-    double* error_end_fet = new double[n_tests];
-    double* error_max_fet = new double[n_tests];
-    int* evaluations_fet = new int[n_tests];
+    double* error_list = new double;
+    double error_end, error_max;
+    int evaluations;
 
+    printf("We Error Sensibility with Fetkovich\n");
+    FILE* outFile = fopen("aq1_fetkovich_sens.txt", "w");
     printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
     for (int i=0; i<10; i++){
         aqFet.reset_f_evaluations();
         aqFet.solve_aquifer_flow(200., steps[i]);
-        evaluations_fet[i] = aqFet.get_f_evaluations();
+        evaluations = aqFet.get_f_evaluations();
         error_list = aqFet.get_result_cumulative_flow_error(true);
-        error_end_fet[i] = error_list[steps[i]];
-        error_max_fet[i] = max_array(error_list, steps[i]+1);
-        printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations_fet[i], error_end_fet[i], error_max_fet[i]);
+        error_end = error_list[steps[i]];
+        error_max = max_array(error_list, steps[i]+1);
+        printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+        fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+    }
+    fclose(outFile);
+
+    string stringArray[4]={"euler","euler_aitken","rungekutta","rungekutta_aitken"};
+
+    for (int j=0; j<4; j++){
+        printf("We Error Sensibility with %s\n", stringArray[j].c_str());
+        outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
+        printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+        fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+        aqIVP1.set_relative_error(true);
+        for (int i=0; i<10; i++){
+            aqIVP1.set_time_steps(steps[i]);
+            aqIVP1.reset_f_evaluations();
+            switch (j) {
+                case 0:
+                    aqIVP1.solve_euler();
+                    break;
+                case 1:
+                    aqIVP1.solve_euler_aitken();
+                    break;
+                case 2:
+                    aqIVP1.solve_rungekutta();
+                    break;
+                case 3:
+                    aqIVP1.solve_rungekutta_aitken();
+                    break;
+                default:
+                    printf("Undifined!\n");
+                    return;
+            }
+            evaluations = aqIVP1.get_f_evaluations();
+            aqIVP1.solve_integral();
+            aqIVP1.calculate_exact_error();
+            error_list = aqIVP1.get_y_cumulative_error();
+            error_end = error_list[steps[i]];
+            error_max = max_array(error_list, steps[i]+1);
+            printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+            fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+        }
+        fclose(outFile);
     }
 }
 
