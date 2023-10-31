@@ -579,13 +579,17 @@ class IVP{
         void solve_rungekutta();
         void solve_rungekutta_aitken();
 
+        void solve_integral();
+
     private:
         void reset_results();
         void reset_error_estimate();
 
         bool has_f() const;
         bool has_exact() const;
+        bool has_exact_cumulative() const;
         bool has_solution() const;
+        bool has_solution_cumulative() const;
         bool has_exact_error() const;
         bool has_estimated_error() const;
         bool has_dfdt() const;
@@ -607,6 +611,9 @@ class IVP{
         double *y_exact_pointer;
         double *y_error_pointer;
         double *y_error_limit_pointer;
+        double *y_cum_pointer;
+        double *y_exact_cum_pointer;
+        double *y_error_cum_pointer;
         int extra_search_points;
         bool relative_error;
         double Lipschitz;
@@ -626,6 +633,9 @@ IVP::IVP():
     t_pointer(nullptr), y_pointer(nullptr),
     y_exact_pointer(nullptr), y_error_pointer(nullptr),
     y_error_limit_pointer(nullptr),
+    y_cum_pointer(nullptr),
+    y_exact_cum_pointer(nullptr),
+    y_error_cum_pointer(nullptr),
     extra_search_points(20), relative_error(false),
     Lipschitz(0), calculated_L(false),
     max_dfdt(0), calculated_M(false),
@@ -635,6 +645,7 @@ IVP::IVP():
 void IVP::reset_results(){
     t_pointer = nullptr;
     y_pointer = nullptr;
+    y_cum_pointer = nullptr;
     calculated_L = false;
     calculated_M = false;
     // reset_f_evaluations();
@@ -646,6 +657,7 @@ void IVP::reset_f_evaluations(){
 void IVP::reset_error_estimate(){
     y_exact_pointer = nullptr;
     y_error_pointer = nullptr;
+    y_error_cum_pointer = nullptr;
     y_error_limit_pointer = nullptr;
 }
 void IVP::set_f(double (*f)(double, double)){
@@ -695,9 +707,11 @@ void IVP::set_time_steps(int n){
     reset_results();
 }
 void IVP::set_relative_error(bool relative){
-    relative_error = relative;
-    y_exact_pointer = nullptr;
-    y_error_pointer = nullptr;
+    if (relative_error != relative){
+        relative_error = relative;
+        y_error_pointer = nullptr;
+        y_error_cum_pointer = nullptr;
+    }
 }
 void IVP::set_Lipschitz_L(double L){
     if (L<=0){
@@ -755,6 +769,13 @@ double IVP::get_exact(double t) const{
         return std::numeric_limits<double>::quiet_NaN();
     }
     return exact_pointer(t);
+}
+double IVP::get_exact_cumulative(double t) const{
+    if (!has_exact_cumulative()){
+        printf("Exact cumulative response not defined.\n");
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    return exact_cum_pointer(t);
 }
 double IVP::get_Lipschitz() const{
     if (!calculated_L){
@@ -866,8 +887,14 @@ bool IVP::has_f() const{
 bool IVP::has_exact() const{
     return exact_pointer != nullptr;
 }
+bool IVP::has_exact_cumulative() const{
+    return exact_cum_pointer != nullptr;
+}
 bool IVP::has_solution() const{
     return t_pointer != nullptr && y_pointer != nullptr;
+}
+bool IVP::has_solution_cumulative() const{
+    return y_cum_pointer != nullptr;
 }
 bool IVP::has_exact_error() const{
     return y_exact_pointer != nullptr && y_error_pointer != nullptr;
@@ -895,17 +922,12 @@ double* IVP::get_y() const{
     return copy_array(y_pointer, time_steps+1);
 }
 double* IVP::get_y_cumulative() const{
-    Integration integration;
-    integration.add_points(t_pointer, y_pointer, time_steps+1);
-
-
-    return copy_array(y_pointer, time_steps+1);
+    return copy_array(y_cum_pointer, time_steps+1);
 }
 
 int IVP::get_f_evaluations() const{
     return f_evaluations;
 }
-
 
 void IVP::calculate_exact_error(){
     if (!has_solution()){
@@ -931,6 +953,24 @@ void IVP::calculate_exact_error(){
     }
     y_exact_pointer = y_exact;
     y_error_pointer = y_error;
+
+    if (has_exact_cumulative() && has_solution_cumulative()){
+        double* y_exact_cum = new double[time_steps+1];
+        double* y_error_cum = new double[time_steps+1];
+        for (int i=0; i<time_steps+1; i++){
+            y_exact_cum[i] = get_exact_cumulative(t_pointer[i]);
+            y_error_cum[i] = abs(y_exact_cum[i] - y_cum_pointer[i]);
+            if (relative_error){
+                if (abs(y_exact_cum[i]) > eps){
+                    y_error_cum[i] = y_error_cum[i] / abs(y_exact_cum[i]);
+                } else{
+                    y_error_cum[i] = std::numeric_limits<double>::quiet_NaN();
+                }
+            }
+        }
+        y_exact_cum_pointer = y_exact_cum;
+        y_error_cum_pointer = y_error_cum;
+    }
 }
 
 void IVP::print_solution(){
@@ -944,8 +984,14 @@ void IVP::print_solution(){
         printf("\t%16s","error_limit");
     }
     if (has_exact_error()){
-        printf("\t%16s\t%16s","y_exact","exact_error");
+        printf("\t%16s\t%16s","y_exact","y_error");
     }
+    // if (has_solution_cumulative()){
+    //     printf("\t%16s","Sy_aprox");
+    //     if (has_exact_cumulative()){
+    //         printf("\t%16s\t%16s","Sy_exact","S_error");
+    //     }
+    // }
     printf("\n");
 
     for (int i=0; i<time_steps+1; i++){
@@ -956,6 +1002,12 @@ void IVP::print_solution(){
         if (has_exact_error()){
             printf("\t%16.10g\t%16.10g", y_exact_pointer[i],y_error_pointer[i]);
         }
+        // if (has_solution_cumulative()){
+        //     printf("\t%16.10g",y_cum_pointer[i]);
+        //     if (has_exact_cumulative()){
+        //         printf("\t%16.10g\t%16.10g",y_exact_cum_pointer[i],y_error_cum_pointer[i]);
+        //     }
+        // }
         printf("\n");
     }
     if (relative_error){
@@ -982,6 +1034,12 @@ void IVP::print_solution(string filename){
     if (has_exact_error()){
         fprintf(outFile,"\t%16s\t%16s","y_exact","exact_error");
     }
+    if (has_solution_cumulative()){
+        fprintf(outFile,"\t%16s","Sy_aprox");
+        if (has_exact_cumulative()){
+            fprintf(outFile,"\t%16s\t%16s","Sy_exact","S_error");
+        }
+    }
     fprintf(outFile,"\n");
 
     for (int i=0; i<time_steps+1; i++){
@@ -991,6 +1049,12 @@ void IVP::print_solution(string filename){
         }
         if (has_exact_error()){
             fprintf(outFile,"\t%16.10g\t%16.10g", y_exact_pointer[i],y_error_pointer[i]);
+        }
+        if (has_solution_cumulative()){
+            fprintf(outFile,"\t%16.10g",y_cum_pointer[i]);
+            if (has_exact_cumulative()){
+                fprintf(outFile,"\t%16.10g\t%16.10g",y_exact_cum_pointer[i],y_error_cum_pointer[i]);
+            }
         }
         fprintf(outFile,"\n");
     }
@@ -1125,6 +1189,15 @@ void IVP::solve_rungekutta_aitken(){
     }
 }
 
+void IVP::solve_integral(){
+    if (!has_solution()){
+        printf("No solution found. Cannot continue.\n");
+        return;
+    }
+    Integration integration;
+    integration.add_points(t_pointer, y_pointer, time_steps+1);
+    y_cum_pointer = integration.solve();
+}
 // ############# Tests #############
 
 void tests_splines(){
@@ -1182,6 +1255,9 @@ double delfdely_test_1(double t, double y){
 double exact_test_1(double t){
     return pow(t+1, 2) - 0.5 * exp(t); // y(0)=0.5
 }
+double exact_int_test_1(double t){
+    return t*(1. + t*(1. + t/3.) ) + 0.5 *(1. - exp(t));
+}
 
 double f_test_2(double t, double y){
     return -2.*y + 3.*exp(t);
@@ -1198,6 +1274,9 @@ double dfdt_test_2(double t, double y){
 double exact_test_2(double t){
     return 2. * exp(-2.*t) + exp(t);  // y(0)=3
 }
+double exact_int_test_2(double t){
+    return - exp(-2.*t) + exp(t);
+}
 
 double f_test_3(double t, double y){
     return 4*cos(t) - 8*sin(t) + 2*y;
@@ -1213,6 +1292,9 @@ double dfdt_test_3(double t, double y){
 }
 double exact_test_3(double t){
     return 4*sin(t) + 3*exp(2*t);  // y(0)=3
+}
+double exact_int_test_3(double t){
+    return 4 - 4*cos(t) + 3*exp(t)*sinh(t);
 }
 
 double a = 3.;
@@ -1231,6 +1313,9 @@ double dfdt_test_4(double t, double y){
 double exact_test_4(double t){
     return 3.*exp(-a*t);  // y(0)=3
 }
+double exact_int_test_4(double t){
+    return 3/a * (1- exp(-a*t));
+}
 
 void test_rungekutta(IVP ivp, string problemname, string filename){
     const char* name = problemname.c_str();
@@ -1241,6 +1326,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_euler.txt");
@@ -1250,6 +1336,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_euler_n0.500.txt");
@@ -1259,6 +1346,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_euler_n0.333.txt");
@@ -1268,6 +1356,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_euler_n0.167.txt");
@@ -1277,6 +1366,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_euler_aitken.txt");
@@ -1286,6 +1376,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta.txt");
@@ -1295,6 +1386,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_n0.500.txt");
@@ -1304,6 +1396,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_n0.333.txt");
@@ -1313,6 +1406,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_n0.167.txt");
@@ -1322,6 +1416,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta_aitken();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_aitken.txt");
@@ -1335,6 +1430,7 @@ void tests_rungekutta(){
     test1.set_t_initial(0.);
     test1.set_t_end(2.);
     test1.set_exact(exact_test_1);
+    test1.set_exact_cumulative(exact_int_test_1);
     test_rungekutta(test1, "#1", "test1");
 
     printf("### Problem #2 ###\n");
@@ -1344,6 +1440,7 @@ void tests_rungekutta(){
     test2.set_t_initial(0.);
     test2.set_t_end(2.);
     test2.set_exact(exact_test_2);
+    test2.set_exact_cumulative(exact_int_test_2);
     test_rungekutta(test2, "#2", "test2");
 
     printf("### Problem #3 ###\n");
@@ -1353,6 +1450,7 @@ void tests_rungekutta(){
     test3.set_t_initial(0.);
     test3.set_t_end(2.);
     test3.set_exact(exact_test_3);
+    test3.set_exact_cumulative(exact_int_test_3);
     test_rungekutta(test3, "#3", "test3");
 
     printf("### Problem #4 ###\n");
@@ -1362,6 +1460,7 @@ void tests_rungekutta(){
     test4.set_t_initial(0.);
     test4.set_t_end(2.);
     test4.set_exact(exact_test_4);
+    test4.set_exact_cumulative(exact_int_test_4);
     test_rungekutta(test4, "#4", "test4");
 }
 
@@ -1893,7 +1992,7 @@ int main(){
         std::cout << "Running on an unknown system" << std::endl;
     #endif
     // tests_splines();
-    tests_integration();
+    // tests_integration();
     // tests_rungekutta();
-    // Fetkovich_tests();
+    Fetkovich_tests();
 }
