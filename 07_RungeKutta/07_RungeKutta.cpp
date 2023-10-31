@@ -9,9 +9,25 @@ using namespace std;
 const double eps = 1E-12;
 
 double* copy_array(double *original, int number_points){
+    if (number_points < 1){
+        return nullptr;
+    }
     double* out = new double[number_points];
     for(int i=0; i<number_points; i++){
         out[i] = original[i];
+    }
+    return out;
+}
+
+double max_array(double *vector, int number_points){
+    if (number_points < 1){
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+    double out = vector[0];
+    for(int i=1; i<number_points; i++){
+        if (vector[i] > out || isnan(out)){
+            out = vector[i];
+        };
     }
     return out;
 }
@@ -565,6 +581,8 @@ class IVP{
         double* get_t() const;
         double* get_y() const;
         double* get_y_cumulative() const;
+        double* get_y_error() const;
+        double* get_y_cumulative_error() const;
         int get_f_evaluations() const;
 
         void reset_f_evaluations();
@@ -923,6 +941,12 @@ double* IVP::get_y() const{
 }
 double* IVP::get_y_cumulative() const{
     return copy_array(y_cum_pointer, time_steps+1);
+}
+double* IVP::get_y_error() const{
+    return copy_array(y_error_pointer, time_steps+1);
+}
+double* IVP::get_y_cumulative_error() const{
+    return copy_array(y_error_cum_pointer, time_steps+1);
 }
 
 int IVP::get_f_evaluations() const{
@@ -1487,13 +1511,19 @@ class Fetkovich{
         double* get_result_aquifer_pressure() const; // bar
         double* get_result_reservoir_pressure() const; // bar
 
+        double* get_result_water_flow_error(bool relative) const; // m3/d or adm.
+        double* get_result_cumulative_flow_error(bool relative) const; // m3 or adm.
+
+        double get_exact(double t) const;
+        double get_exact_cumulative(double t) const;
+
         void print_solution();
         void print_solution(string filename);
 
         int get_f_evaluations() const;
-    private:
         void reset_f_evaluations();
 
+    private:
         double We_max() const;
 
         double get_aquifer_pressure(double We) const;   // bar
@@ -1502,9 +1532,7 @@ class Fetkovich{
         double get_f_pr(double We, double t) const;
 
         bool has_exact() const;
-        double get_exact(double t) const;
         bool has_exact_cumulative() const;
-        double get_exact_cumulative(double t) const;
 
         bool has_solution() const;
 
@@ -1686,6 +1714,60 @@ double* Fetkovich::get_result_aquifer_pressure() const{
 }
 double* Fetkovich::get_result_reservoir_pressure() const{
     return p_reservoir_pointer;
+}
+
+double* Fetkovich::get_result_water_flow_error(bool relative) const{
+    if (!has_solution()){
+        printf("There is no solution. Cannot continue.\n");
+        return nan_array(time_steps);
+    }
+    if (!has_exact()){
+        printf("There is no exact solution. Cannot continue.\n");
+        return nan_array(time_steps);
+    }
+
+    double exact, error;
+    double* error_list = new double[time_steps];
+    for (int i=0; i<time_steps; i++){
+        exact = get_exact(t_pointer[i]);
+        error = abs(exact - Qw_pointer[i]);
+        if (relative){
+            if (abs(exact) > eps){
+                error = error/abs(exact);
+            } else{
+                error = std::numeric_limits<double>::quiet_NaN();
+            }
+        }
+        error_list[i] = error;
+    }
+    return error_list;
+}
+
+double* Fetkovich::get_result_cumulative_flow_error(bool relative) const{
+    if (!has_solution()){
+        printf("There is no solution. Cannot continue.\n");
+        return nan_array(time_steps);
+    }
+    if (!has_exact_cumulative()){
+        printf("There is no exact solution. Cannot continue.\n");
+        return nan_array(time_steps);
+    }
+
+    double exact, error;
+    double* error_list = new double[time_steps];
+    for (int i=0; i<time_steps; i++){
+        exact = get_exact_cumulative(t_pointer[i]);
+        error = abs(exact - We_pointer[i]);
+        if (relative){
+            if (abs(exact) > eps){
+                error = error/abs(exact);
+            } else{
+                error = std::numeric_limits<double>::quiet_NaN();
+            }
+        }
+        error_list[i] = error;
+    }
+    return error_list;
 }
 
 void Fetkovich::print_solution(){
@@ -1968,10 +2050,10 @@ void Fetkovich_tests(){
     aqFet.set_exact_water_flow_function(f_qw_instant_res);
     aqFet.set_exact_water_cumulative_function(f_qw_cumulative_res);
 
-    aqFet.solve_aquifer_flow(200., 100);
-    printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
-    aqFet.print_solution();
-    aqFet.print_solution("aq1_fetkovich.txt");
+    // aqFet.solve_aquifer_flow(200., 100);
+    // printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
+    // aqFet.print_solution();
+    // aqFet.print_solution("aq1_fetkovich.txt");
 
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
     IVP aqIVP1;
@@ -1980,7 +2062,29 @@ void Fetkovich_tests(){
     aqIVP1.set_t_initial(0.);
     aqIVP1.set_t_end(200.);
     aqIVP1.set_exact(f_qw_instant_res);
-    test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
+    aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
+    // test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
+
+    printf("We Error Sensibility with Fetkovich\n");
+    double* error_list = new double;
+
+    int n_tests = 11;
+    int* steps = new int[n_tests]{5, 10, 20, 50, 80, 100, 150, 200, 250, 500, 1000};
+
+    double* error_end_fet = new double[n_tests];
+    double* error_max_fet = new double[n_tests];
+    int* evaluations_fet = new int[n_tests];
+
+    printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    for (int i=0; i<10; i++){
+        aqFet.reset_f_evaluations();
+        aqFet.solve_aquifer_flow(200., steps[i]);
+        evaluations_fet[i] = aqFet.get_f_evaluations();
+        error_list = aqFet.get_result_cumulative_flow_error(true);
+        error_end_fet[i] = error_list[steps[i]];
+        error_max_fet[i] = max_array(error_list, steps[i]+1);
+        printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations_fet[i], error_end_fet[i], error_max_fet[i]);
+    }
 }
 
 int main(){
