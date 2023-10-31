@@ -3,6 +3,7 @@
 #include <limits>
 #include <cstdio>
 #include <string>
+#include <cstdlib>
 using namespace std;
 
 const double eps = 1E-12;
@@ -15,6 +16,13 @@ double* copy_array(double *original, int number_points){
     return out;
 }
 
+double* nan_array(int number_points){
+    double* out = new double[number_points];
+    for (int i = 0; i < number_points; i++) {
+        out[i] = std::numeric_limits<double>::quiet_NaN();
+    }
+    return out;
+}
 class Spline{
     public:
         Spline();
@@ -390,6 +398,7 @@ class Integration{
         void add_points(double *x, double *y, int number_points);
         double solve_Simpson() const;
         double solve_Trapezoidal() const;
+        double* solve() const;
 
     private:
         bool has_data() const;
@@ -433,7 +442,7 @@ double Integration::solve_Simpson() const{
         printf("Simpson only works with an odd number of points.\n");
         return std::numeric_limits<double>::quiet_NaN();
     }
-    double h = (x_pointer[n_points-1] - x_pointer[0]) / (n_points+1);
+    double h = (x_pointer[n_points-1] - x_pointer[0]) / (n_points-1);
     for (int i=1; i<n_points; i++){
         if (abs(h - (x_pointer[i] - x_pointer[i-1])) > eps){
             printf("Simpson only works with a constant step.\n");
@@ -441,8 +450,8 @@ double Integration::solve_Simpson() const{
         }
     }
     double s0 = y_pointer[n_points-1] + y_pointer[0];
-    double s1 = 0;
-    double s2 = 0;
+    double s1 = 0.;
+    double s2 = 0.;
     for (int i=1; i<n_points-1; i++){
         if (i % 2 == 0){
             s2 += y_pointer[i];
@@ -450,7 +459,7 @@ double Integration::solve_Simpson() const{
             s1 += y_pointer[i];
         }
     }
-    return h/3. * (s0 + 2*s2 + 4*s1);
+    return h/3. * (s0 + 2.*s2 + 4.*s1);
 }
 
 double Integration::solve_Trapezoidal() const{
@@ -458,7 +467,7 @@ double Integration::solve_Trapezoidal() const{
         printf("No data defined yet.\n");
         return std::numeric_limits<double>::quiet_NaN();
     }
-    double h = (x_pointer[n_points-1] - x_pointer[0]) / (n_points+1);
+    double h = (x_pointer[n_points-1] - x_pointer[0]) / (n_points-1);
     for (int i=1; i<n_points; i++){
         if (abs(h - (x_pointer[i] - x_pointer[i-1])) > eps){
             printf("Trapezoidal rule integration only works with a constant step.\n");
@@ -466,11 +475,61 @@ double Integration::solve_Trapezoidal() const{
         }
     }
     double s0 = y_pointer[n_points-1] + y_pointer[0];
-    double s1 = 0;
+    double s1 = 0.;
     for (int i=1; i<n_points-1; i++){
         s1 += y_pointer[i];
     }
-    return h/2. * (s0 + 2*s1);
+    return h/2. * (s0 + 2.*s1);
+}
+
+double* Integration::solve() const{
+    if (!has_data()){
+        printf("No data defined yet.\n");
+        return nan_array(1);
+    }
+    double* h = new double[n_points-1];
+    for (int i=1; i<n_points; i++){
+        h[i-1] = x_pointer[i] - x_pointer[i-1];
+        if (h[i-1] <= 0){
+            printf("X-values must be in ascending order.\n");
+            return nan_array(n_points);
+        }
+    }
+    double* s = new double[n_points];
+    s[0] = 0.;
+    double w1, w2, w3;
+    for (int i=1; i<n_points; i++){
+        if (i % 2 == 1){
+            s[i] = s[i-1] + h[i-1]/2. * (y_pointer[i] + y_pointer[i-1]);
+        } else{
+            w1 = 2.*h[i-2] + h[i-1] * (1. - h[i-1]/h[i-2]);
+            w2 = pow(h[i-2] + h[i-1], 3.) / (h[i-2]*h[i-1]);
+            w3 = 2.*h[i-1] + h[i-2] * (1. - h[i-2]/h[i-1]);
+            s[i] = s[i-2] + 1./6. * (y_pointer[i-2]*w1 + y_pointer[i-1]*w2 + y_pointer[i]*w3);
+        }
+    }
+    return s;
+}
+
+void tests_integration(){
+    Integration integration;
+    int n = 18;
+    double* x = new double[n+1];
+    double* y = new double[n+1];
+    for (int i=0; i<n+1; i++){
+        x[i] = M_PI * i/n;
+        y[i] = sin(x[i]);
+    }
+    integration.add_points(x,y,n+1);
+    printf("Integration of Sin(x) from 0 to pi\n");
+    printf("  Simpson: %g (expected 2.0000104)\n", integration.solve_Simpson());
+    printf("  Trapezoidal rule: %g (expected 1.9949205)\n", integration.solve_Trapezoidal());
+    double* s = integration.solve();
+    printf("  'General' integrator:\n");
+    printf("%5s\t%10s\t%10s\t%10s\t%10s\t\n","i","x","Aprox","Exact","Error");
+    for (int i=0; i<n+1; i++){
+        printf("%5d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\t\n",i,x[i],s[i],1-cos(x[i]),abs(s[i]-1+cos(x[i])));
+    }
 }
 
 
@@ -479,6 +538,7 @@ class IVP{
         IVP();
         void set_f(double (*f)(double, double));
         void set_exact(double (*f)(double));
+        void set_exact_cumulative(double (*f)(double));
         void set_dfdt(double (*f)(double, double));
         void set_delfdely(double (*f)(double, double));
         void set_y_initial(double y);
@@ -498,11 +558,13 @@ class IVP{
         double get_dfdt(double t, double y) const;
         double get_delfdely(double t, double y) const;
         double get_exact(double t) const;
+        double get_exact_cumulative(double t) const;
         double get_Lipschitz() const;
         double get_max_dfdt() const;
 
         double* get_t() const;
         double* get_y() const;
+        double* get_y_cumulative() const;
         int get_f_evaluations() const;
 
         void reset_f_evaluations();
@@ -533,6 +595,7 @@ class IVP{
 
         double (*f_pointer)(double, double);
         double (*exact_pointer)(double);
+        double (*exact_cum_pointer)(double);
         double (*dfdt_pointer)(double, double);
         double (*delfdely_pointer)(double, double);
         double y_initial;
@@ -555,6 +618,7 @@ class IVP{
 
 IVP::IVP():
     f_pointer(nullptr), exact_pointer(nullptr),
+    exact_cum_pointer(nullptr),
     dfdt_pointer(nullptr),
     delfdely_pointer(nullptr),
     y_initial(0), t_initial(0),
@@ -598,6 +662,9 @@ void IVP::set_delfdely(double (*f)(double, double)){
 }
 void IVP::set_exact(double (*f)(double)){
     exact_pointer = f;
+}
+void IVP::set_exact_cumulative(double (*f)(double)){
+    exact_cum_pointer = f;
 }
 void IVP::set_y_initial(double y){
     y_initial = y;
@@ -825,6 +892,13 @@ double* IVP::get_t() const{
     return copy_array(t_pointer, time_steps+1);
 }
 double* IVP::get_y() const{
+    return copy_array(y_pointer, time_steps+1);
+}
+double* IVP::get_y_cumulative() const{
+    Integration integration;
+    integration.add_points(t_pointer, y_pointer, time_steps+1);
+
+
     return copy_array(y_pointer, time_steps+1);
 }
 
@@ -1800,7 +1874,7 @@ void Fetkovich_tests(){
     aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
-    printf("Instant Pressure Equilibrium Reservoir with Euler\n");
+    printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
     IVP aqIVP1;
     aqIVP1.set_f(f_instant_res);
     aqIVP1.set_y_initial(400.);
@@ -1811,7 +1885,15 @@ void Fetkovich_tests(){
 }
 
 int main(){
+    #ifdef _WIN32
+        system("cls");
+    #elif __unix__
+        system("clear");
+    #else
+        std::cout << "Running on an unknown system" << std::endl;
+    #endif
     // tests_splines();
+    tests_integration();
     // tests_rungekutta();
-    Fetkovich_tests();
+    // Fetkovich_tests();
 }
