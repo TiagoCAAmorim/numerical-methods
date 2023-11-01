@@ -593,9 +593,11 @@ class IVP{
         void solve_euler();
         void estimate_error_euler();
         void solve_euler_aitken();
+        void solve_euler_aitken(int n1, int n2);
 
         void solve_rungekutta();
         void solve_rungekutta_aitken();
+        void solve_rungekutta_aitken(int n1, int n2);
 
         void solve_integral();
 
@@ -1145,13 +1147,17 @@ void IVP::estimate_error_euler(){
 }
 
 void IVP::solve_euler_aitken(){
+    solve_euler_aitken(2,4);
+}
+
+void IVP::solve_euler_aitken(int n1, int n2){
     int time_steps_original = time_steps;
 
-    set_time_steps(3 * time_steps_original);
+    set_time_steps(n2 * time_steps_original);
     solve_euler();
     double* y2 = copy_array(y_pointer, time_steps+1);
 
-    set_time_steps(2 * time_steps_original);
+    set_time_steps(n1 * time_steps_original);
     solve_euler();
     double* y1 = copy_array(y_pointer, time_steps+1);
 
@@ -1160,7 +1166,7 @@ void IVP::solve_euler_aitken(){
     double* y0 = copy_array(y_pointer, time_steps+1);
 
     for (int i=1; i<time_steps+1; i++){
-        y_pointer[i] = y0[i] - pow(y1[2*i] - y0[i], 2) / (y2[3*i] - 2*y1[2*i] + y0[i]);
+        y_pointer[i] = y0[i] - pow(y1[n1*i] - y0[i], 2) / (y2[n2*i] - 2*y1[n1*i] + y0[i]);
     }
 }
 
@@ -1193,14 +1199,19 @@ void IVP::solve_rungekutta(){
     y_pointer = y;
     reset_error_estimate();
 }
+
 void IVP::solve_rungekutta_aitken(){
+    solve_rungekutta_aitken(2,4);
+}
+
+void IVP::solve_rungekutta_aitken(int n1, int n2){
     int time_steps_original = time_steps;
 
-    set_time_steps(3 * time_steps_original);
+    set_time_steps(n2 * time_steps_original);
     solve_rungekutta();
     double* y2 = copy_array(y_pointer, time_steps+1);
 
-    set_time_steps(2 * time_steps_original);
+    set_time_steps(n1 * time_steps_original);
     solve_rungekutta();
     double* y1 = copy_array(y_pointer, time_steps+1);
 
@@ -1209,7 +1220,7 @@ void IVP::solve_rungekutta_aitken(){
     double* y0 = copy_array(y_pointer, time_steps+1);
 
     for (int i=1; i<time_steps+1; i++){
-        y_pointer[i] = y0[i] - pow(y1[2*i] - y0[i], 2) / (y2[3*i] - 2*y1[2*i] + y0[i]);
+        y_pointer[i] = y0[i] - pow(y1[n1*i] - y0[i], 2) / (y2[n2*i] - 2*y1[n1*i] + y0[i]);
     }
 }
 
@@ -1222,6 +1233,7 @@ void IVP::solve_integral(){
     integration.add_points(t_pointer, y_pointer, time_steps+1);
     y_cum_pointer = integration.solve();
 }
+
 // ############# Tests #############
 
 void tests_splines(){
@@ -1345,8 +1357,10 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     const char* name = problemname.c_str();
     ivp.set_relative_error(false);
 
+    const int n = 14;
+
     printf(" Problem %s: Euler\n", name);
-    ivp.set_time_steps(240);
+    ivp.set_time_steps(28*n);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
@@ -1356,37 +1370,37 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.print_solution(filename+"_euler.txt");
 
     printf(" Problem %s: Euler 1/2 Time-Steps\n", name);
-    ivp.set_time_steps(120);
+    ivp.set_time_steps(14*n);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_euler_n0.500.txt");
+    ivp.print_solution(filename+"_euler_2h.txt");
 
-    printf(" Problem %s: Euler 1/3 Time-Steps\n", name);
-    ivp.set_time_steps(80);
+    printf(" Problem %s: Euler 1/4 Time-Steps\n", name);
+    ivp.set_time_steps(7*n);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_euler_n0.333.txt");
+    ivp.print_solution(filename+"_euler_4h.txt");
 
-    printf(" Problem %s: Euler 1/6 Time-Steps\n", name);
-    ivp.set_time_steps(40);
+    printf(" Problem %s: Euler 1/8 Time-Steps\n", name);
+    ivp.set_time_steps(7*n/2);
     ivp.reset_f_evaluations();
     ivp.solve_euler();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_euler_n0.167.txt");
+    ivp.print_solution(filename+"_euler_8h.txt");
 
     printf(" Problem %s: Euler+Aitken\n", name);
-    ivp.set_time_steps(40);
+    ivp.set_time_steps(4*n);
     ivp.reset_f_evaluations();
     ivp.solve_euler_aitken();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
@@ -1395,8 +1409,18 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.print_solution();
     ivp.print_solution(filename+"_euler_aitken.txt");
 
+    printf(" Problem %s: Euler+Aitken 2-3\n", name);
+    ivp.set_time_steps(4*n*7/6);
+    ivp.reset_f_evaluations();
+    ivp.solve_euler_aitken(2,3);
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    ivp.solve_integral();
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_euler_aitken_old.txt");
+
     printf(" Problem %s: Runge-Kutta\n", name);
-    ivp.set_time_steps(60);
+    ivp.set_time_steps(7*n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
@@ -1406,37 +1430,37 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     ivp.print_solution(filename+"_rungekutta.txt");
 
     printf(" Problem %s: Runge-Kutta 1/2 Time-Steps\n", name);
-    ivp.set_time_steps(30);
+    ivp.set_time_steps(4*n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_rungekutta_n0.500.txt");
+    ivp.print_solution(filename+"_rungekutta_2h.txt");
 
-    printf(" Problem %s: Runge-Kutta 1/3 Time-Steps\n", name);
-    ivp.set_time_steps(20);
+    printf(" Problem %s: Runge-Kutta 1/4 Time-Steps\n", name);
+    ivp.set_time_steps(2*n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_rungekutta_n0.333.txt");
+    ivp.print_solution(filename+"_rungekutta_4h.txt");
 
-    printf(" Problem %s: Runge-Kutta 1/6 Time-Steps\n", name);
-    ivp.set_time_steps(10);
+    printf(" Problem %s: Runge-Kutta 1/8 Time-Steps\n", name);
+    ivp.set_time_steps(n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_rungekutta_n0.167.txt");
+    ivp.print_solution(filename+"_rungekutta_8h.txt");
 
     printf(" Problem %s: Runge-Kutta + Aikten\n", name);
-    ivp.set_time_steps(10);
+    ivp.set_time_steps(n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta_aitken();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
@@ -2050,10 +2074,10 @@ void Fetkovich_tests(){
     aqFet.set_exact_water_flow_function(f_qw_instant_res);
     aqFet.set_exact_water_cumulative_function(f_qw_cumulative_res);
 
-    // aqFet.solve_aquifer_flow(200., 100);
-    // printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
-    // aqFet.print_solution();
-    // aqFet.print_solution("aq1_fetkovich.txt");
+    aqFet.solve_aquifer_flow(200., 100);
+    printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
+    aqFet.print_solution();
+    aqFet.print_solution("aq1_fetkovich.txt");
 
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
     IVP aqIVP1;
@@ -2063,7 +2087,7 @@ void Fetkovich_tests(){
     aqIVP1.set_t_end(200.);
     aqIVP1.set_exact(f_qw_instant_res);
     aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
-    // test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
+    test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
 
 
     int n_tests = 11;
@@ -2140,6 +2164,6 @@ int main(){
     #endif
     // tests_splines();
     // tests_integration();
-    // tests_rungekutta();
+    tests_rungekutta();
     Fetkovich_tests();
 }
