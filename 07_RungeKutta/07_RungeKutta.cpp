@@ -596,12 +596,17 @@ class IVP{
         void solve_euler_aitken(int n1, int n2);
 
         void solve_rungekutta();
+        void solve_rungekutta(int n);
         void solve_rungekutta_aitken();
-        void solve_rungekutta_aitken(int n1, int n2);
+        void solve_rungekutta_aitken(int n);
+        void solve_rungekutta_aitken(int n, int n1, int n2);
 
         void solve_integral();
 
     private:
+        void solve_rungekutta2();
+        void solve_rungekutta3();
+        void solve_rungekutta4();
         void reset_results();
         void reset_error_estimate();
 
@@ -1171,6 +1176,88 @@ void IVP::solve_euler_aitken(int n1, int n2){
 }
 
 void IVP::solve_rungekutta(){
+    solve_rungekutta4();
+}
+
+void IVP::solve_rungekutta(int n){
+    switch (n)
+    {
+    case 1:
+        solve_euler();
+        break;
+    case 2:
+        solve_rungekutta2();
+        break;
+    case 3:
+        solve_rungekutta3();
+        break;
+    case 4:
+        solve_rungekutta4();
+        break;
+    default:
+        printf("No Runge-Kutta methods higher than 4 were implemented.\n");
+        break;
+    }
+}
+
+void IVP::solve_rungekutta2(){
+    if (!has_f()){
+        printf("Function f(t,y) not defined. Cannot continue.\n");
+        return;
+    }
+    double h = (t_end - t_initial) / time_steps;
+    double* t = new double[time_steps+1];
+    double* y = new double[time_steps+1];
+
+    t[0] = t_initial;
+    y[0] = y_initial;
+
+
+    double k1,k2;
+    for (int i=0; i<time_steps; i++){
+        t[i+1] = t[0] + (i+1)*h;
+        k1 = h * f_pointer(t[i], y[i]);
+        k2 = h * f_pointer(t[i]+h/2., y[i]+k1/2.);
+        f_evaluations += 2;
+
+        y[i+1] = y[i] + k2;
+    }
+
+    t_pointer = t;
+    y_pointer = y;
+    reset_error_estimate();
+}
+
+void IVP::solve_rungekutta3(){
+    if (!has_f()){
+        printf("Function f(t,y) not defined. Cannot continue.\n");
+        return;
+    }
+    double h = (t_end - t_initial) / time_steps;
+    double* t = new double[time_steps+1];
+    double* y = new double[time_steps+1];
+
+    t[0] = t_initial;
+    y[0] = y_initial;
+
+
+    double k1,k2,k3;
+    for (int i=0; i<time_steps; i++){
+        t[i+1] = t[0] + (i+1)*h;
+        k1 = h * f_pointer(t[i], y[i]);
+        k2 = h * f_pointer(t[i]+h/3., y[i]+k1/3.);
+        k3 = h * f_pointer(t[i]+h*2./3., y[i]+k2*2./3.);
+        f_evaluations += 3;
+
+        y[i+1] = y[i] + 1./4. * (k1 + 3.*k3);
+    }
+
+    t_pointer = t;
+    y_pointer = y;
+    reset_error_estimate();
+}
+
+void IVP::solve_rungekutta4(){
     if (!has_f()){
         printf("Function f(t,y) not defined. Cannot continue.\n");
         return;
@@ -1187,12 +1274,12 @@ void IVP::solve_rungekutta(){
     for (int i=0; i<time_steps; i++){
         t[i+1] = t[0] + (i+1)*h;
         k1 = h * f_pointer(t[i], y[i]);
-        k2 = h * f_pointer(t[i]+h/2, y[i]+k1/2);
-        k3 = h * f_pointer(t[i]+h/2, y[i]+k2/2);
+        k2 = h * f_pointer(t[i]+h/2., y[i]+k1/2.);
+        k3 = h * f_pointer(t[i]+h/2., y[i]+k2/2.);
         k4 = h * f_pointer(t[i+1], y[i]+k3);
         f_evaluations += 4;
 
-        y[i+1] = y[i] + 1/6. * (k1 + 2*k2 + 2*k3 + k4);
+        y[i+1] = y[i] + 1./6. * (k1 + 2.*k2 + 2.*k3 + k4);
     }
 
     t_pointer = t;
@@ -1201,22 +1288,24 @@ void IVP::solve_rungekutta(){
 }
 
 void IVP::solve_rungekutta_aitken(){
-    solve_rungekutta_aitken(2,4);
+    solve_rungekutta_aitken(4, 2, 4);
 }
-
-void IVP::solve_rungekutta_aitken(int n1, int n2){
+void IVP::solve_rungekutta_aitken(int n){
+    solve_rungekutta_aitken(n, 2, 4);
+}
+void IVP::solve_rungekutta_aitken(int n, int n1, int n2){
     int time_steps_original = time_steps;
 
     set_time_steps(n2 * time_steps_original);
-    solve_rungekutta();
+    solve_rungekutta(n);
     double* y2 = copy_array(y_pointer, time_steps+1);
 
     set_time_steps(n1 * time_steps_original);
-    solve_rungekutta();
+    solve_rungekutta(n);
     double* y1 = copy_array(y_pointer, time_steps+1);
 
     set_time_steps(time_steps_original);
-    solve_rungekutta();
+    solve_rungekutta(n);
     double* y0 = copy_array(y_pointer, time_steps+1);
 
     for (int i=1; i<time_steps+1; i++){
@@ -2074,7 +2163,7 @@ void Fetkovich_tests(){
     aqFet.set_exact_water_flow_function(f_qw_instant_res);
     aqFet.set_exact_water_cumulative_function(f_qw_cumulative_res);
 
-    aqFet.solve_aquifer_flow(200., 100);
+    aqFet.solve_aquifer_flow(200., 28*14/2);
     printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
     aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
@@ -2113,9 +2202,9 @@ void Fetkovich_tests(){
     }
     fclose(outFile);
 
-    string stringArray[4]={"euler","euler_aitken","rungekutta","rungekutta_aitken"};
+    string stringArray[8]={"euler","euler_aitken","rungekutta2","rungekutta3","rungekutta4","rungekutta_aitken2","rungekutta_aitken3","rungekutta_aitken4"};
 
-    for (int j=0; j<4; j++){
+    for (int j=0; j<8; j++){
         printf("We Error Sensibility with %s\n", stringArray[j].c_str());
         outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
         printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
@@ -2132,10 +2221,22 @@ void Fetkovich_tests(){
                     aqIVP1.solve_euler_aitken();
                     break;
                 case 2:
-                    aqIVP1.solve_rungekutta();
+                    aqIVP1.solve_rungekutta(2);
                     break;
                 case 3:
-                    aqIVP1.solve_rungekutta_aitken();
+                    aqIVP1.solve_rungekutta(3);
+                    break;
+                case 4:
+                    aqIVP1.solve_rungekutta(4);
+                    break;
+                case 5:
+                    aqIVP1.solve_rungekutta_aitken(2);
+                    break;
+                case 6:
+                    aqIVP1.solve_rungekutta_aitken(3);
+                    break;
+                case 7:
+                    aqIVP1.solve_rungekutta_aitken(4);
                     break;
                 default:
                     printf("Undifined!\n");
@@ -2164,6 +2265,6 @@ int main(){
     #endif
     // tests_splines();
     // tests_integration();
-    tests_rungekutta();
+    // tests_rungekutta();
     Fetkovich_tests();
 }
