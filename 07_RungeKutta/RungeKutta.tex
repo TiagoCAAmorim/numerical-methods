@@ -1,0 +1,742 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics}
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Aplicação dos Métodos de Runge-Kutta para Resolver o Comportamento de Aquíferos Analíticos\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 5 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28},
+city={Rio de Janeiro},
+postcode={20231-030},
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+    O algoritmo proposto por Fetkovich para modelar o comportamento de um aquífero usa uma formulação implícita com respeito à pressão da interface entre o aquífero e o reservatório. Foi avaliado o uso dos métodos de Runge-Kutta para resolver o aquífero de Fetkovich. As avaliações mostraram que apenas o método de Runge-Kutta de quarta ordem consegue se aproximar dos erros de aproximação do método de Fetkovich. Para um número menor de passos de tempo o método de Fetkovich se mostrou melhor que o de Runge-Kutta.
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método de Fetkovich \sep Método de Euler \sep Método de Runge-Kutta \sep Método de Aitken \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+    O modelo de aquífero proposto por Fetkovich resulta em uma equação diferencial ordinária (EDO). O método proposto realiza uma simplificação nesta EDO e propõe um método numérico de resolução do influxo de água com o tempo.
+
+    Este trabalho se propõe a não realizar a simplificação feita por Fetkovich e aplica métodos de aproximação numérica de EDO para resolver este problema. Em uma primeira avaliação constatou-se que o método de Euler não é adequado para resolver o modelo de aquífero proposto por Fetkovich \cite{relatorioeuler}. Neste relatório é avaliada a aplicação do método de Runge-Kutta de quarta ordem. Também é revista a aplicação do método de Aitken para melhorar as respostas do método de Euler.
+
+\section{Metodologia}
+
+        Uma descrição dos métodos de Fetkovich e de Euler, além da formalização do modelo de aquífero proposto por Fetkovich como um problema de valor inicial (PVI), foram feitas com mais detalhe no relatório da primeira parte da avaliação proposta \cite{relatorioeuler}. Neste relatório este tópicos são apresentados de forma resumida.
+
+    \subsection{Método de Fetkovich}
+
+        O modelo de Fetkovich assume que a contribuição de um aquífero é diretamente proporcional à diferença entre a pressão média do aquífero e a pressão na interface entre o reservatório e o aquífero, e negligencia quaisquer efeitos transientes no aquífero \cite{fetkovich1971simplified}. O método de Fetkovich resolve a EDO resultante deste modelo assumindo uma pressão constante na interface entre o aquífero e o reservatório, de modo que é possível encontrar uma solução analítica para este problema:
+
+        \begin{align}
+            W_e &= \frac{W_{e,max}}{p_{i,aq}} (p_{i,aq} - p_{res}) \left( 1- e^{-J\frac{p_{i,aq}}{W_{e,max}} t} \right) \label{eq:we}
+        \end{align}
+
+        Para lidar com a premissa de pressão constante na interface entre o aquífero e o reservatório, o método de Fetkovich propõe resolver o problema de forma incremental. Para um tempo $t_j$ com $j=1,2,\ldots,n$:
+
+        \begin{align}
+            (\Delta W_e)_j &= \frac{W_{e,max}}{p_{i,aq}} ((\overline{p}_{i,aq})_{j-1} - (\overline{p}_{res})_j) \left( 1- e^{-J\frac{p_{i,aq}}{W_{e,max}} \Delta t_j} \right) \label{eq:deltawe}
+        \end{align}
+
+        \noindent
+        onde
+
+        \begin{align}
+            (\overline{p}_{res})_j &= \frac{(p_{res})_j + (p_{res})_{j-1}}{2} \label{eq:presmedio}
+        \end{align}
+
+        \begin{align}
+            (\overline{p}_{i,aq})_j &= p_{i,aq} \left( 1 - \frac{(\Delta W_e)_j}{W_{e,max}} \right) \label{eq:paqmedio}
+        \end{align}
+
+        Com $(p_{res})_0 = p_{i,res}$ e $(\overline{p}_{i,aq})_0 = p_{i,aq}$.
+
+        Ao final do procedimento, o volume de água que passa do aquífero ao reservatório é a soma dos $(\Delta W_e)_j$. O termo da pressão no aquífero é calculado no passo de tempo anterior. O único termo que não pode ser calculado diretamente é $(p_{res})_j$. Como este termo é normalmente função, entre outros, do influxo de água e do tempo, a cada passo de tempo é preciso resolver um problema do tipo $g(y) = y$.
+
+    \subsection{Modelo de Fetkovich como PVI}
+
+        O modelo de aquífero proposto por Fetkovich pode ser transformado em um problema de valor inicial. Serão feitas algumas simplificações no modelo de reservatório para conseguir uma resposta analítica com a qual avaliar as diferentes abordagens\footnote{Maiores detalhes em \cite{relatorioeuler}.}:
+
+        \begin{itemize}
+            \item No reservatório o equilíbrio hidrostático é alcançado \emph{instantaneamente}.
+            \item Fator volume de formação da água ($Bw$) constante e igual a $1.0$.
+            \item Fator volume de formação do óleo ($Bo$) varia linearmente com a pressão.
+            \item Volume poroso do reservatório ($Pv$) varia linearmente com a pressão.
+            \item Não há produção de óleo no intervalo de tempo em que é feita esta análise ($\frac{dN}{dt}=0$).
+        \end{itemize}
+
+        Com estas simplificações chega-se a:
+
+        \begin{align}
+            \frac{d^2W_e}{dt^2} &= - J \left(\frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  \frac{dW_e}{dt} \label{eq:dwe2dt2res}
+        \end{align}
+        com
+        \begin{align}
+            \left.\frac{dW_e}{dt}\right|_{t=0} &= J (p_{i,aq} - p_{i,res}) \nonumber
+        \end{align}
+
+        A EDO \ref{eq:dwe2dt2res} tem solução analítica na forma:
+
+        \begin{align}
+            \frac{dW_e}{dt} &= J (p_{i,aq} - p_{i,res}) e^{-J \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  t} \label{eq:dwedtres}
+        \end{align}
+
+        Integrando \ref{eq:dwedtres} no tempo, e sabendo que $W_e(t=0)=0$, temos uma expressão analítica para o influxo de água do aquífero para o reservatório:
+
+        \begin{align}
+            \alpha &= \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right) \nonumber \\
+            W_e &= \frac{p_{i,aq} - p_{i,res}}{\alpha} \left( 1- e^{-J \alpha t} \right) \label{eq:wepres}
+        \end{align}
+
+        Desta forma será possível comparar as respostas exatas de $\frac{dW_e}{dt}$ e $W_e$ com as aproximações do método de Fetkovich e dos métodos de Euler e Runge-Kutta.
+
+    \subsection{Método de Euler}
+
+        O método de Euler se propõe a encontrar uma aproximação ($w_j \approx y(t_j)$) da solução de um problema de valor inicial bem posto (PVI):
+
+        \begin{align}
+            \frac{dy}{dt} = f(t,y), \quad a \leq t \leq b, \quad y(a) = \alpha \label{eq:pvi}
+        \end{align}
+
+       A proposta do método de Euler é usar uma aproximação de primeira ordem de um polinômio de Taylor e resolver o PVI discretizando no tempo. O método de Euler para $n$ passos de tempo pode ser resumido em:
+
+        \begin{align}
+            h &= \frac{b-a}{n} \nonumber \\
+            t_j &= a + h j \nonumber \\
+            w_0 &= \alpha \nonumber \\
+            w_{j+1} &= w_{j} + h f(t_{j}, w_{j}), \; j=0,1,\ldots,n-1 \label{eq:euler}
+        \end{align}
+
+        O método de Euler tem erro de truncamento local $\mathcal{O}(h)$.
+
+    \subsection{Métodos de Runge-Kutta}
+
+        A família de métodos de Runge-Kutta tem erro de truncamento local de alta ordem \cite{burden2016analise}, e, ao contrário dos métodos de Taylor, não necessita do cálculo de derivadas de $f(t,y)$. Os métodos de Runge-Kutta partem do método de Taylor de ordem $n$ (\ref{eq:taylorn}) e dos dos polinômios de Taylor para duas variáveis (\ref{eq:taylorduasvar}).
+
+        \begin{subequations} \label{eq:taylorn}
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_{j+1} &= w_j + h T^{(n)}(t_j,w_j), \; j=0,1,\ldots,n-1 \\
+            \text{com}& \nonumber \\
+            T^{(n)}(t_j,w_j) &= f(t_j,w_j) + \sum_{k=1}^{n-1}\frac{h^k}{(k+1)!}f^{(k)}(t_j,w_j)
+        \end{align}
+        \end{subequations}
+
+        \begin{subequations} \label{eq:taylorduasvar}
+        \begin{align}
+            f&(t,y) = P_n(t,y) + R_n(t,y) \\
+            P_n&(t,y) = f(t_0,y_0) + \nonumber \\
+            &\sum_{k = 1}^{n} \left[ \frac{1}{k!} \sum_{j = 0}^{k} \binom{k}{j} (t-t_0)^{k-j}(y-y_0)^j\frac{\partial^kf}{\partial t^{k-j} \partial y^j}(t_0,y_0) \right] \\
+            R_n&(t,y) = \frac{1}{n+1!} \nonumber \\
+            &\sum_{j = 0}^{n+1} \binom{n+1}{j} (t-t_0)^{n+1-j}(y-y_0)^j\frac{\partial^{n+1}f}{\partial t^{n+1-j} \partial y^j}(\xi,\mu) \\
+            \text{com}& \nonumber \\
+            &\xi \, \epsilon \, [t_0,t] \; \text{e} \; \mu  \, \epsilon \, [y_0,y] \nonumber
+        \end{align}
+        \end{subequations}
+
+        Os métodos de Runge-Kutta de segunda ordem buscam uma aproximação de $T^{(2)}(t,y)$ da forma $a_1f(t+\alpha_1,y+\beta_1)$, com um erro de truncamento local não maior que $\mathcal{O}(h^2)$. Igualando o primeiro termo com a expansão do segundo termo em um polinômio de Taylor de segunda ordem, chega-se ao método do Ponto Médio \cite{burden2016analise}:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            k_1 &= hf\left(t_j,w_j\right) \nonumber \\
+            k_2 &= hf\left(t_j+\frac{h}{2},w_j+\frac{1}{2}k_1\right) \nonumber \\
+            w_{j+1} &= w_{j} + k_2 \label{eq:pontomedio} \\
+            \text{com } j&=0,1,\ldots,n-1 \nonumber
+        \end{align}
+
+        O método do Ponto Médio tem erro de truncamento local $\mathcal{O}(h^2)$.
+
+        Para os métodos de Runge-Kutta de terceira ordem é preciso aproximar $T^{(3)}(t,y)$ com $f(t+\alpha_1,y+\delta_1f(t+\alpha_2,y+\delta_2f(t,y)))$. Um dos métodos de Runge-Kutta de terceira ordem é o método de Heu:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            k_1 &= hf\left(t_j,w_j\right) \nonumber \\
+            k_2 &= hf\left(t_j+\frac{h}{3},w_j+\frac{1}{3}k_1\right) \nonumber \\
+            k_3 &= hf\left(t_j+\frac{2h}{3},w_j+\frac{2}{3}k_2\right) \nonumber \\
+            w_{j+1} &= w_{j} + \frac{1}{4} (k_1 + 3 k_3) \label{eq:heu} \\
+            \text{com } j&=0,1,\ldots,n-1 \nonumber
+        \end{align}
+
+        O método de Heu tem erro de truncamento local $\mathcal{O}(h^3)$.
+
+        O método de Runge-Kutta de quarta ordem tem a forma:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            k_1 &= hf\left(t_j,w_j\right) \nonumber \\
+            k_2 &= hf\left(t_j+\frac{h}{2},w_j+\frac{1}{2}k_1\right) \nonumber \\
+            k_3 &= hf\left(t_j+\frac{h}{2},w_j+\frac{1}{2}k_2\right) \nonumber \\
+            k_4 &= hf\left(t_{j+1},w_j+k_3\right) \nonumber \\
+            w_{j+1} &= w_{j} + \frac{1}{6} (k_1 + 2k_2 + 2k_3 + k_4) \label{eq:rk4} \\
+            \text{com } j&=0,1,\ldots,n-1 \nonumber
+        \end{align}
+
+        O método de Runge-Kutta de quarta ordem tem erro de truncamento local $\mathcal{O}(h^4)$.
+
+\section{Implementação} \label{sec:implementacao}
+
+        Todo o código utilizado nesta análise foi desenvolvido em C++. Foram criados objetos próprios para cada elemento integrante do problema proposto:
+
+        \begin{description}
+            \item[IVP] Classe que define um problema de valor inicial na forma \ref{eq:pvi}.
+            \begin{itemize}
+                \item O usuário precisa especificar $f(t,y)$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y(a)$ (valor inicial).
+                \item Opcionalmente o usuário pode prover $\frac{\partial f}{\partial y}$ e $\frac{df}{dt}$ para que seja estimado o limitante do erro de aproximação do método de Euler. O usuário também pode prover diretamente os valores de $L$ e $M$.
+                \item O usuário também pode especificar a solução exata ($y=f(t)$), para calcular o erro de aproximação.
+                \item São disponibilizados diferentes métodos de resolução do PVI: Euler, Runge-Kutta de segunda, terceira e quarta ordem.
+                \item Além dos métodos de Euler e Runge-Kutta, foi implementada uma rotina que tenta melhorar as respostas utilizando o método de Aitken. Nesta opção o método de Euler ou Runge-Kutta é feito com 3 diferentes números de passos de tempo: $n$, $2 n$ e $4 n$. Nos passos de tempo comuns entre as 3 resoluções é aplicado o método de Aitken\footnote{$w^{(n)}_j$ é a aproximação de $y(t_j)$ de uma aplicação do método de Euler ou Runge-Kutta com $n$ passos.}:
+            \end{itemize}
+
+                \begin{align}
+                    \widehat{w}_j = w^{(n)}_j - \frac{\left(w^{(2n)}_{2j} - w^{(n)}_j\right) ^2}{w^{(4n)}_{4j}-2w^{(2n)}_{2j}+w^{(n)}_j} \label{eq:aitken}
+                \end{align}
+
+
+            \item[Spline] Classe que constrói uma função interpoladora do tipo Spline natural a um conjunto de pontos $(x,y)$ \cite{relatoriosplinesnaturais}.
+            \begin{itemize}
+                \item Os valores das funções que definem $L$ e $M$ dependem de $y(t)$ (que é aproximado por $w$). Estas funções só podem ser avaliadas nos $n$ valores de $w_i$ que são calculados pelo método de Euler.
+                \item Esta classe foi incluída no código para incrementar a busca pelos valores de $L$ e $M$. São criadas splines a partir dos valores calculados de cada função, de modo que um número maior de pontos podem ser avaliados.
+            \end{itemize}
+
+            \item[Integration] Classe que computa a integral numérica de um conjunto de pontos $(x,y)$.
+            \begin{itemize}
+                \item Como o PVI proposto resolve $\frac{dW_e}{dt}$, esta classe será utilizada para gerar os valores de $W_e$ a partir dos resultados dos métodos de Euler ou Runge-Kutta.
+                \item Foram implementadas 3 opções de cálculo de integral numérica: Trapézio Composto, Simpson Composto e \emph{Simpson Composto de Passo Variavel}.
+                \item O cálculo com \emph{Simpson Composto de Passo Variavel}\footnote{Este não é o nome \emph{oficial} deste método. Não foi encontrado no livro de referência esta variação de integração numérica.} usa a mesma lógica do método de Simpson Composto de usar os interpoladores de Lagrange. A diferença deste método é que não assume que $(x_{i+1}-x_i)$ tem o mesmo valor entre os pares de pontos contíguos. A cada três pontos é feita uma integração com esta regra (\ref{eq:simpsonvariavel}). Caso o número total de pontos for par, o valor da integral entre os dois últimos pontos é feito com a regra do Trapézio\footnote{Para o estudo em questão o passo é constante, de modo que esta implementação não é estritamente necessária. Optou-se por montar um código mais flexível para uso em aplicações futuras.}. A integral numérica entre três pontos contíguos $(x_i,y_i)$ tais que $x_{i-1}<x_{i}<x_{i+1}$ tem a seguinte forma:
+            \end{itemize}
+
+            \begin{align}
+                h_1 &= x_i - x_{i-1} \nonumber \\
+                h_2 &= x_{i+1} - x_{i} \nonumber \\
+                w_1 &= 2 h_1 + h_2 \left(1-\frac{h_2}{h_1} \right) \nonumber \\
+                w_2 &= \frac{(h_1 + h_2)^3}{h_1 h_2}\nonumber \\
+                w_3 &= 2 h_2 + h_1 \left(1-\frac{h_1}{h_2} \right) \nonumber \\
+                \int_{x_{i-1}}^{x_{i+1}} f(x) \, dx &\approx \frac{1}{6} (w_1 y_{i-1} + w_2 y_{i} + w_3 y_{i+1}) \label{eq:simpsonvariavel}
+            \end{align}
+
+            \item[Fetkovich] Classe que resolve o comportamento de um aquífero como proposto por Fetkovich.
+            \begin{itemize}
+                \item O usuário precisa definir as características do aquífero e prover uma função que retorne a pressão na interface do aquífero com o reservatório. Esta função depende do tempo e do influxo acumulado de água do aquífero para o reservatório ($W_e$).
+            \end{itemize}
+        \end{description}
+
+        Para facilitar a estimativa de parâmetros de aquífero e reservatório foram implementadas algumas correlações \emph{clássicas}:
+
+        \begin{itemize}
+            \item Newman: Compressibilidade de rocha \cite{10.2118/3835-PA}.
+            \item Standing: Pressão de bolha, compressibilidade do óleo na pressão de bolha e fator volume de formação do óleo na pressão de bolha \cite{standing1952volumetric}.
+        \end{itemize}
+
+
+\section{Resultados}
+
+        Foram utilizados os mesmos problemas de valor inicial do relatório anterior para comparar os resultados do método de Runge-Kutta de quarta ordem com o de Euler:
+
+        \begin{enumerate}
+            \item $y' = y - t^2 + 1, \quad 0 \leq t \leq  2, \quad y(0) = 0.5$ \label{item:pvi1}
+            \item $y' = -2y + 3 e^t, \quad 0 \leq t \leq  2, \quad y(0) = 3.0$ \label{item:pvi2}
+            \item $y' = 4 cos(t) - 8 sin(t) + 2 y, \quad 0 \leq t \leq  2, \quad y(0) = 3.0$ \label{item:pvi3}
+        \end{enumerate}
+
+        Os resultados exatos de cada problema são, respectivamente:
+
+        \begin{enumerate}
+            \item $y = (t+1)^2 - 0.5 e^t$
+            \item $y = 2 e^{-2 t} + e^t$
+            \item $y = 4 sin(t) + 3 e^{2 t}$
+        \end{enumerate}
+
+        Foi assumido que em uma aplicação mais computacionalmente intensiva a avaliação da função $f(t,y)$ tem o maior peso. Para levar em consideração esta hipótese, em todas as comparações feitas a seguir o número de avaliações de $f(t,y)$ em cada opção é o mesmo. Por exemplo, o método de Euler, que necessita de apenas uma avaliação de $f(t,y)$ a cada passo de tempo, terá quatro vezes mais passos de tempo que o método de Runge-Kutta de quarta ordem, que necessita de quatro avaliações por passo de tempo.
+
+        Uma primeira mudança com relação à avaliação anterior foi a revisão do número de passos de tempo utilizados no método de Aitken (Figuras \ref{fig:teste1}, \ref{fig:teste2} e \ref{fig:teste3}). Anteriormente foi definida uma progressão linear do número de passos de tempo ($n$, $2 n$ e $3 n$). As avaliações com os PVI de teste indicaram o aparente ganho observado anteriormente ao usar Euler com Aitken em uma progressão linear era efeito de um número maior de avaliações de $f(t,y)$. Foi observado um significativo ganho de qualidade ao usar a progressão geométrica no número de passos de tempo ($n$, $2 n$ e $4 n$). Nos testes seguintes foi sempre usada a progressão geométrica.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.95,0.20)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test1_euler.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test1_euler_aitken_old.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test1_euler_aitken.txt};
+                    \legend{Euler, Euler+Aitken (lin), Euler+Aitken (geo)};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com o método de Euler e Euler associado com Aitken, com duas opções de progressão do número de passos de tempo, do PVI número \ref{item:pvi1}.}
+            \label{fig:teste1}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.95,0.55)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test2_euler.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test2_euler_aitken_old.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test2_euler_aitken.txt};
+                    \legend{Euler, Euler+Aitken (lin), Euler+Aitken (geo)};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com o método de Euler e Euler associado com Aitken, com duas opções de progressão do número de passos de tempo, do PVI número \ref{item:pvi2}.}
+            \label{fig:teste2}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.95,0.20)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test3_euler.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test3_euler_aitken_old.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test3_euler_aitken.txt};
+                    \legend{Euler, Euler+Aitken (lin), Euler+Aitken (geo)};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com o método de Euler e Euler associado com Aitken, com duas opções de progressão do número de passos de tempo, do PVI número \ref{item:pvi3}.}
+            \label{fig:teste3}
+        \end{figure}
+
+        Foi avaliado não somente o uso do método de Runge-Kutta para resolver os testes propostos, mas também o uso do método de Runge-Kutta associado ao método de Aitken (Figuras \ref{fig:teste1rk}, \ref{fig:teste2rk} e \ref{fig:teste3rk}). Os resultados mostraram que o método de Aitken conseguiu melhorar os resultados do método de Runge-Kutta de quarta ordem, mas em uma escala menor que na aplicação com o método de Euler. Novamente, em todas as análises foi utilizado o mesmo número total de avaliações de $f(t,y)$.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.95,0.65)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test1_euler.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test1_rungekutta.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test1_rungekutta_aitken.txt};
+                    \legend{Euler, Runge-Kutta, RK+Aitken};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com os métodos de Euler, Runge-Kutta e Runge-Kutta associado com Aitken do PVI número \ref{item:pvi1}.}
+            \label{fig:teste1rk}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.95,0.65)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test2_euler.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test2_rungekutta.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test2_rungekutta_aitken.txt};
+                    \legend{Euler, Runge-Kutta, RK+Aitken};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com os métodos de Euler, Runge-Kutta e Runge-Kutta associado com Aitken do PVI número \ref{item:pvi2}.}
+            \label{fig:teste2rk}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.95,0.65)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test3_euler.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test3_rungekutta.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test3_rungekutta_aitken.txt};
+                    \legend{Euler, Runge-Kutta, RK+Aitken};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com os métodos de Euler, Runge-Kutta e Runge-Kutta associado com Aitken do PVI número \ref{item:pvi3}.}
+            \label{fig:teste3rk}
+        \end{figure}
+
+        Na aplicação da resolução do modelo de aquífero de Fetkovich foi aplicado o mesmo expediente de ter o mesmo número de avaliações de $f(t,y)$ em cada opção. Como no método de Fetkovich não se sabe de antemão \emph{exatamente} quantas avaliações de $f(t,y)$ serão feitas, assumiu-se que em média 2 avaliações são feitas a cada passo de tempo\footnote{No problema proposto o número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram 392 avaliações. Optou-se por fazer a comparação assumindo 2 avaliações por time-step para se aproximar mais de um problema mais \emph{geral}, em que a convergência do método de Fetkovich pode ser mais lenta que a observada.}. Para o número de avaliações que foi estabelecido (392), o método de Runge-Kutta de quarta ordem parece ter um desempenho melhor que o do método de Fetkovich em termos de erro de estimativa da vazão de água (Figura \ref{fig:testeaq1erroqw}). Como as vazões de água nos tempos longos são muito baixas e de menor interesse, a aparente degradação da resposta com o método de Fetkovich perde importância. Ao fazer a comparação em termos de produção acumulada de água (Figura \ref{fig:testeaq1errowe}), o método de Fetkovich se mostra mais estável que todos os demais.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.98,1.1)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {aq1_euler.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=t, y=exact_error] {aq1_euler_aitken.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {aq1_rungekutta.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=t, y=exact_error] {aq1_rungekutta_aitken.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Time, y=ErrorRel] {aq1_fetkovich.txt};
+                    \legend{Euler, Euler+Aitken, Runge-Kutta, RK+Aitken, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação da vazão de água com os métodos de Euler, Runge-Kutta, Runge-Kutta+Aitken e Fetkovich do problema proposto.}
+            \label{fig:testeaq1erroqw}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(0.98,1.15)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=S_error] {aq1_euler.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=t, y=S_error] {aq1_euler_aitken.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=S_error] {aq1_rungekutta.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=t, y=S_error] {aq1_rungekutta_aitken.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Time, y=ErrorRelWe] {aq1_fetkovich.txt};
+                    \legend{Euler, Euler+Aitken, Runge-Kutta, RK+Aitken, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação da vazão de água acumulada com os métodos de Euler, Runge-Kutta, Runge-Kutta+Aitken e Fetkovich do problema proposto.}
+            \label{fig:testeaq1errowe}
+        \end{figure}
+
+        Foi feita uma sensibilidade do erro de estimativa da vazão de água acumulada dos diferentes métodos testados em função do número de avaliações de $f(t,y)$. Os gráficos foram montados em função do erro relativo no tempo final (Figura \ref{fig:testeaq1sens}) e do máximo erro relativo entre todos os time-steps (Figura \ref{fig:testeaq1sensmax}). Os resultados mostram que o método de Fetkovich tem melhores resultados para um número menor de de time-steps. O único método que teve resultados melhores que o de Fetkovich foi o de Runge-Kutta de quarta ordem, mas apenas para um número elevado de time-steps.
+
+        Uma sensibilidade adicional com métodos de Runge-Kutta de diferentes ordens (Figura \ref{fig:testeaq1sensrk}) mostrou que o de quarta ordem tem maior eficiência que os demais para resolver o problema proposto.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    xmax=1000,
+                    legend style={at={(0.98,0.90)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_euler_sens.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_euler_aitken_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta_aitken4_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_fetkovich_sens.txt};
+                    \legend{Euler, Euler+Aitken, Runge-Kutta, RK+Aitken, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do erro relativo da aproximação da vazão de água acumulada no tempo final com os métodos de Euler, Runge-Kutta, Runge-Kutta+Aitken e Fetkovich do problema proposto.}
+            \label{fig:testeaq1sens}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t)|/|y(t)|_{max}$},
+                    xmax=1000,
+                    legend style={at={(0.98,0.80)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_euler_sens.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_euler_aitken_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta_aitken4_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_fetkovich_sens.txt};
+                    \legend{Euler, Euler+Aitken, Runge-Kutta, RK+Aitken, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do máximo erro relativo da aproximação da vazão de água acumulada com os métodos de Euler, Runge-Kutta, Runge-Kutta+Aitken e Fetkovich do problema proposto.}
+            \label{fig:testeaq1sensmax}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    xmax=1000,
+                    legend style={at={(0.98,0.90)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_euler_sens.txt};
+                    \addplot[color=magenta, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta2_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta3_sens.txt};
+                    \addplot[color=orange, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_fetkovich_sens.txt};
+                    \legend{Euler, RK 2$^a$ ordem, RK 3$^a$ ordem, RK 4$^a$ ordem, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do erro relativo da aproximação da vazão de água acumulada no tempo final com os métodos de Euler, Runge-Kutta de 2$^a$, 3$^a$ e 4$^a$, e Fetkovich do problema proposto.}
+            \label{fig:testeaq1sensrk}
+        \end{figure}
+
+        O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/07_RungeKutta/07_RungeKutta.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+    \section{Conclusão}
+
+        Foram avaliadas diferentes possibilidades para resolver o modelo de aquífero proposto por Fetkovich com métodos de Runge-Kutta. Entre os métodos de resolução de problemas de valor inicial, o método que se mostrou mais eficaz foi o de Runge-Kutta de quarta ordem. Contudo, o método de resolução proposto por Fetkovich se mostrou mais estável e eficiente, especialmente com um número menor de avaliações da função de interesse.
+
+    % \label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+\section{Lista de Variáveis}
+
+\begin{description}
+    \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3z$).
+    \item[$Bo_b$:]Fator volume de formação do óleo no reservatório na pressão de bolha ($m^3/m^3$).
+    \item[$Bw$:]Fator volume de formação da água no reservatório ($m^3/m^3$).
+    \item[$c_r$:]Compressibilidade do volume poroso ($1/bar$).
+    \item[$c_{o,b}$:]Compressibilidade do óleo na pressão de bolha ($1/bar$).
+    \item[$c_{aq}$:]Compressibilidade total do aquífero ($1/bar$).
+    \item[$J$:]Índice de produtividade do aquífero ($m^3/d/bar$).
+    \item[$L$:]Constante de Lipschitz.
+    \item[$M$:]Limitante da derivada 2$^a$.
+    \item[$N$:]Volume de óleo no reservatório medido em condições padrão ($m^3$).
+    \item[$p_{aq}$:]Pressão média do aquífero ($bar$).
+    \item[$p_{i,aq}$:]Pressão inicial do aquífero ($bar$).
+    \item[$(\overline{p}_{i,aq})_j$:]Pressão média do aquífero no tempo $t_j$ ($bar$).
+    \item[$p_b$:]Pressão de bolha do óleo ($bar$).
+    \item[$p_{res}$:]Pressão na interface entre o aquífero e o reservatório ($bar$).
+    \item[$p_{i,res}$:]Pressão inicial na interface entre o aquífero e o reservatório ($bar$).
+    \item[$(\overline{p}_{res})_j$:]Pressão média na interface entre o aquífero e o reservatório entre os tempos $t_{j-1}$ e $t_j$ ($bar$).
+    \item[$Pv$:]Volume poroso no reservatório ($m^3$).
+    \item[$Pv_i$:]Volume poroso no reservatório na pressão inicial ($m^3$).
+    \item[$Q_w$ ou $\frac{dW_e}{dt}$:]Vazão de água do aquífero para o reservatório ($m^3/d$).
+    \item[$\Delta t_j$:]Diferença entre os tempos $t_{j-1}$ e $t_j$ ($d$).
+    \item[$W_e$:]Volume de água acumulado do aquífero para o reservatório ($m^3$).
+    \item[$W_{e,max}$:]Máximo influxo de água \emph{possível}\footnote{Equivale ao influxo quando $p_{aq}=0$.} do aquífero para o reservatório ($m^3$).
+    \item[$(\Delta W_e)_j$:]Influxo de água entre os tempos $t_{j-1}$ e $t_j$ ($m^3$).
+    \item[$W_{i,aq}$:]Volume inicial do aquífero ($m^3$).
+    \item[$W_{res}$:]Volume de água no reservatório ($m^3$).
+    \item[$W_{i,res}$:]Volume inicial de água no reservatório ($m^3$).
+\end{description}
+
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
