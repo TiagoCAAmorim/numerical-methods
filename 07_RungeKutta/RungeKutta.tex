@@ -137,7 +137,7 @@
 %%             country={}}
 %% \fntext[label3]{}
 
-\title{Aplicação do Método de Runge-Kutta para Resolver o Comportamento de Aquíferos Analíticos\tnoteref{label_title}}
+\title{Aplicação dos Métodos de Runge-Kutta para Resolver o Comportamento de Aquíferos Analíticos\tnoteref{label_title}}
 \tnotetext[label_title]{Relatório número 5 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
 
 %% use optional labels to link authors explicitly to addresses:
@@ -168,8 +168,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-    O algoritmo proposto por Fetkovich para modelar o comportamento de um aquífero usa uma formulação implícita com respeito à pressão da interface
-    Foi revisto o uso do método de Euler associado ao método de Aitken. A reavaliação teve resultados melhores que na primeira avaliação. O método de Runge-Kutta se mostrou muito próximo dos resultados do método de Fetkovich.
+    O algoritmo proposto por Fetkovich para modelar o comportamento de um aquífero usa uma formulação implícita com respeito à pressão da interface entre o aquífero e o reservatório. Foi avaliado o uso dos métodos de Runge-Kutta para resolver o aquífero de Fetkovich. As avaliações mostraram que apenas o método de Runge-Kutta de quarta ordem consegue se aproximar dos erros de aproximação do método de Fetkovich. Para um número menor de passos de tempo o método de Fetkovich se mostrou melhor que o de Runge-Kutta.
 
 \end{abstract}
 
@@ -205,15 +204,15 @@ country={Brasil}}
 
     O modelo de aquífero proposto por Fetkovich resulta em uma equação diferencial ordinária (EDO). O método proposto realiza uma simplificação nesta EDO e propõe um método numérico de resolução do influxo de água com o tempo.
 
-    Este trabalho se propõe a não realizar a simplificação feita por Fetkovich. Em uma primeira avaliação constatou-se que o método de Euler não é adequado para resolver o modelo de aquífero proposto por Fetkovich \cite{relatorioeuler}. Neste relatório é avaliada a aplicação do método de Runge-Kutta de 4$^a$ ordem. Também é revista a aplicação do método de Aitken para melhorar as respostas do método de Euler.
+    Este trabalho se propõe a não realizar a simplificação feita por Fetkovich e aplica métodos de aproximação numérica de EDO para resolver este problema. Em uma primeira avaliação constatou-se que o método de Euler não é adequado para resolver o modelo de aquífero proposto por Fetkovich \cite{relatorioeuler}. Neste relatório é avaliada a aplicação do método de Runge-Kutta de quarta ordem. Também é revista a aplicação do método de Aitken para melhorar as respostas do método de Euler.
 
 \section{Metodologia}
 
-        Os métodos de Fetkovich e de Euler, além da formalização do modelo de aquífero proposto por Fetkovich como um problema de valor inicial (PVI), foram discutidos com mais detalhe no relatório da primeira parte da avaliação proposta \cite{relatorioeuler}. Neste relatório este tópicos são apresentados de forma resumida.
+        Uma descrição dos métodos de Fetkovich e de Euler, além da formalização do modelo de aquífero proposto por Fetkovich como um problema de valor inicial (PVI), foram feitas com mais detalhe no relatório da primeira parte da avaliação proposta \cite{relatorioeuler}. Neste relatório este tópicos são apresentados de forma resumida.
 
     \subsection{Método de Fetkovich}
 
-        O modelo de Fetkovich assume que a contribuição de um aquífero é diretamente proporcional à diferença entre a pressão média do aquífero e a pressão na interface entre o reservatório e o aquífero e negligencia quaisquer efeitos transientes no aquífero \cite{fetkovich1971simplified}. O método de Fetkovich resolve a EDO resultante deste modelo assumindo uma pressão constante na interface entre o aquífero e o reservatório:
+        O modelo de Fetkovich assume que a contribuição de um aquífero é diretamente proporcional à diferença entre a pressão média do aquífero e a pressão na interface entre o reservatório e o aquífero, e negligencia quaisquer efeitos transientes no aquífero \cite{fetkovich1971simplified}. O método de Fetkovich resolve a EDO resultante deste modelo assumindo uma pressão constante na interface entre o aquífero e o reservatório, de modo que é possível encontrar uma solução analítica para este problema:
 
         \begin{align}
             W_e &= \frac{W_{e,max}}{p_{i,aq}} (p_{i,aq} - p_{res}) \left( 1- e^{-J\frac{p_{i,aq}}{W_{e,max}} t} \right) \label{eq:we}
@@ -238,25 +237,27 @@ country={Brasil}}
 
         Com $(p_{res})_0 = p_{i,res}$ e $(\overline{p}_{i,aq})_0 = p_{i,aq}$.
 
-        Ao final do procedimento, o volume de água que passa do aquífero ao reservatório é a soma dos $(\Delta W_e)_j$. O termo da pressão no aquífero é calculado no passo de tempo anterior. O único termo que não pode ser calculado diretamente é $(p_{res})_j$. Como este termo é normalmente função, entre outros, do influxo de água e do tempo, a cada passo de tempo é preciso resolver um problema do tipo $y = g(y)$.
+        Ao final do procedimento, o volume de água que passa do aquífero ao reservatório é a soma dos $(\Delta W_e)_j$. O termo da pressão no aquífero é calculado no passo de tempo anterior. O único termo que não pode ser calculado diretamente é $(p_{res})_j$. Como este termo é normalmente função, entre outros, do influxo de água e do tempo, a cada passo de tempo é preciso resolver um problema do tipo $g(y) = y$.
 
     \subsection{Modelo de Fetkovich como PVI}
 
-        O modelo de aquífero proposto por Fetkovich pode ser transformado em um problema de valor inicial. Serão feitas algumas simplificações no modelo de reservatório para conseguir uma resposta exata com a qual avaliar as diferentes abordagens\footnote{Maiores detalhes em \cite{relatorioeuler}.}:
+        O modelo de aquífero proposto por Fetkovich pode ser transformado em um problema de valor inicial. Serão feitas algumas simplificações no modelo de reservatório para conseguir uma resposta analítica com a qual avaliar as diferentes abordagens\footnote{Maiores detalhes em \cite{relatorioeuler}.}:
 
         \begin{itemize}
             \item No reservatório o equilíbrio hidrostático é alcançado \emph{instantaneamente}.
-            \item Fator volume de formação da água constante e igual a $1.0$.
-            \item Fator volume de formação do óleo varia linearmente com a pressão
-            \item Volume poroso do reservatório varia linearmente com a pressão.
-            \item Não há produção de óleo no intervalo de tempo em que é feita esta análise.
+            \item Fator volume de formação da água ($Bw$) constante e igual a $1.0$.
+            \item Fator volume de formação do óleo ($Bo$) varia linearmente com a pressão.
+            \item Volume poroso do reservatório ($Pv$) varia linearmente com a pressão.
+            \item Não há produção de óleo no intervalo de tempo em que é feita esta análise ($\frac{dN}{dt}=0$).
         \end{itemize}
 
         Com estas simplificações chega-se a:
 
         \begin{align}
-            \frac{d^2W_e}{dt^2} &= - J \left(\frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  \frac{dW_e}{dt} \label{eq:dwe2dt2res} \\
-            \text{com}& \nonumber \\
+            \frac{d^2W_e}{dt^2} &= - J \left(\frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  \frac{dW_e}{dt} \label{eq:dwe2dt2res}
+        \end{align}
+        com
+        \begin{align}
             \left.\frac{dW_e}{dt}\right|_{t=0} &= J (p_{i,aq} - p_{i,res}) \nonumber
         \end{align}
 
@@ -266,7 +267,7 @@ country={Brasil}}
             \frac{dW_e}{dt} &= J (p_{i,aq} - p_{i,res}) e^{-J \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right)  t} \label{eq:dwedtres}
         \end{align}
 
-        Integrando \ref{eq:dwedtres} no tempo e sabendo que $W_e(t=0)=0$ temos uma expressão analítica para o influxo de água do aquífero para o reservatório:
+        Integrando \ref{eq:dwedtres} no tempo, e sabendo que $W_e(t=0)=0$, temos uma expressão analítica para o influxo de água do aquífero para o reservatório:
 
         \begin{align}
             \alpha &= \left( \frac{p_{i,aq}}{W_{e,max}} + \frac{1}{N Bo_b c_{o,b} + Pv_i c_r} \right) \nonumber \\
@@ -283,7 +284,7 @@ country={Brasil}}
             \frac{dy}{dt} = f(t,y), \quad a \leq t \leq b, \quad y(a) = \alpha \label{eq:pvi}
         \end{align}
 
-       A proposta do método de Euler é usar uma aproximação de segunda ordem de um polinômio de Taylor e resolver o PVI discretizando no tempo. O método de Euler para $n$ passos de tempo pode ser resumido em:
+       A proposta do método de Euler é usar uma aproximação de primeira ordem de um polinômio de Taylor e resolver o PVI discretizando no tempo. O método de Euler para $n$ passos de tempo pode ser resumido em:
 
         \begin{align}
             h &= \frac{b-a}{n} \nonumber \\
@@ -319,7 +320,7 @@ country={Brasil}}
         \end{align}
         \end{subequations}
 
-        Os métodos de Runge-Kutta de segunda ordem buscam uma aproximação de $T^{(2)}(t,y)$ da forma $a_1f(t+\alpha_1,y+\beta_1)$, com um erro de truncamento local não maior que $\mathcal{O}(h^2)$. Igualando o primeiro termo com a expansão do segundo termo em um polinômio de Taylor de segunda ordem, chega-se ao método do ponto médio \cite{burden2016analise}:
+        Os métodos de Runge-Kutta de segunda ordem buscam uma aproximação de $T^{(2)}(t,y)$ da forma $a_1f(t+\alpha_1,y+\beta_1)$, com um erro de truncamento local não maior que $\mathcal{O}(h^2)$. Igualando o primeiro termo com a expansão do segundo termo em um polinômio de Taylor de segunda ordem, chega-se ao método do Ponto Médio \cite{burden2016analise}:
 
         \begin{align}
             w_0 &= \alpha \nonumber \\
@@ -329,7 +330,7 @@ country={Brasil}}
             \text{com } j&=0,1,\ldots,n-1 \nonumber
         \end{align}
 
-        O método do ponto médio tem erro de truncamento local $\mathcal{O}(h^2)$.
+        O método do Ponto Médio tem erro de truncamento local $\mathcal{O}(h^2)$.
 
         Para os métodos de Runge-Kutta de terceira ordem é preciso aproximar $T^{(3)}(t,y)$ com $f(t+\alpha_1,y+\delta_1f(t+\alpha_2,y+\delta_2f(t,y)))$. Um dos métodos de Runge-Kutta de terceira ordem é o método de Heu:
 
@@ -363,12 +364,12 @@ country={Brasil}}
         Todo o código utilizado nesta análise foi desenvolvido em C++. Foram criados objetos próprios para cada elemento integrante do problema proposto:
 
         \begin{description}
-            \item[IVP] Classe que define um problema de valor inicial na forma.
+            \item[IVP] Classe que define um problema de valor inicial na forma \ref{eq:pvi}.
             \begin{itemize}
                 \item O usuário precisa especificar $f(t,y)$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y(a)$ (valor inicial).
                 \item Opcionalmente o usuário pode prover $\frac{\partial f}{\partial y}$ e $\frac{df}{dt}$ para que seja estimado o limitante do erro de aproximação do método de Euler. O usuário também pode prover diretamente os valores de $L$ e $M$.
-                \item O usuário também pode especificar a função exata, para calcular o erro de aproximação.
-                \item são disponibilizados diferentes métodos de resolução do PVI: Euler, Runge-Kutta de segunda, terceira e quarta ordem.
+                \item O usuário também pode especificar a solução exata ($y=f(t)$), para calcular o erro de aproximação.
+                \item São disponibilizados diferentes métodos de resolução do PVI: Euler, Runge-Kutta de segunda, terceira e quarta ordem.
                 \item Além dos métodos de Euler e Runge-Kutta, foi implementada uma rotina que tenta melhorar as respostas utilizando o método de Aitken. Nesta opção o método de Euler ou Runge-Kutta é feito com 3 diferentes números de passos de tempo: $n$, $2 n$ e $4 n$. Nos passos de tempo comuns entre as 3 resoluções é aplicado o método de Aitken\footnote{$w^{(n)}_j$ é a aproximação de $y(t_j)$ de uma aplicação do método de Euler ou Runge-Kutta com $n$ passos.}:
             \end{itemize}
 
@@ -387,7 +388,7 @@ country={Brasil}}
             \begin{itemize}
                 \item Como o PVI proposto resolve $\frac{dW_e}{dt}$, esta classe será utilizada para gerar os valores de $W_e$ a partir dos resultados dos métodos de Euler ou Runge-Kutta.
                 \item Foram implementadas 3 opções de cálculo de integral numérica: Trapézio Composto, Simpson Composto e \emph{Simpson Composto de Passo Variavel}.
-                \item O cálculo com \emph{Simpson Composto de Passo Variavel}\footnote{Este não é o nome \emph{oficial} deste método. Não foi encontrado no livro de referência esta variação de integração numérica.} usa a mesma lógica do método de Simpson Composto de usar os interpoladores de Lagrange, mas não assume que $(x_{i+1}-x_i)$ tem sempre o mesmo valor entre os pares de pontos. Caso o número total de pontos seja par, o valor da integral entre os dois últimos pontos é feito com a regra do Trapézio\footnote{Para o estudo em questão o passo é constante, de modo que esta implementação não é estritamente necessária. Optou-se por montar um código mais flexível para uso em aplicações futuras.}. A integral numérica entre três pontos conseguinte $(x_i,y_i)$ tais que $x_{i-1}<x_{i}<x_{i+1}<$ tem a seguinte forma:
+                \item O cálculo com \emph{Simpson Composto de Passo Variavel}\footnote{Este não é o nome \emph{oficial} deste método. Não foi encontrado no livro de referência esta variação de integração numérica.} usa a mesma lógica do método de Simpson Composto de usar os interpoladores de Lagrange. A diferença deste método é que não assume que $(x_{i+1}-x_i)$ tem o mesmo valor entre os pares de pontos contíguos. A cada três pontos é feita uma integração com esta regra (\ref{eq:simpsonvariavel}). Caso o número total de pontos for par, o valor da integral entre os dois últimos pontos é feito com a regra do Trapézio\footnote{Para o estudo em questão o passo é constante, de modo que esta implementação não é estritamente necessária. Optou-se por montar um código mais flexível para uso em aplicações futuras.}. A integral numérica entre três pontos contíguos $(x_i,y_i)$ tais que $x_{i-1}<x_{i}<x_{i+1}$ tem a seguinte forma:
             \end{itemize}
 
             \begin{align}
@@ -415,7 +416,7 @@ country={Brasil}}
 
 \section{Resultados}
 
-        Foram utilizadas os mesmos problemas de valor inicial do relatório anterior para comparar os resultados do método de Runge-Kutta de quarta ordem com o de Euler:
+        Foram utilizados os mesmos problemas de valor inicial do relatório anterior para comparar os resultados do método de Runge-Kutta de quarta ordem com o de Euler:
 
         \begin{enumerate}
             \item $y' = y - t^2 + 1, \quad 0 \leq t \leq  2, \quad y(0) = 0.5$ \label{item:pvi1}
@@ -431,7 +432,7 @@ country={Brasil}}
             \item $y = 4 sin(t) + 3 e^{2 t}$
         \end{enumerate}
 
-        Foi assumido que em uma aplicação mais computacionalmente intensiva a avaliação da função $f(t,y)$ tem o maior peso. Para levar em consideração esta hipótese, em todas as comparações feitas a seguir o número de avaliações de $f(t,y)$ em cada opção é o mesmo.
+        Foi assumido que em uma aplicação mais computacionalmente intensiva a avaliação da função $f(t,y)$ tem o maior peso. Para levar em consideração esta hipótese, em todas as comparações feitas a seguir o número de avaliações de $f(t,y)$ em cada opção é o mesmo. Por exemplo, o método de Euler, que necessita de apenas uma avaliação de $f(t,y)$ a cada passo de tempo, terá quatro vezes mais passos de tempo que o método de Runge-Kutta de quarta ordem, que necessita de quatro avaliações por passo de tempo.
 
         Uma primeira mudança com relação à avaliação anterior foi a revisão do número de passos de tempo utilizados no método de Aitken (Figuras \ref{fig:teste1}, \ref{fig:teste2} e \ref{fig:teste3}). Anteriormente foi definida uma progressão linear do número de passos de tempo ($n$, $2 n$ e $3 n$). As avaliações com os PVI de teste indicaram o aparente ganho observado anteriormente ao usar Euler com Aitken em uma progressão linear era efeito de um número maior de avaliações de $f(t,y)$. Foi observado um significativo ganho de qualidade ao usar a progressão geométrica no número de passos de tempo ($n$, $2 n$ e $4 n$). Nos testes seguintes foi sempre usada a progressão geométrica.
 
@@ -489,7 +490,7 @@ country={Brasil}}
             \label{fig:teste3}
         \end{figure}
 
-        Foi avaliado não somente o uso do método de Runge-Kutta para resolver os testes propostos, mas também o uso do método de Runge-Kutta associado ao método de Aitken (Figuras \ref{fig:teste1rk}, \ref{fig:teste2rk} e \ref{fig:teste3rk}). Os resultados mostraram que o método de Aitken conseguiu melhorar os resultados do método de Runge-Kutta de quarta ordem, utilizando o mesmo número total de avaliações de $f(t,y)$.
+        Foi avaliado não somente o uso do método de Runge-Kutta para resolver os testes propostos, mas também o uso do método de Runge-Kutta associado ao método de Aitken (Figuras \ref{fig:teste1rk}, \ref{fig:teste2rk} e \ref{fig:teste3rk}). Os resultados mostraram que o método de Aitken conseguiu melhorar os resultados do método de Runge-Kutta de quarta ordem, mas em uma escala menor que na aplicação com o método de Euler. Novamente, em todas as análises foi utilizado o mesmo número total de avaliações de $f(t,y)$.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -545,7 +546,7 @@ country={Brasil}}
             \label{fig:teste3rk}
         \end{figure}
 
-        Na aplicação da resolução do modelo de aquífero de Fetkovich foi aplicado o mesmo expediente de ter o mesmo número de avaliações de $f(t,y)$ em cada opção. Como no método de Fetkovich não se sabe de antemão \emph{exatamente} quantas avaliações de $f(t,y)$ serão feitas, assumiu-se que em média 2 avaliações são feitas a cada passo de tempo. Para o número de avaliações que foi estabelecido (392), o método de Runge-Kutta de quarta ordem parece ter um desempenho melhor que o do método de Fetkovich (Figura \ref{fig:testeaq1erroqw}). Como as vazões de água nos tempos longos são muito baixas e de menor interesse, a aparente degradação da resposta com o método de Fetkovich perde importância. Ao fazer a comparação em termos de produção acumulada de água (Figura \ref{fig:testeaq1errowe}), o método de Fetkovich se mostra mais estável que todos os demais.
+        Na aplicação da resolução do modelo de aquífero de Fetkovich foi aplicado o mesmo expediente de ter o mesmo número de avaliações de $f(t,y)$ em cada opção. Como no método de Fetkovich não se sabe de antemão \emph{exatamente} quantas avaliações de $f(t,y)$ serão feitas, assumiu-se que em média 2 avaliações são feitas a cada passo de tempo\footnote{No problema proposto o número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram 392 avaliações. Optou-se por fazer a comparação assumindo 2 avaliações por time-step para se aproximar mais de um problema mais \emph{geral}, em que a convergência do método de Fetkovich pode ser mais lenta que a observada.}. Para o número de avaliações que foi estabelecido (392), o método de Runge-Kutta de quarta ordem parece ter um desempenho melhor que o do método de Fetkovich em termos de erro de estimativa da vazão de água (Figura \ref{fig:testeaq1erroqw}). Como as vazões de água nos tempos longos são muito baixas e de menor interesse, a aparente degradação da resposta com o método de Fetkovich perde importância. Ao fazer a comparação em termos de produção acumulada de água (Figura \ref{fig:testeaq1errowe}), o método de Fetkovich se mostra mais estável que todos os demais.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -587,16 +588,78 @@ country={Brasil}}
             \label{fig:testeaq1errowe}
         \end{figure}
 
-        Foi feita uma sensibilidade do erro de estimativa da vazão de água acumulada dos diferentes métodos testados em função do número de avaliações de $f(t,y)$. Os gráficos foram montados em função do erro relativo no tempo final e do máximo erro relativo entre todos os time-steps.
+        Foi feita uma sensibilidade do erro de estimativa da vazão de água acumulada dos diferentes métodos testados em função do número de avaliações de $f(t,y)$. Os gráficos foram montados em função do erro relativo no tempo final (Figura \ref{fig:testeaq1sens}) e do máximo erro relativo entre todos os time-steps (Figura \ref{fig:testeaq1sensmax}). Os resultados mostram que o método de Fetkovich tem melhores resultados para um número menor de de time-steps. O único método que teve resultados melhores que o de Fetkovich foi o de Runge-Kutta de quarta ordem, mas apenas para um número elevado de time-steps.
 
+        Uma sensibilidade adicional com métodos de Runge-Kutta de diferentes ordens (Figura \ref{fig:testeaq1sensrk}) mostrou que o de quarta ordem tem maior eficiência que os demais para resolver o problema proposto.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    xmax=1000,
+                    legend style={at={(0.98,0.90)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_euler_sens.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_euler_aitken_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta_aitken4_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_fetkovich_sens.txt};
+                    \legend{Euler, Euler+Aitken, Runge-Kutta, RK+Aitken, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do erro relativo da aproximação da vazão de água acumulada no tempo final com os métodos de Euler, Runge-Kutta, Runge-Kutta+Aitken e Fetkovich do problema proposto.}
+            \label{fig:testeaq1sens}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t)|/|y(t)|_{max}$},
+                    xmax=1000,
+                    legend style={at={(0.98,0.80)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_euler_sens.txt};
+                    \addplot[color=black, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_euler_aitken_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=blue, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta_aitken4_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_fetkovich_sens.txt};
+                    \legend{Euler, Euler+Aitken, Runge-Kutta, RK+Aitken, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do máximo erro relativo da aproximação da vazão de água acumulada com os métodos de Euler, Runge-Kutta, Runge-Kutta+Aitken e Fetkovich do problema proposto.}
+            \label{fig:testeaq1sensmax}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    xmax=1000,
+                    legend style={at={(0.98,0.90)}, anchor=east},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_euler_sens.txt};
+                    \addplot[color=magenta, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta2_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta3_sens.txt};
+                    \addplot[color=orange, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_fetkovich_sens.txt};
+                    \legend{Euler, RK 2$^a$ ordem, RK 3$^a$ ordem, RK 4$^a$ ordem, Fetkovich};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do erro relativo da aproximação da vazão de água acumulada no tempo final com os métodos de Euler, Runge-Kutta de 2$^a$, 3$^a$ e 4$^a$, e Fetkovich do problema proposto.}
+            \label{fig:testeaq1sensrk}
+        \end{figure}
 
         O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/07_RungeKutta/07_RungeKutta.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
 
     \section{Conclusão}
 
-        Os resultados indicaram que o método de Euler fornece resultados pobres e com pouco controle da qualidade das respostas. Os limitantes dos erros se mostraram muito grandes e de pouca utilidade. Os erros do método de Euler se mostraram significativos para o número de passos utilizado. O método de Aitken se mostrou efetivo na melhora das respostas estimadas com o método de Euler.
-
-        Para um mesmo número de passos de tempo, os resultados do método de Fetkovich se mostraram muito melhores que os resultados do método de Euler. O método de Fetkovivh tem a vantagem de utizar relações constitutivas entre as variáveis do problema para melhorar as suas estimativas.
+        Foram avaliadas diferentes possibilidades para resolver o modelo de aquífero proposto por Fetkovich com métodos de Runge-Kutta. Entre os métodos de resolução de problemas de valor inicial, o método que se mostrou mais eficaz foi o de Runge-Kutta de quarta ordem. Contudo, o método de resolução proposto por Fetkovich se mostrou mais estável e eficiente, especialmente com um número menor de avaliações da função de interesse.
 
     % \label{}
 
@@ -608,7 +671,7 @@ country={Brasil}}
 \section{Lista de Variáveis}
 
 \begin{description}
-    \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3$).
+    \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3z$).
     \item[$Bo_b$:]Fator volume de formação do óleo no reservatório na pressão de bolha ($m^3/m^3$).
     \item[$Bw$:]Fator volume de formação da água no reservatório ($m^3/m^3$).
     \item[$c_r$:]Compressibilidade do volume poroso ($1/bar$).

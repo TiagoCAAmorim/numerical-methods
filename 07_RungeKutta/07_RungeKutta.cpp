@@ -2176,7 +2176,7 @@ void Fetkovich_tests(){
     aqIVP1.set_t_end(200.);
     aqIVP1.set_exact(f_qw_instant_res);
     aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
-    test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
+    // test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
 
 
     int n_tests = 11;
@@ -2263,8 +2263,8 @@ int main(){
     #else
         std::cout << "Running on an unknown system" << std::endl;
     #endif
-    // tests_splines();
-    // tests_integration();
-    // tests_rungekutta();
+    tests_splines();
+    tests_integration();
+    tests_rungekutta();
     Fetkovich_tests();
 }
