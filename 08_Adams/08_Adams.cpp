@@ -263,7 +263,7 @@ void Spline::build_fixed(){
         d[i] = (c[i+1] - c[i]) / 3 / h[i];
     }
 
-    if (fabs(b[0]  - y_prime_pointer[0]) > eps){
+    if (fabs(b[0] - y_prime_pointer[0]) > eps){
         printf("Fixed spline calculation failed: b[0] != y_prime_initial. Check code. Cannot continue.\n");
         return;
     };
@@ -603,6 +603,8 @@ class IVP{
 
         void solve_adams();
         void solve_adams(int steps, bool implicit);
+        void set_adams_convergence_limit(double value);
+        void set_adams_convergence_iterartions(int value);
 
         void solve_integral();
 
@@ -656,6 +658,8 @@ class IVP{
         double max_dfdt;
         bool calculated_M;
         int f_evaluations;
+        double conv_adams;
+        int max_iter_adams;
 };
 
 IVP::IVP():
@@ -674,7 +678,8 @@ IVP::IVP():
     extra_search_points(20), relative_error(false),
     Lipschitz(0), calculated_L(false),
     max_dfdt(0), calculated_M(false),
-    f_evaluations(0)
+    f_evaluations(0),
+    conv_adams(1e-4), max_iter_adams(20)
     {};
 
 void IVP::reset_results(){
@@ -1400,7 +1405,7 @@ void IVP::solve_adams_2(bool one_step, int current_step){
         w_aprox_new = y[i+1];
         w_error = 1;
         count = 0;
-        while (w_error > eps && count<=20){
+        while (w_error > conv_adams && count<=max_iter_adams){
             w_aprox = w_aprox_new;
 
             w_aprox_new = 5.*f_pointer(t[i+1], w_aprox_new);
@@ -1417,7 +1422,7 @@ void IVP::solve_adams_2(bool one_step, int current_step){
             count++;
         }
 
-        if (count > 20){
+        if (count > max_iter_adams){
             printf("Could not converge in time-step %d. Error: %g.\n",i+1,w_error);
         }
 
@@ -1513,7 +1518,7 @@ void IVP::solve_adams_3(bool one_step, int current_step){
         w_aprox_new = y[i+1];
         w_error = 1;
         count = 0;
-        while (w_error > eps && count<=20){
+        while (w_error > conv_adams && count<=max_iter_adams){
             w_aprox = w_aprox_new;
 
             w_aprox_new = 9.*f_pointer(t[i+1], w_aprox_new);
@@ -1531,7 +1536,7 @@ void IVP::solve_adams_3(bool one_step, int current_step){
             count++;
         }
 
-        if (count > 20){
+        if (count > max_iter_adams){
             printf("Could not converge in time-step %d. Error: %g.\n",i+1,w_error);
         }
 
@@ -1560,127 +1565,13 @@ void  IVP::solve_adams(int steps, bool implicit){
     }
 }
 
-// void IVP::solve_adams_3(bool one_step, int current_step){
-//     if (!has_f()){
-//         printf("Function f(t,y) not defined. Cannot continue.\n");
-//         return;
-//     }
-//     double h = (t_end - t_initial) / time_steps;
-//     double* t = new double[time_steps+1];
-//     double* y = new double[time_steps+1];
+void IVP::set_adams_convergence_limit(double value){
+    conv_adams = value;
+}
 
-
-
-//     t[0] = t_initial;
-//     y[0] = y_initial;
-//     t[1] = t[0] + h;
-//     y[1] = w1;
-//     t[2] = t[0] + 2*h;
-//     y[2] = w2;
-
-//     double w_aprox, w_aprox_new, w_error;
-//     int count;
-//     for (int i=2; i<time_steps; i++){
-//         t[i+1] = t[0] + (i+1)*h;
-//         w_aprox = 23.*f_pointer(t[i], y[i]);
-//         w_aprox += -16.*f_pointer(t[i-1], y[i-1]);
-//         w_aprox += 5.*f_pointer(t[i-2], y[i-2]);
-//         w_aprox = y[i] + h/12 * w_aprox;
-//         f_evaluations += 1;
-
-//         w_aprox_new = w_aprox;
-//         w_error = 1;
-//         count = 0;
-//         while (w_error > eps && count<=20){
-//             w_aprox = w_aprox_new;
-
-//             w_aprox_new = 9.*f_pointer(t[i+1], w_aprox_new);
-//             w_aprox_new += 19.*f_pointer(t[i], y[i]);
-//             w_aprox_new += -5.*f_pointer(t[i-1], y[i-1]);
-//             w_aprox_new += f_pointer(t[i-2], y[i-2]);
-//             w_aprox_new = y[i] + h/24 * w_aprox_new;
-//             f_evaluations += 1;
-
-//             if (abs(w_aprox_new) > eps){
-//                 w_error = abs((w_aprox - w_aprox_new)/w_aprox_new);
-//             } else{
-//                 w_error = abs(w_aprox - w_aprox_new);
-//             }
-//             count++;
-//         }
-
-//         if (count > 20){
-//             printf("Could not converge in time-step %d. Error: %g.\n",i+1,w_error);
-//         }
-
-//         y[i+1] = w_aprox_new;
-//     }
-
-//     t_pointer = t;
-//     y_pointer = y;
-//     reset_error_estimate();
-// }
-
-// void IVP::solve_adams(double w1, bool one_step, int current_step){
-//     if (!has_f()){
-//         printf("Function f(t,y) not defined. Cannot continue.\n");
-//         return;
-//     }
-//     double h = (t_end - t_initial) / time_steps;
-//     double* t = new double[time_steps+1];
-//     double* y = new double[time_steps+1];
-
-//     t[0] = t_initial;
-//     y[0] = y_initial;
-//     t[1] = t[0] + h;
-//     y[1] = w1;
-
-//     int steps = time_steps;
-//     if (one_step){
-//         steps = 2;
-//     }
-//     double w_aprox, w_aprox_new, w_error;
-//     int count;
-//     for (int i=1; i<steps; i++){
-//         t[i+1] = t[0] + (i+1)*h;
-//         w_aprox = 23.*f_pointer(t[i], y[i]);
-//         w_aprox += -16.*f_pointer(t[i-1], y[i-1]);
-//         w_aprox += 5.*f_pointer(t[i-2], y[i-2]);
-//         w_aprox = y[i] + h/12 * w_aprox;
-//         f_evaluations += 1;
-
-//         w_aprox_new = w_aprox;
-//         w_error = 1;
-//         count = 0;
-//         while (w_error > eps && count<=20){
-//             w_aprox = w_aprox_new;
-
-//             w_aprox_new = 9.*f_pointer(t[i+1], w_aprox_new);
-//             w_aprox_new += 19.*f_pointer(t[i], y[i]);
-//             w_aprox_new += -5.*f_pointer(t[i-1], y[i-1]);
-//             w_aprox_new += f_pointer(t[i-2], y[i-2]);
-//             w_aprox_new = y[i] + h/24 * w_aprox_new;
-//             f_evaluations += 1;
-
-//             if (abs(w_aprox_new) > eps){
-//                 w_error = abs((w_aprox - w_aprox_new)/w_aprox_new);
-//             } else{
-//                 w_error = abs(w_aprox - w_aprox_new);
-//             }
-//             count++;
-//         }
-
-//         if (count > 20){
-//             printf("Could not converge in time-step %d. Error: %g.\n",i+1,w_error);
-//         }
-
-//         y[i+1] = w_aprox_new;
-//     }
-
-//     t_pointer = t;
-//     y_pointer = y;
-//     reset_error_estimate();
-// }
+void IVP::set_adams_convergence_iterartions(int value){
+    max_iter_adams = value;
+}
 
 void IVP::solve_integral(){
     if (!has_solution()){
@@ -1811,10 +1702,11 @@ double exact_int_test_4(double t){
     return 3/a * (1- exp(-a*t));
 }
 
-void test_adams(IVP ivp, string problemname, string filename){
+void test_adams(IVP ivp, string problemname, string filename, FILE* evaluationsFile){
     const char* name = problemname.c_str();
     ivp.set_relative_error(false);
 
+    ivp.set_adams_convergence_limit(1e-3);
     const int n = 10;
 
     printf(" Problem %s: Runge-Kutta\n", name);
@@ -1822,6 +1714,7 @@ void test_adams(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta();
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
@@ -1832,16 +1725,18 @@ void test_adams(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_adams(2, false);
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams2Exp", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_adams_2_exp.txt");
 
     printf(" Problem %s: Adams 2 step implicit\n", name);
-    ivp.set_time_steps(3*n);
+    ivp.set_time_steps(10*n);
     ivp.reset_f_evaluations();
     ivp.solve_adams(2, true);
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams2Imp", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
@@ -1852,16 +1747,18 @@ void test_adams(IVP ivp, string problemname, string filename){
     ivp.reset_f_evaluations();
     ivp.solve_adams(3, false);
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams3Exp", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_adams_3_exp.txt");
 
     printf(" Problem %s: Adams 3 step implicit\n", name);
-    ivp.set_time_steps(3*n);
+    ivp.set_time_steps(10*n);
     ivp.reset_f_evaluations();
     ivp.solve_adams(3, true);
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams3Imp", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
@@ -1869,6 +1766,13 @@ void test_adams(IVP ivp, string problemname, string filename){
 }
 
 void tests_adams(){
+
+    FILE* outFile = fopen("evaluations.txt", "w");
+    if (outFile == nullptr) {
+        printf("Coud not create file: %s\n","evaluations.txt");
+    }
+    fprintf(outFile, "%s\t%s\t%s\n", "Problem", "Method", "Evaluations");
+
     printf("### Problem #1 ###\n");
     IVP test1;
     test1.set_f(f_test_1);
@@ -1877,37 +1781,39 @@ void tests_adams(){
     test1.set_t_end(2.);
     test1.set_exact(exact_test_1);
     test1.set_exact_cumulative(exact_int_test_1);
-    test_adams(test1, "#1", "test1");
+    test_adams(test1, "#1", "test1", outFile);
 
-    // printf("### Problem #2 ###\n");
-    // IVP test2;
-    // test2.set_f(f_test_2);
-    // test2.set_y_initial(3.);
-    // test2.set_t_initial(0.);
-    // test2.set_t_end(2.);
-    // test2.set_exact(exact_test_2);
-    // test2.set_exact_cumulative(exact_int_test_2);
-    // test_rungekutta(test2, "#2", "test2");
+    printf("### Problem #2 ###\n");
+    IVP test2;
+    test2.set_f(f_test_2);
+    test2.set_y_initial(3.);
+    test2.set_t_initial(0.);
+    test2.set_t_end(2.);
+    test2.set_exact(exact_test_2);
+    test2.set_exact_cumulative(exact_int_test_2);
+    test_adams(test2, "#2", "test2", outFile);
 
-    // printf("### Problem #3 ###\n");
-    // IVP test3;
-    // test3.set_f(f_test_3);
-    // test3.set_y_initial(3.);
-    // test3.set_t_initial(0.);
-    // test3.set_t_end(2.);
-    // test3.set_exact(exact_test_3);
-    // test3.set_exact_cumulative(exact_int_test_3);
-    // test_rungekutta(test3, "#3", "test3");
+    printf("### Problem #3 ###\n");
+    IVP test3;
+    test3.set_f(f_test_3);
+    test3.set_y_initial(3.);
+    test3.set_t_initial(0.);
+    test3.set_t_end(2.);
+    test3.set_exact(exact_test_3);
+    test3.set_exact_cumulative(exact_int_test_3);
+    test_adams(test3, "#3", "test3", outFile);
 
-    // printf("### Problem #4 ###\n");
-    // IVP test4;
-    // test4.set_f(f_test_4);
-    // test4.set_y_initial(3.);
-    // test4.set_t_initial(0.);
-    // test4.set_t_end(2.);
-    // test4.set_exact(exact_test_4);
-    // test4.set_exact_cumulative(exact_int_test_4);
-    // test_rungekutta(test4, "#4", "test4");
+    printf("### Problem #4 ###\n");
+    IVP test4;
+    test4.set_f(f_test_4);
+    test4.set_y_initial(3.);
+    test4.set_t_initial(0.);
+    test4.set_t_end(2.);
+    test4.set_exact(exact_test_4);
+    test4.set_exact_cumulative(exact_int_test_4);
+    test_adams(test4, "#4", "test4", outFile);
+
+    fclose(outFile);
 }
 
 class Fetkovich{
@@ -1977,10 +1883,6 @@ class Fetkovich{
         double (*f_exact_cum_pointer)(double);
 
         int f_evaluations;
-
-        // double Qw;
-        // double We;
-        // double Pa;
 };
 
 Fetkovich::Fetkovich():
@@ -2461,6 +2363,12 @@ double f_instant_res(double t, double qw){
 }
 
 void Fetkovich_tests(){
+    FILE* outFile = fopen("evaluationsAquifer.txt", "w");
+    if (outFile == nullptr) {
+        printf("Coud not create file: %s\n","evaluationsAquifer.txt");
+    }
+    fprintf(outFile, "%s\t%s\t%s\n", "Problem", "Method", "Evaluations");
+
     printf("Instant Pressure Equilibrium Reservoir with Fetkovich\n");
     Fetkovich aqFet;
     aqFet.set_aquifer_initial_pore_volume(1*1E6);
@@ -2477,6 +2385,8 @@ void Fetkovich_tests(){
     aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
+    fprintf(outFile, "%s\t%s\t%d\n", "Aquifer#1", "Fetkovich", aqFet.get_f_evaluations());
+
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
     IVP aqIVP1;
     aqIVP1.set_f(f_instant_res);
@@ -2485,8 +2395,10 @@ void Fetkovich_tests(){
     aqIVP1.set_t_end(200.);
     aqIVP1.set_exact(f_qw_instant_res);
     aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
-    // test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
 
+    aqIVP1.set_adams_convergence_iterartions(200);
+    test_adams(aqIVP1, "Aquifer#1", "aq1", outFile);
+    fclose(outFile);
 
     int n_tests = 11;
     int* steps = new int[n_tests]{5, 10, 20, 50, 80, 100, 150, 200, 250, 500, 1000};
@@ -2496,7 +2408,7 @@ void Fetkovich_tests(){
     int evaluations;
 
     printf("We Error Sensibility with Fetkovich\n");
-    FILE* outFile = fopen("aq1_fetkovich_sens.txt", "w");
+    outFile = fopen("aq1_fetkovich_sens.txt", "w");
     printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
     fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
     for (int i=0; i<10; i++){
@@ -2511,41 +2423,51 @@ void Fetkovich_tests(){
     }
     fclose(outFile);
 
-    string stringArray[8]={"euler","euler_aitken","rungekutta2","rungekutta3","rungekutta4","rungekutta_aitken2","rungekutta_aitken3","rungekutta_aitken4"};
+    string stringArray[9]={"rungekutta4","adams2exp","adams3exp","adams2impA","adams2impB","adams2impC","adams3impA","adams3impB","adams3impC"};
 
-    for (int j=0; j<8; j++){
+    aqIVP1.set_relative_error(true);
+    aqIVP1.set_adams_convergence_iterartions(200);
+    for (int j=0; j<9; j++){
         printf("We Error Sensibility with %s\n", stringArray[j].c_str());
         outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
         printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
         fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-        aqIVP1.set_relative_error(true);
         for (int i=0; i<10; i++){
             aqIVP1.set_time_steps(steps[i]);
             aqIVP1.reset_f_evaluations();
             switch (j) {
                 case 0:
-                    aqIVP1.solve_euler();
-                    break;
-                case 1:
-                    aqIVP1.solve_euler_aitken();
-                    break;
-                case 2:
-                    aqIVP1.solve_rungekutta(2);
-                    break;
-                case 3:
-                    aqIVP1.solve_rungekutta(3);
-                    break;
-                case 4:
                     aqIVP1.solve_rungekutta(4);
                     break;
+                case 1:
+                    aqIVP1.solve_adams(2,false);
+                    break;
+                case 2:
+                    aqIVP1.solve_adams(3,false);
+                    break;
+                case 3:
+                    aqIVP1.set_adams_convergence_limit(1e-5);
+                    aqIVP1.solve_adams(2,true);
+                    break;
+                case 4:
+                    aqIVP1.set_adams_convergence_limit(1e-3);
+                    aqIVP1.solve_adams(2,true);
+                    break;
                 case 5:
-                    aqIVP1.solve_rungekutta_aitken(2);
+                    aqIVP1.set_adams_convergence_limit(1e-1);
+                    aqIVP1.solve_adams(2,true);
                     break;
                 case 6:
-                    aqIVP1.solve_rungekutta_aitken(3);
+                    aqIVP1.set_adams_convergence_limit(1e-5);
+                    aqIVP1.solve_adams(3,true);
                     break;
                 case 7:
-                    aqIVP1.solve_rungekutta_aitken(4);
+                    aqIVP1.set_adams_convergence_limit(1e-3);
+                    aqIVP1.solve_adams(3,true);
+                    break;
+                case 8:
+                    aqIVP1.set_adams_convergence_limit(1e-1);
+                    aqIVP1.solve_adams(3,true);
                     break;
                 default:
                     printf("Undifined!\n");
@@ -2574,6 +2496,6 @@ int main(){
     #endif
     // tests_splines();
     // tests_integration();
-    tests_adams();
-    // Fetkovich_tests();
+    // tests_adams();
+    Fetkovich_tests();
 }
