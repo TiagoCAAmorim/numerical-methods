@@ -618,6 +618,9 @@ class IVP{
         void solve_adams_2(bool one_step, int current_step);
         void solve_adams_exp_3(bool one_step, int current_step);
         void solve_adams_3(bool one_step, int current_step);
+        void solve_adams_exp_4(bool one_step, int current_step);
+        void solve_adams_4(bool one_step, int current_step);
+        void solve_adams_exp_5(bool one_step, int current_step);
 
         void reset_results();
         void reset_error_estimate();
@@ -679,7 +682,7 @@ IVP::IVP():
     Lipschitz(0), calculated_L(false),
     max_dfdt(0), calculated_M(false),
     f_evaluations(0),
-    conv_adams(1e-4), max_iter_adams(20)
+    conv_adams(1e20), max_iter_adams(1)
     {};
 
 void IVP::reset_results(){
@@ -1548,8 +1551,186 @@ void IVP::solve_adams_3(bool one_step, int current_step){
     reset_error_estimate();
 }
 
+void IVP::solve_adams_exp_4(bool one_step, int current_step){
+    if (!has_f()){
+        printf("Function f(t,y) not defined. Cannot continue.\n");
+        return;
+    }
+    double h = (t_end - t_initial) / time_steps;
+    double* t = new double[time_steps+1];
+    double* y = new double[time_steps+1];
+
+    int steps = time_steps;
+    if (one_step){
+        steps = current_step;
+    }
+
+    if (current_step <= 3){
+        if (one_step){
+            solve_adams_exp_3(true, current_step);
+            current_step += 1;
+        } else {
+            if (current_step==1){
+                solve_rungekutta4(true, 1);
+                current_step += 1;
+            }
+            if (current_step==2){
+                solve_adams_exp_2(true, 2);
+                current_step += 1;
+            }
+            solve_adams_exp_3(true, 3);
+            current_step += 1;
+        }
+    }
+
+    t = t_pointer;
+    y = y_pointer;
+
+    for (int i=(current_step-1); i<steps; i++){
+        t[i+1] = t[0] + (i+1)*h;
+        y[i+1] = 55.*f_pointer(t[i], y[i]);
+        y[i+1] += -59.*f_pointer(t[i-1], y[i-1]);
+        y[i+1] += 37.*f_pointer(t[i-2], y[i-2]);
+        y[i+1] += -9.*f_pointer(t[i-3], y[i-3]);
+        y[i+1] = y[i] + h/24. * y[i+1];
+        f_evaluations += 1;
+    }
+
+    t_pointer = t;
+    y_pointer = y;
+    reset_error_estimate();
+}
+
+void IVP::solve_adams_4(bool one_step, int current_step){
+    if (!has_f()){
+        printf("Function f(t,y) not defined. Cannot continue.\n");
+        return;
+    }
+    double h = (t_end - t_initial) / time_steps;
+    double* t = new double[time_steps+1];
+    double* y = new double[time_steps+1];
+
+    int steps = time_steps;
+    if (one_step){
+        steps = current_step;
+    }
+
+    if (current_step <= 3){
+        if (one_step){
+            solve_adams_3(true, current_step);
+            current_step += 1;
+        } else {
+            if (current_step==1){
+                solve_rungekutta4(true, 1);
+                current_step += 1;
+            }
+            if (current_step==2){
+                solve_adams_2(true, 2);
+                current_step += 1;
+            }
+            solve_adams_3(true, 3);
+            current_step += 1;
+        }
+    }
+
+    t = t_pointer;
+    y = y_pointer;
+
+    int count;
+    double w_aprox, w_aprox_new, w_error;
+    for (int i=(current_step-1); i<steps; i++){
+        solve_adams_exp_4(true, i+1);
+
+        w_aprox_new = y[i+1];
+        w_error = 1;
+        count = 0;
+        while (w_error > conv_adams && count<=max_iter_adams){
+            w_aprox = w_aprox_new;
+
+            w_aprox_new = 251.*f_pointer(t[i+1], w_aprox_new);
+            w_aprox_new += 646.*f_pointer(t[i], y[i]);
+            w_aprox_new += -264.*f_pointer(t[i-1], y[i-1]);
+            w_aprox_new += 106.*f_pointer(t[i-2], y[i-2]);
+            w_aprox_new = y[i] + h/720. * w_aprox_new;
+            f_evaluations += 1;
+
+            if (abs(w_aprox_new) > eps){
+                w_error = abs((w_aprox - w_aprox_new)/w_aprox_new);
+            } else{
+                w_error = abs(w_aprox - w_aprox_new);
+            }
+            count++;
+        }
+
+        if (count > max_iter_adams){
+            printf("Could not converge in time-step %d. Error: %g.\n",i+1,w_error);
+        }
+
+        y[i+1] = w_aprox_new;
+    }
+
+    t_pointer = t;
+    y_pointer = y;
+    reset_error_estimate();
+}
+
+void IVP::solve_adams_exp_5(bool one_step, int current_step){
+    if (!has_f()){
+        printf("Function f(t,y) not defined. Cannot continue.\n");
+        return;
+    }
+    double h = (t_end - t_initial) / time_steps;
+    double* t = new double[time_steps+1];
+    double* y = new double[time_steps+1];
+
+    int steps = time_steps;
+    if (one_step){
+        steps = current_step;
+    }
+
+    if (current_step <= 4){
+        if (one_step){
+            solve_adams_exp_4(true, current_step);
+            current_step += 1;
+        } else {
+            if (current_step==1){
+                solve_rungekutta4(true, 1);
+                current_step += 1;
+            }
+            if (current_step==2){
+                solve_adams_exp_2(true, 2);
+                current_step += 1;
+            }
+            if (current_step==3){
+                solve_adams_exp_3(true, 3);
+                current_step += 1;
+            }
+            solve_adams_exp_4(true, 4);
+            current_step += 1;
+        }
+    }
+
+    t = t_pointer;
+    y = y_pointer;
+
+    for (int i=(current_step-1); i<steps; i++){
+        t[i+1] = t[0] + (i+1)*h;
+        y[i+1] = 1901.*f_pointer(t[i], y[i]);
+        y[i+1] += -2774.*f_pointer(t[i-1], y[i-1]);
+        y[i+1] += 2616.*f_pointer(t[i-2], y[i-2]);
+        y[i+1] += -1274.*f_pointer(t[i-3], y[i-3]);
+        y[i+1] += 251.*f_pointer(t[i-4], y[i-4]);
+        y[i+1] = y[i] + h/720. * y[i+1];
+        f_evaluations += 1;
+    }
+
+    t_pointer = t;
+    y_pointer = y;
+    reset_error_estimate();
+}
+
 void  IVP::solve_adams(){
-    solve_adams(3, true);
+    solve_adams(4, true);
 }
 void  IVP::solve_adams(int steps, bool implicit){
     if (steps==2 && implicit){
@@ -1560,6 +1741,12 @@ void  IVP::solve_adams(int steps, bool implicit){
         solve_adams_3(false,1);
     } else if (steps==3){
         solve_adams_exp_3(false,1);
+    } else if (steps==4 && implicit){
+        solve_adams_4(false,1);
+    } else if (steps==4){
+        solve_adams_exp_4(false,1);
+    } else if (steps==5 && !implicit){
+        solve_adams_exp_5(false,1);
     } else{
         printf("Invalid number of steps in Adams implementations!\n");
     }
@@ -1763,6 +1950,39 @@ void test_adams(IVP ivp, string problemname, string filename, FILE* evaluationsF
     ivp.calculate_exact_error();
     ivp.print_solution();
     ivp.print_solution(filename+"_adams_3_imp.txt");
+
+    printf(" Problem %s: Adams 4 step explicit\n", name);
+    ivp.set_time_steps(20*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_adams(4, false);
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams4Exp", ivp.get_f_evaluations());
+    ivp.solve_integral();
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_adams_4_exp.txt");
+
+    printf(" Problem %s: Adams 4 step implicit\n", name);
+    ivp.set_time_steps(10*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_adams(4, true);
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams4Imp", ivp.get_f_evaluations());
+    ivp.solve_integral();
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_adams_4_imp.txt");
+
+    printf(" Problem %s: Adams 5 step explicit\n", name);
+    ivp.set_time_steps(20*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_adams(5, false);
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams5Exp", ivp.get_f_evaluations());
+    ivp.solve_integral();
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_adams_5_exp.txt");
 }
 
 void tests_adams(){
@@ -2496,6 +2716,6 @@ int main(){
     #endif
     // tests_splines();
     // tests_integration();
-    // tests_adams();
-    Fetkovich_tests();
+    tests_adams();
+    // Fetkovich_tests();
 }
