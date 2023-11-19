@@ -612,7 +612,11 @@ class IVP{
         void solve_rungekutta2();
         void solve_rungekutta3();
         void solve_rungekutta4();
+        void solve_rungekutta5();
+        void solve_rungekutta2(bool one_step, int current_step);
+        void solve_rungekutta3(bool one_step, int current_step);
         void solve_rungekutta4(bool one_step, int current_step);
+        void solve_rungekutta5(bool one_step, int current_step);
 
         void solve_adams_exp_2(bool one_step, int current_step);
         void solve_adams_2(bool one_step, int current_step);
@@ -1212,6 +1216,9 @@ void IVP::solve_rungekutta(int n){
     case 4:
         solve_rungekutta4();
         break;
+    case 5:
+        solve_rungekutta5();
+        break;
     default:
         printf("No Runge-Kutta methods higher than 4 were implemented.\n");
         break;
@@ -1219,6 +1226,10 @@ void IVP::solve_rungekutta(int n){
 }
 
 void IVP::solve_rungekutta2(){
+    solve_rungekutta2(false, 1);
+}
+
+void IVP::solve_rungekutta2(bool one_step, int current_step){
     if (!has_f()){
         printf("Function f(t,y) not defined. Cannot continue.\n");
         return;
@@ -1227,12 +1238,20 @@ void IVP::solve_rungekutta2(){
     double* t = new double[time_steps+1];
     double* y = new double[time_steps+1];
 
-    t[0] = t_initial;
-    y[0] = y_initial;
+    if (current_step==1){
+        t[0] = t_initial;
+        y[0] = y_initial;
+    } else{
+        t = t_pointer;
+        y = y_pointer;
+    }
 
-
+    int steps = time_steps;
+    if (one_step){
+        steps = current_step;
+    }
     double k1,k2;
-    for (int i=0; i<time_steps; i++){
+    for (int i=(current_step-1); i<steps; i++){
         t[i+1] = t[0] + (i+1)*h;
         k1 = h * f_pointer(t[i], y[i]);
         k2 = h * f_pointer(t[i]+h/2., y[i]+k1/2.);
@@ -1247,6 +1266,10 @@ void IVP::solve_rungekutta2(){
 }
 
 void IVP::solve_rungekutta3(){
+    solve_rungekutta3(false, 1);
+}
+
+void IVP::solve_rungekutta3(bool one_step, int current_step){
     if (!has_f()){
         printf("Function f(t,y) not defined. Cannot continue.\n");
         return;
@@ -1255,12 +1278,20 @@ void IVP::solve_rungekutta3(){
     double* t = new double[time_steps+1];
     double* y = new double[time_steps+1];
 
-    t[0] = t_initial;
-    y[0] = y_initial;
+    if (current_step==1){
+        t[0] = t_initial;
+        y[0] = y_initial;
+    } else{
+        t = t_pointer;
+        y = y_pointer;
+    }
 
-
+    int steps = time_steps;
+    if (one_step){
+        steps = current_step;
+    }
     double k1,k2,k3;
-    for (int i=0; i<time_steps; i++){
+    for (int i=(current_step-1); i<steps; i++){
         t[i+1] = t[0] + (i+1)*h;
         k1 = h * f_pointer(t[i], y[i]);
         k2 = h * f_pointer(t[i]+h/3., y[i]+k1/3.);
@@ -1310,6 +1341,50 @@ void IVP::solve_rungekutta4(bool one_step, int current_step){
         f_evaluations += 4;
 
         y[i+1] = y[i] + 1./6. * (k1 + 2.*k2 + 2.*k3 + k4);
+    }
+
+    t_pointer = t;
+    y_pointer = y;
+    reset_error_estimate();
+}
+
+void IVP::solve_rungekutta5(){
+    solve_rungekutta5(false, 1);
+}
+
+void IVP::solve_rungekutta5(bool one_step, int current_step){
+    if (!has_f()){
+        printf("Function f(t,y) not defined. Cannot continue.\n");
+        return;
+    }
+    double h = (t_end - t_initial) / time_steps;
+    double* t = new double[time_steps+1];
+    double* y = new double[time_steps+1];
+
+    if (current_step==1){
+        t[0] = t_initial;
+        y[0] = y_initial;
+    } else{
+        t = t_pointer;
+        y = y_pointer;
+    }
+
+    int steps = time_steps;
+    if (one_step){
+        steps = current_step;
+    }
+    double k1,k2,k3,k4,k5,k6;
+    for (int i=(current_step-1); i<steps; i++){
+        t[i+1] = t[0] + (i+1)*h;
+        k1 = h * f_pointer(t[i]          , y[i]);
+        k2 = h * f_pointer(t[i]+h/4.     , y[i] + k1/4.);
+        k3 = h * f_pointer(t[i]+h*3./8.  , y[i] + k1*3./32.      + k2*9./32.);
+        k4 = h * f_pointer(t[i]+h*12./13., y[i] + k1*1932./2197. - k2*7200./2197. + k3*7296./2197.);
+        k5 = h * f_pointer(t[i]+h        , y[i] + k1*439./216.   - k2*8.          + k3*3680./513.  - k4*845./4104.);
+        k6 = h * f_pointer(t[i]+h/2.     , y[i] - k1*8./27.      + k2*2.          - k3*3544./2565. + k4*1859./4104. - k5*11./40.);
+        f_evaluations += 6;
+
+        y[i+1] = y[i] + 16./135.*k1 + 6656./12825.*k3 + 28561./56430.*k4 - 9./50.*k5 + 2./55.*k6;
     }
 
     t_pointer = t;
@@ -1896,16 +1971,27 @@ void test_adams(IVP ivp, string problemname, string filename, FILE* evaluationsF
     ivp.set_adams_convergence_limit(1e-3);
     const int n = 10;
 
-    printf(" Problem %s: Runge-Kutta\n", name);
+    printf(" Problem %s: Runge-Kutta 4\n", name);
     ivp.set_time_steps(5*n);
     ivp.reset_f_evaluations();
-    ivp.solve_rungekutta();
+    ivp.solve_rungekutta(4);
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta4", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
     ivp.print_solution();
-    ivp.print_solution(filename+"_rungekutta.txt");
+    ivp.print_solution(filename+"_rungekutta4.txt");
+
+    printf(" Problem %s: Runge-Kutta 5\n", name);
+    ivp.set_time_steps(5*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(5);
+    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta5", ivp.get_f_evaluations());
+    ivp.solve_integral();
+    ivp.calculate_exact_error();
+    ivp.print_solution();
+    ivp.print_solution(filename+"_rungekutta5.txt");
 
     printf(" Problem %s: Adams 2 step explicit\n", name);
     ivp.set_time_steps(20*n);
