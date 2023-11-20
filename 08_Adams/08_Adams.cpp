@@ -1895,7 +1895,7 @@ double exact_int_test_4(double t){
 
 void test_adams(IVP ivp, string problemname, string filename, FILE* evaluationsFile){
     const char* name = problemname.c_str();
-    ivp.set_relative_error(false);
+    ivp.set_relative_error(true);
 
     ivp.set_adams_convergence_limit(1e-3);
     const int n = 10;
@@ -2642,7 +2642,6 @@ void Fetkovich_tests(){
     aqIVP1.set_exact(f_qw_instant_res);
     aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
 
-    aqIVP1.set_adams_convergence_iterartions(200);
     test_adams(aqIVP1, "Aquifer#1", "aq1", outFile);
     fclose(outFile);
 
@@ -2669,10 +2668,10 @@ void Fetkovich_tests(){
     }
     fclose(outFile);
 
-    string stringArray[9]={"rungekutta4","adams2exp","adams3exp","adams4exp","adams5exp","adams1imp","adams2imp","adams3imp","adams4imp"};
+    string stringArray[10]={"rungekutta4","rungekutta5","adams_2_exp","adams_3_exp","adams_4_exp","adams_5_exp","adams_1_imp","adams_2_imp","adams_3_imp","adams_4_imp"};
 
     aqIVP1.set_relative_error(true);
-    for (int j=0; j<9; j++){
+    for (int j=0; j<10; j++){
         printf("We Error Sensibility with %s\n", stringArray[j].c_str());
         outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
         // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
@@ -2685,27 +2684,30 @@ void Fetkovich_tests(){
                     aqIVP1.solve_rungekutta(4);
                     break;
                 case 1:
-                    aqIVP1.solve_adams(2,false);
+                    aqIVP1.solve_rungekutta(5);
                     break;
                 case 2:
-                    aqIVP1.solve_adams(3,false);
+                    aqIVP1.solve_adams(2,false);
                     break;
                 case 3:
-                    aqIVP1.solve_adams(4,false);
+                    aqIVP1.solve_adams(3,false);
                     break;
                 case 4:
-                    aqIVP1.solve_adams(5,false);
+                    aqIVP1.solve_adams(4,false);
                     break;
                 case 5:
-                    aqIVP1.solve_adams(1,true);
+                    aqIVP1.solve_adams(5,false);
                     break;
                 case 6:
-                    aqIVP1.solve_adams(2,true);
+                    aqIVP1.solve_adams(1,true);
                     break;
                 case 7:
-                    aqIVP1.solve_adams(3,true);
+                    aqIVP1.solve_adams(2,true);
                     break;
                 case 8:
+                    aqIVP1.solve_adams(3,true);
+                    break;
+                case 9:
                     aqIVP1.solve_adams(4,true);
                     break;
                 default:
