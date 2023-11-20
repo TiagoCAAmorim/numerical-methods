@@ -56,7 +56,7 @@
 %     width = 10cm,
 %     tick pos = left,
 %     legend style={at={(0.98,0.30)}, anchor=east},
-%     legend cell align=left,     
+%     legend cell align=left,
 %     }
 %  \pgfkeys{
 %     /pgf/number format/.cd,
@@ -82,21 +82,21 @@
 \definecolor{backcolour}{rgb}{0.98,0.98,0.98}
 
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
+    backgroundcolor=\color{backcolour},
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2
 }
 
@@ -156,9 +156,9 @@
 \tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
 \ead{t100675@dac.unicamp.br}
 \affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
-addressline={Av. Henrique Valadares, 28}, 
+addressline={Av. Henrique Valadares, 28},
 city={Rio de Janeiro},
-postcode={20231-030}, 
+postcode={20231-030},
 state={RJ},
 country={Brasil}}
 
@@ -212,7 +212,7 @@ O algoritmo de cálculo do inverso da mínima curvatura é discutido em \cite{re
 
 \begin{subequations}\label{eq:inversomcm}
     \begin{align}
-        \cos \theta_2 =& 2 \frac{\Delta V}{\Delta S f(\alpha)} - \cos \theta_1 \label{eq:costheta2} \\ 
+        \cos \theta_2 =& 2 \frac{\Delta V}{\Delta S f(\alpha)} - \cos \theta_1 \label{eq:costheta2} \\
         \sin \theta_2 =& \sqrt{1 - \cos^2 \theta_2} \label{eq:sintheta2} \\
         \sin \phi_2 =& \frac{-\Delta N}{\Delta H^2} \left( \frac{\Delta \Psi \sin \theta_1}{\sin \theta_2} \right) \nonumber \\
         & + \frac{\Delta E}{\Delta H^2} \sqrt{\Delta H^2 - \left( \frac{\Delta \Psi \sin \theta_1}{\sin \theta_2} \right)^2} \label{eq:sinphi2} \\
@@ -234,8 +234,8 @@ onde
 Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a implementação deste algoritmo e seus limites. Em \cite{relatorionewtonraphson} é apresentada a derivação do problema em função da variável principal: $\Delta S f(\alpha)$.
 
     \subsection{Método da Secante}
-    
-    O código desenvolvido foi baseado no pseudo-código de \cite{burden2016analise}. Uma forma simplificada é apresentada no Algoritmo \ref{alg:secante}. O Método da Secante deriva do Método de Newton-Raphson, e faz uma aproximação da derivada da função de interesse: $f^{\prime}(x) \approx \Delta f(x) / \Delta x$. O método precisa de dois pontos iniciais, e, assim como o Método de Newton-Raphson, converge mais rápido que o Método da Bissecção, e não tem garantia de encontrar uma raiz. 
+
+    O código desenvolvido foi baseado no pseudo-código de \cite{burden2016analise}. Uma forma simplificada é apresentada no Algoritmo \ref{alg:secante}. O Método da Secante deriva do Método de Newton-Raphson, e faz uma aproximação da derivada da função de interesse: $f^{\prime}(x) \approx \Delta f(x) / \Delta x$. O método precisa de dois pontos iniciais, e, assim como o Método de Newton-Raphson, converge mais rápido que o Método da Bissecção, e não tem garantia de encontrar uma raiz.
 
     \begin{algorithm}
         \caption{Método da Secante}\label{alg:secante}
@@ -266,14 +266,14 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
         \item A cada iteração é verificado se a função está variando muito pouco: $|f(x_i)-f(x_{i-1})| < \epsilon$. Em caso positivo é gerada uma mensagem e é encerrado o \emph{loop}.
         \item Como o método não garante convergência, ao longo das iterações é guardado o melhor resultado ($x$ tal que $|f(x)|$ seja mínimo). Este é o resultado que é retornado.
     \end{itemize}
-    
+
     \section{Resultados}
-    
+
     Para facilitar a análise da qualidade do código desenvolvido, foram criadas funções que realizam diversos testes onde a resposta exata é conhecida:
 
     \begin{description}
         \item[tests\textunderscore secant()] Testa o Método da Secante em diferentes funções: linear, quadrática, exponencial e trigonométrica. Também foram aplicados casos específicos para o algoritmo tratar: raiz no ponto inicial, ponto inicial muito próximo da raiz, ponto inicial em um ponto de mínimo da função (derivada nula), uso de critério de convergência relativo, função com derivada nula na raiz, função com vários mínimos e máximos locais.
-        
+
         \item[tests\textunderscore minimum\textunderscore curvature()] Testa o algoritmo proposto para resolver o inversa da mínima curvatura para diferentes geometrias de trecho de poço: poço vertical, horizontal, inclinado, em curva.
     \end{description}
 
@@ -281,15 +281,15 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
 
     Como esperado, as funções lineares convergiram em uma iteração, pois a aproximação da derivada feita no Método da Secante é exata neste exemplo. As demais funções polinomiais testadas convergiram rapidamente, mas com mais iterações que o Método de Newton Raphson (Tabela \ref{table:iteracoes}). O Método da Secante teve problemas de convergência com a função exponencial: $e^{x^2-4}-1$. O método só conseguiu convergir quando foram definidos valores iniciais próximos da raiz. Como esta função \emph{cresce} muito rapidamente em $x<-2$ e $x>2$, o termo $(f(x_{i-1})-f(x_{i-2}))$ sofre com problemas numéricos, pois é a subtração de números com grandezas muito distintas.
 
-    Para as diferentes funções testadas, o Método da Bisseção convergiu linearmente em uma razão de aproximadamente 2 \cite{relatoriobisseccao}, e o Método de Newton-Raphson em geral teve convergência quadrática \cite{relatorionewtonraphson}. Com o Método da Secante a convergência foi aproximadamente quadrática, em geral um pouco pior que o Método de Newton-Raphson (Figura \ref{fig:erro}). 
+    Para as diferentes funções testadas, o Método da Bisseção convergiu linearmente em uma razão de aproximadamente 2 \cite{relatoriobisseccao}, e o Método de Newton-Raphson em geral teve convergência quadrática \cite{relatorionewtonraphson}. Com o Método da Secante a convergência foi aproximadamente quadrática, em geral um pouco pior que o Método de Newton-Raphson (Figura \ref{fig:erro}).
 
-    \begin{table*} 
+    \begin{table*}
         \caption{Comparação entre o número de iterações necessários para um mesmo critério de convergência usando os Métodos da Bissecção, Newton-Raphson e Secante.}
         \label{table:iteracoes}
         \begin{tabular}{ l c c c c c c c c c}
             \hline
             \multirow{2}{*}{Função} & \multirow{2}{*}{Raiz} & \multicolumn{3}{c}{Bissecção} & \multicolumn{2}{c}{Newton-Raphson} & \multicolumn{3}{c}{Secante}\\
-            &  & $x_a$ & $x_b$ & Iter. & $x_0$ & Iter. & $x_0$ & $x_1$ & Iter. \\ 
+            &  & $x_a$ & $x_b$ & Iter. & $x_0$ & Iter. & $x_0$ & $x_1$ & Iter. \\
             \hline
             Linear & 0.3 & 0. & 2. &  11 & 0. & 1 & 0 & 1 & 1\\
             Quadrática & -0.1 & -0.25 & 1. & 11 & 0.25 & 4 & 0.25 & 1. & 6 \\
@@ -301,8 +301,8 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
             \hline
         \end{tabular}
     \end{table*}
-    
-    \begin{figure*} 
+
+    \begin{figure*}
         \begin{tikzpicture}
             \begin{axis}[
                 height = 8cm, % standard 10cm
@@ -316,7 +316,7 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
                 ylabel = {$\varepsilon_i = |P_i - P|$},
                 legend style={at={(0.99,0.85)}, anchor=east},
                 ]
-    
+
                 \addplot[color=black, solid, mark=*] table [x=Iteration, y =Linear] {IterationError.txt};
                 \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Quadratic] {IterationError.txt};
                 \addplot[color=green, solid, mark=*] table [x=Iteration, y =Exponential] {IterationError.txt};
@@ -330,14 +330,14 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
         \caption{Evolução do erro do Método da Secante com diferentes funções (linhas tracejadas representam $\varepsilon_{i+1} / \varepsilon_i = 0.5$ e $\varepsilon_{i+1} / \varepsilon_i^2 = 0.5$).}
         \label{fig:erro}
     \end{figure*}
-    
-    O Método de Newton-Raphson se mostrou instável para algumas das funções de teste \cite{relatorionewtonraphson}, ficando muito dependente do ponto inicial para conseguir convergir. Uma função especialmente complicada para o Método de Newton-Raphson foi\footnote{Esta função é diferente da função 'Trigonométrica' listada na Tabela \ref{table:iteracoes} e na Figura \ref{fig:erro}, que é $\cos x + \sin x$.}: $3x + x^2 \sin^2 \frac{x\pi}{10}$. 
-    
-    Com o Método da Secante não foi observado este problema, e diferentes valores iniciais conseguiram convergir para a raiz do problema. Os valores de $x_i$ \textbf{não} convergiram monotonicamente para a raiz, mas conseguiram encontrar o resultado correto (Figura \ref{fig:ftrigonometrica}). Aparentemente, ao avaliar dois pontos em uma região com derivada perto de zero, o método irá \emph{pular} para um novo ponto longe do anterior, e na próxima iteração serão utilizados dois pontos distantes entre si. Ao fazer a inclinação média entre os dois pontos distantes o método irá dar maior relevância à tendência mais geral da função, e menor às variações de maior frequência. 
+
+    O Método de Newton-Raphson se mostrou instável para algumas das funções de teste \cite{relatorionewtonraphson}, ficando muito dependente do ponto inicial para conseguir convergir. Uma função especialmente complicada para o Método de Newton-Raphson foi\footnote{Esta função é diferente da função 'Trigonométrica' listada na Tabela \ref{table:iteracoes} e na Figura \ref{fig:erro}, que é $\cos x + \sin x$.}: $3x + x^2 \sin^2 \frac{x\pi}{10}$.
+
+    Com o Método da Secante não foi observado este problema, e diferentes valores iniciais conseguiram convergir para a raiz do problema. Os valores de $x_i$ \textbf{não} convergiram monotonicamente para a raiz, mas conseguiram encontrar o resultado correto (Figura \ref{fig:ftrigonometrica}). Aparentemente, ao avaliar dois pontos em uma região com derivada perto de zero, o método irá \emph{pular} para um novo ponto longe do anterior, e na próxima iteração serão utilizados dois pontos distantes entre si. Ao fazer a inclinação média entre os dois pontos distantes o método irá dar maior relevância à tendência mais geral da função, e menor às variações de maior frequência.
 
     O Método da Secante precisa de dois valores iniciais de $x$, e a ordem em que estes valores são fornecidos pelo usuário pode impactar o resultado. A Figura \ref{fig:erroinv} mostra que, para funções \emph{bem comportadas}, é uma boa prática entrar um valor de $x_1$ mais próximo da raiz que o valor de $x_0$. Ao fazer isto, o valor de $x_1$ é que será utilizado na 2$^a$ iteração. Para as funções testadas o impacto foi pequeno, mas foi positivo seguir a boa prática. O impacto foi maior apenas na avaliação da função trigonométrica (Figura \ref{fig:ftrigonometrica}). Neste exemplo a convergência foi muito impactada e a raiz encontrada pelos dois testes foi diferente.
 
-    \begin{figure*} 
+    \begin{figure*}
         \centering
         \begin{tikzpicture}
             \begin{axis}[
@@ -352,7 +352,7 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
                 ylabel = {$\varepsilon_i = |P_i - P|$},
                 legend style={at={(0.99,0.85)}, anchor=east},
                 ]
-    
+
                 \addplot[color=black, solid, mark=*] table [x=Iteration, y =Normal] {InvertedPoints_3rdDegree.txt};
                 \addplot[color=blue, solid, mark=*] table [x=Iteration, y =Normal] {InvertedPoints_Exp.txt};
                 \addplot[color=red, solid, mark=*] table [x=Iteration, y =Normal] {InvertedPoints_Trig.txt};
@@ -360,26 +360,26 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
                 \addplot[color=black, dashed, mark=*] table [x=Iteration, y =Inv] {InvertedPoints_3rdDegree.txt};
                 \addplot[color=blue, dashed, mark=*] table [x=Iteration, y =Inv] {InvertedPoints_Exp.txt};
                 \addplot[color=red, dashed, mark=*] table [x=Iteration, y =Inv] {InvertedPoints_TrigInv.txt};
-                
+
                 \legend{Polinômio 3$^o$ grau, Exponencial, Trigonométrica};
             \end{axis}
-            
+
         \end{tikzpicture}
         \caption{Sensibilidade da evolução do erro do Método da Secante em função dos pontos iniciais: $x_0$ e $x_1$ (Linhas contínuas tem $|f(x_1)|<|f(x_0)|$, e as tracejadas o inverso).}
         \label{fig:erroinv}
     \end{figure*}
-    
-    Na aplicação do Método da Secante para resolver o inverso da mínima curvatura os resultados foram ainda melhores que os do Método de Newton Raphson, que já foram muito bons. O lado \emph{à direita} da raiz tem forma próxima de uma reta (Figura \ref{fig:fpoco3d}), e a aproximação da derivada do Método da Secante por uma inclinação \emph{média} se mostrou muito eficaz logo na primeira iteração. Nos testes realizados esta primeira iteração, a partir dos pontos iniciais fornecidos pelo usuário, conseguiram uma aproximação muito boa da raiz.
-    No código foram utilizados por padrão valores 50\% e 10\% maior que o mínimo como $x_0$ e $x_1$, respectivamente. 
 
-    O código dos três métodos foi implementado em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/03_Secante/03_secante.c}{https://github.com/ TiagoCAAmorim/numerical-methods}.
+    Na aplicação do Método da Secante para resolver o inverso da mínima curvatura os resultados foram ainda melhores que os do Método de Newton Raphson, que já foram muito bons. O lado \emph{à direita} da raiz tem forma próxima de uma reta (Figura \ref{fig:fpoco3d}), e a aproximação da derivada do Método da Secante por uma inclinação \emph{média} se mostrou muito eficaz logo na primeira iteração. Nos testes realizados esta primeira iteração, a partir dos pontos iniciais fornecidos pelo usuário, conseguiram uma aproximação muito boa da raiz.
+    No código foram utilizados por padrão valores 50\% e 10\% maior que o mínimo como $x_0$ e $x_1$, respectivamente.
+
+    O código dos três métodos foi implementado em um único arquivo, e pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/03_Secant/03_secant.c}{https://github.com/ TiagoCAAmorim/numerical-methods}.
 
     \section{Conclusão}
-    
+
     O Método da Secante apresentou desempenho melhor que o do Método de Newton-Raphson para fazer o cálculo de parâmetros de perfuração em função de coordenadas cartesianas. O formato da função de interesse para resolver o problema proposto levou a uma estimativa muito boa da solução na primeira iteração em todos os testes realizados. Além de alcançar convergência em um número menor de iterações, o Método da Secante tem a vantagem adicional de não precisar calcular a derivada da função, ou seja, reduzindo ainda mais o custo computacional necessário para resolver o problema proposto.
 
     % \label{}
-    
+
 %% The Appendices part is started with the command \appendix;
 %% appendix sections are then done as normal sections
 
@@ -389,7 +389,7 @@ Em \cite{relatoriobisseccao} são discutidos detalhes adicionais sobre a impleme
 
 Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou raízes) está denotada pelo quadrado azul. São apresentadas apenas algumas das funções de teste. Em vermelho estão os pontos avaliados ao longo de um dos testes realizados.
 
-\begin{figure}[hbt!] 
+\begin{figure}[hbt!]
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot [domain=-3:3, smooth, thick] { 3*x*x*(x + 2) };
@@ -434,7 +434,7 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
     \label{fig:polinomial}
 \end{figure}
 
-\begin{figure}[hbt!] 
+\begin{figure}[hbt!]
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot [domain=-3.05:3.05, smooth, thick] { exp(x^2 - 4) -1 };
@@ -464,8 +464,8 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
         \caption{Função exponencial: $e^{x^2-4}-1$.}
         \label{fig:fexponencial}
     \end{figure}
-    
-    \begin{figure}[hbt!] 
+
+    \begin{figure}[hbt!]
         \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot[smooth, thick] table [x=x, y = fx] {f_trig.txt};
@@ -540,7 +540,7 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
     \label{fig:ftrigonometrica}
 \end{figure}
 
-\begin{figure}[hbt!] 
+\begin{figure}[hbt!]
     \begin{tikzpicture}
         \begin{axis} [axis lines=center]
             \addplot[smooth, thick] table [x=x, y = fx] {f_3Dwell.txt};
@@ -567,7 +567,7 @@ Nos gráficos a seguir as curvas pretas são as funções de teste. A raiz (ou r
 %% bibitems, please use
 %%
 
-\bibliographystyle{elsarticle-num} 
+\bibliographystyle{elsarticle-num}
 \bibliography{refs}
 
 %% else use the following coding to input the bibitems directly in the
