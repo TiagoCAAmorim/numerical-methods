@@ -36,7 +36,10 @@ Reports (in Latex) in Brazilian Portuguese.
 
 * Practical example: **Fetkovich Aquifer**
   * Compared the computaional efficiency of the Fetkovich Method to solve an analytical aquifer to different methods of solving initial problem values.
-  * Only the $4^{th}$ order Runge-Kutta method had results similar to the Fetkovich Method.
+  * The first proposed problem was an aquifer connected to a reservoir that was at a different pressure in the initial time.
+    * The $4^{th}$ and $5^{th}$ order Runge-Kutta method had results similar to or better than the Fetkovich Method.
+    * The multi-steps methods had better performance than Rung-Kutta methods of similar local error.
+    * The best results were achieved with the Adams-Bashforth 5 step method (explicit).
 
 * Implementation:
   * Defined a commmon object that holds all methods implemented.
@@ -47,7 +50,7 @@ Reports (in Latex) in Brazilian Portuguese.
     * Runge-Kutta:
       * Implemented $2^{nd}$ (midpoint), $3^{rd}$ (Heu), $4^{th}$ (_original_ version) and $5^{th}$ ($5^{th}$ order Fehlberg) order versions (see [Wikipedia](https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods)).
       * Implemented Aitken scheme as well, but results were not so good as with Euler.
-    * Adams:
+    * Multi-steps:
       * Implemented explicit and implicit versions:
         * Adams-Bashforth with 2, 3, 4 and 5 steps (explicit).
         * Adams-Moulton with 1, 2, 3 and 4 steps (implicit).
