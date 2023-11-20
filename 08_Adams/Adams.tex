@@ -168,7 +168,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-
+    O aquífero analítico proposto por Fetkovich é de grande utilidade na caracterização do comportamento de reservatórios de petróleo. Foram avaliados métodos de aproximação numérica de problemas de valor inicial para resolver este modelo de aquífero. Os métodos de múltiplos passos tiveram bom desempenho na previsão do comportamento do aquífero analítico testado. Os métodos de Adams-Bashforth e Adams-Moulton foram melhores que os métodos de Runge-Kutta de ordem equivalente e que o método de Fetkovich. Entre os métodos implícitos e explícitos avaliados, o método explícito de maior ordem (Adams-Bashforth de 5 passos) foi que teve os melhores resultados.
 
 \end{abstract}
 
@@ -499,9 +499,7 @@ country={Brasil}}
             \label{fig:teste3}
         \end{figure}
 
-        O mesmo teste foi feito na resolução do modelo de aquífero de Fetkovich. O número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram aproximadamente 200 avaliações. A figura \ref{fig:testeAq} mostra que apenas os métodos de Adams-Moulton de 4 passos e Adams-Bashforth de 5 passos tiveram melhor desempenho que o método de Fetkovich nos tempos iniciais, que é quando acontecem as maiores vazões.
-
-        As vazões de água nos tempos longos são baixas e de menor impacto no comportamento do reservatório. A a aparente degradação da resposta com o método de Fetkovich com o tempo perde importância. Foi feita a comparação em termos de produção acumulada de água (figura \ref{fig:testeAqWe}), e o método de Fetkovich se mostra com menores erros e mais estável que todos os demais.
+        O mesmo teste foi feito na resolução do modelo de aquífero de Fetkovich. O número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram aproximadamente 200 avaliações. A figura \ref{fig:testeAq} mostra que apenas os métodos de Adams-Moulton de 1 passo e Adams-Bashforth de 2 passos não conseguiram desempenho melhor que o método de Fetkovich. Foi feita a comparação em termos de produção acumulada de água (figura \ref{fig:testeAqWe}), e o método de Fetkovich se mostra com menores erros e mais estável que todos os demais. Contudo, os erros com os métodos de $\mathcal{O}(h^3)$ são quase todos menores que os de Fetkovich.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -555,14 +553,14 @@ country={Brasil}}
             \label{fig:testeAqWe}
         \end{figure}
 
-        Assim como no relatório passado, foi feita uma sensibilidade do erro de estimativa da vazão de água acumulada dos diferentes métodos testados em função do número de avaliações de $f(t,y)$. Os gráficos foram montados em função do erro relativo no tempo final (Figura \ref{fig:testeaq1sens}) e do máximo erro relativo entre todos os time-steps (Figura \ref{fig:testeaq1sensmax}). Os resultados mostram que o método de Fetkovich tem melhores resultados para um número menor de de time-steps. O único método que teve resultados melhores que o de Fetkovich foi o de Runge-Kutta de quarta ordem, mas apenas para um número elevado de time-steps.
+        Assim como no relatório passado, foi feita uma sensibilidade do erro de estimativa da vazão de água acumulada dos diferentes métodos testados em função do número de avaliações de $f(t,y)$. Os gráficos foram montados em função do erro relativo no tempo final (Figura \ref{fig:testeAqSensEnd}) e do máximo erro relativo entre todos os time-steps (Figura \ref{fig:testeAqSensMax}). Os resultados mostram que o método de Fetkovich tem melhores resultados apenaas para um número reduzido de time-steps. Entre os métodos avaliados o de Adams-Bashforth de 5 passos foi o que mostrou melhor desempenho, tanto em termos de erro no tempo final como de erro relativo máximo.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
                 \begin{semilogyaxis}[
                     grid=both,
                     xlabel = {Avaliações de $f(t,y)$},
-                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    ylabel = {$|\int w_n - \int y(t_{final})|/|\int y(t_{final})|$},
                     xmax=1000,
                     legend style={at={(1.03,1.00)}, anchor=east, font=\footnotesize},
                     ]
@@ -589,9 +587,9 @@ country={Brasil}}
                 \begin{semilogyaxis}[
                     grid=both,
                     xlabel = {Avaliações de $f(t,y)$},
-                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    ylabel = {$|\int w_j - \int y(t_j)|/|\int y(t_j)|_{max}$},
                     xmax=1000,
-                    legend style={at={(1.03,1.00)}, anchor=east, font=\footnotesize},
+                    legend style={at={(1.03,0.80)}, anchor=east, font=\footnotesize},
                     ]
                     \addplot[color=orange, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_fetkovich_sens.txt};
                     \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta4_sens.txt};
@@ -615,7 +613,7 @@ country={Brasil}}
 
     \section{Conclusão}
 
-
+        Os métodos de Adams-Bashforth e Adams-Moulton mostraram melhor desempenho que os métodos de Runge-Kutta de ordem equivalente. Para o problema proposto de resolver o aquífero analítico proposto por Fetkovich, os métodos de passo múltiplo tiveram melhor desempenho que o método de Fetkovich. Entre os métodos implícitos e explícitos avaliados, o método explícito de maior ordem (Adams-Bashforth de 5 passos) foi que teve os melhores resultados.
 
     % \label{}
 
