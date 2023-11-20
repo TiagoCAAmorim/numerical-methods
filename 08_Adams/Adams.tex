@@ -1,0 +1,665 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics}
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Aplicação de Métodos de Múltiplo Passo para Resolver o Comportamento de Aquíferos Analíticos\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 8 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28},
+city={Rio de Janeiro},
+postcode={20231-030},
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método de Fetkovich \sep Métodos de Runge-Kutta \sep Métodos de Adams \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+    Este trabalho se propõe a resolver o modelo de aquífero numérico proposto por Fetkovich com métodos de aproximação numérica de um problema de valor inicial. Avaliações anteriores mostraram que o método de Euler não é adequado para resolver o problema proposto. Entre os métodos de Runge-Kutta testados ($2^a$, $3^a$ e $4^a$ ordem), apenas o de quarta ordem teve resultados próximos daqueles do método de Fetkovich \cite{relatoriorungekutta}.
+
+    Neste relatório é avaliada a aplicação dos métodos de múltiplos passos: Adams-Bashforth (implícitos) e Adams-Moulton (explícitos), de diferentes ordens.
+
+\section{Metodologia}
+
+        Nos relatórios anteriores \cite{relatorioeuler}\cite{relatoriorungekutta} foi feita uma descrição dos métodos de Fetkovich, Euler, Aitken e Runge-Kutta. Também foi apresentada a formalização do modelo de aquífero proposto por Fetkovich como um problema de valor inicial (PVI). Este relatório focará nas implementações adicionais que foram feitas e seus resultados.
+
+    \subsection{Métodos de Passo Múltiplo}
+
+        Os métodos de passo múltiplo fazem uso de mais de uma das aproximações de $w_j \approx y(t_j)$ de para estimar o próximo o próximo ponto da malha. Dado um problema de valor inicial do tipo:
+
+        \begin{align}
+            \frac{dy}{dt} = f(t,y), \quad a \leq t \leq b, \quad y(a) = \alpha \label{eq:pvi}
+        \end{align}
+
+        Um método de passo múltiplo buscará uma aproximação para $w_{j+1}$ em $t_{j+1}$ com a seguinte forma:
+
+        \begin{align}
+            w_{j+1} =& \sum_{i=0}^{m-1} \left( a_{m-1-i} w_{j-i} \right) \nonumber \\
+            &+ h \sum_{i=0}^{m} \left[ b_{m-i} f(t_{j+1-i},w_{j+1-i}) \right] \label{eq:passomultiplo}
+        \end{align}
+        com
+        \begin{align}
+            j&=m-1,m,\ldots,n-1 \nonumber \\
+            h&=(b-a)/n \nonumber
+        \end{align}
+        e os valores iniciais: $w_0=\alpha, w_1=\alpha_1, \; \ldots \; w_{m-1}=\alpha_{m-1}$.
+
+        Observa-se que se $b_m \neq 0$ o próprio valor de $f(t_{j+1},w_{j+1})$ pode ser usado para estimar $w_{j+1}$. Os métodos com esta característica são chamados de implícitos. Se $b_m = 0$ os métodos são chamados de explícitos.
+
+        Foram implementados diferentes métodos explícitos de Adams-Bashforth e implícitos de Adams-Moulton \cite{burden2016analise}.
+
+    \subsubsection{Métodos Explícitos}
+
+        Método explícito de Adams-Bashforth de dois passos:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_1 &= \alpha_1 \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{2} \left[ 3 f(t_j, w_j) - f(t_{j-1}, w_{j-1}) \right] \label{eq:adamsbashforth2}
+        \end{align}
+
+        \noindent com $j=1,2,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = \frac{5}{12}y^{(3)}(\mu_j)h^2$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Para estimar $\alpha_1$ foi utilizado um método de Runge-Kutta de $2^a$ ordem, que tem erro de truncamento local de mesma ordem: $\mathcal{O}(h^2)$.
+
+        Método explícito de Adams-Bashforth de três passos:
+
+        \begin{align}
+            w_0 =& \alpha \nonumber \\
+            w_1 =& \alpha_1 \nonumber \\
+            w_2 =& \alpha_2 \nonumber \\
+            w_{j+1} =& w_j + \frac{h}{12} \left[ 23 f(t_j, w_j) - 16 f(t_{j-1}, w_{j-1}) \right. \nonumber \\
+            & \left. + 5 f(t_{j-2}, w_{j-2}) \right] \label{eq:adamsbashforth3}
+        \end{align}
+
+        \noindent com $j=2,3,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = \frac{3}{8}y^{(4)}(\mu_j)h^3$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Para estimar $\alpha_1$ e $\alpha_2$ foi utilizado um método de Runge-Kutta de $3^a$ ordem, que tem erro de truncamento local de mesma ordem: $\mathcal{O}(h^3)$.
+
+        Método explícito de Adams-Bashforth de quatro passos:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_1 &= \alpha_1 \nonumber \\
+            w_2 &= \alpha_2 \nonumber \\
+            w_3 &= \alpha_3 \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{24} \left[ 55 f(t_j, w_j) - 59 f(t_{j-1}, w_{j-1}) \right. \nonumber \\
+            & \left. + 37 f(t_{j-2}, w_{j-2}) - 9 f(t_{j-3}, w_{j-3}) \right] \label{eq:adamsbashforth4}
+        \end{align}
+
+        \noindent com $j=3,4,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = \frac{251}{720}y^{(5)}(\mu_j)h^4$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Para estimar $\alpha_1$, $\alpha_2$ e $\alpha_3$ foi utilizado um método de Runge-Kutta de $4^a$ ordem, que tem erro de truncamento local de mesma ordem: $\mathcal{O}(h^4)$.
+
+        Método explícito de Adams-Bashforth de cinco passos:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_1 &= \alpha_1 \nonumber \\
+            w_2 &= \alpha_2 \nonumber \\
+            w_3 &= \alpha_3 \nonumber \\
+            w_4 &= \alpha_4 \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{720} \left[ 1901 f(t_j, w_j) - 2774 f(t_{j-1}, w_{j-1}) \right. \nonumber \\
+            & + 2616 f(t_{j-2}, w_{j-2}) - 1274 f(t_{j-3}, w_{j-3}) \nonumber \\
+            &\left.+ 251 f(t_{j-4}, w_{j-4})\right] \label{eq:adamsbashforth5}
+        \end{align}
+
+        \noindent com $j=4,5,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = \frac{95}{288}y^{(6)}(\mu_j)h^5$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Para estimar $\alpha_1$, $\alpha_2$, $\alpha_3$ e $\alpha_4$ foi utilizado um método de Runge-Kutta de ordem superior, que tem erro de truncamento local de mesma ordem: $\mathcal{O}(h^5)$.
+
+    \subsubsection{Métodos Implícitos}
+
+        Método implícito de Adams-Moulton de um passo:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{2} \left[ f(t_{j+1}, w_{j+1}) + f(t_j, w_j) \right] \label{eq:adamsmoulton1}
+        \end{align}
+
+        \noindent com $j=0,1,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = -\frac{1}{12}y^{(3)}(\mu_j)h^2$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Método implícito de Adams-Moulton de dois passos:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_1 &= \alpha_1 \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{12} \left[ 5 f(t_{j+1}, w_{j+1}) + 8 f(t_j, w_j) \right. \nonumber \\
+            &\left. - f(t_{j-1}, w_{j-1}) \right] \label{eq:adamsmoulton2}
+        \end{align}
+
+        \noindent com $j=1,2,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = -\frac{1}{24}y^{(4)}(\mu_j)h^3$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Método implícito de Adams-Moulton de três passos:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_1 &= \alpha_1 \nonumber \\
+            w_2 &= \alpha_2 \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{24} \left[ 9 f(t_{j+1}, w_{j+1}) + 19 f(t_j, w_j) \right. \nonumber \\
+            &\left. - 5 f(t_{j-1}, w_{j-1}) +f(t_{j-2}, w_{j-2}) \right] \label{eq:adamsmoulton3}
+        \end{align}
+
+        \noindent com $j=2,3,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = -\frac{19}{720}y^{(5)}(\mu_j)h^4$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Método implícito de Adams-Moulton de quatro passos:
+
+        \begin{align}
+            w_0 &= \alpha \nonumber \\
+            w_1 &= \alpha_1 \nonumber \\
+            w_2 &= \alpha_2 \nonumber \\
+            w_3 &= \alpha_3 \nonumber \\
+            w_{j+1} &= w_j + \frac{h}{720} \left[ 251 f(t_{j+1}, w_{j+1}) + 646 f(t_j, w_j) \right. \nonumber \\
+            & - 264 f(t_{j-1}, w_{j-1}) + 106 f(t_{j-2}, w_{j-2}) \nonumber \\
+            &\left. - 19 f(t_{j-3}, w_{j-3}) \right] \label{eq:adamsmoulton4}
+        \end{align}
+
+        \noindent com $j=3,4,\ldots,n-1$
+
+        \noindent erro de truncamento local: $\tau_{j+1}(h) = -\frac{3}{160}y^{(6)}(\mu_j)h^5$, com \\ $\mu_j \, \epsilon \, (t_j,t_{j+1})$
+
+        Para todos os métodos implícitos foi implementado o esquema \emph{preditor-corretor}. O método explícito equivalente (de mesmo $\mathcal{O}(h^n)$) é utilizado para fazer a primeira estimativa de $w_{j+1}$ (preditor). Em seguida o método implícito é utilizado para atualizar o valor de $w_{j+1}$ antes de avançar para o próximo passo de temp (corretor).
+
+        Para estimar os $\alpha_i$ foi utilizada a mesma lógica dos métodos explícitos de usar métodos de Runge-Kutta com erro de truncamento local de mesma ordem.
+
+    \subsection{Método de Runge-Kutta de Ordem Superior}
+
+        Para a implementação do método de Adams-Bashforth de cinco passos foi necessário utilizar um dos métodos de Runge-Kutta com erro de aproximação equivalente, e que não foi discutido no relatório anterior. Foi implementada uma das fórmulas do método de Runge-Kutta-Fehlberg \cite{burden2016analise}\footnote{Este é um método adaptativo, que usa formas parecidas do método de Runge-Kutta para estimar erros de aproximação e definir o tamanho do passo de tempo. Foi implementada apenas uma das fórmulas deste método, e utilizada com tamanho de passo de tempo constante.}:
+
+        \begin{align}
+            w_0 =& \alpha \nonumber \\
+            k_1 =& hf\left(t_j,w_j\right) \nonumber \\
+            k_2 =& hf\left(t_j + \frac{h}{4},w_j + \frac{1}{4}k_1 \right) \nonumber \\
+            k_3 =& hf\left(t_j + \frac{3h}{8},w_j + \frac{3}{32}k_1+\frac{9}{32}k_2 \right) \nonumber \\
+            k_4 =& hf\left(t_j + \frac{12h}{13},w_j + \frac{1932}{2197}k_1 - \frac{7200}{2197}k_2+\frac{7296}{2197}k_3\right) \nonumber \\
+            k_5 =& hf\left(t_j + h,w_j + \frac{439}{216}k_1 - 8k_2+\frac{3680}{513}k_3 \right. \nonumber \\
+            & \left. - \frac{845}{4104}k_4 \right) \nonumber \\
+            k_6 =& hf\left(t_j + \frac{h}{2},w_j - \frac{8}{27}k_1 + 2k_2 - \frac{3544}{2565}k_3+\frac{1859}{4104}k_4 \right. \nonumber \\
+            & \left. - \frac{11}{40}k_5 \right) \nonumber \\
+            w_{j+1} =& w_{j} + \frac{16}{135} k_1 + \frac{6656}{12825} k_3 + \frac{28561}{56430} k_4 - \frac{9}{20} k_5 \nonumber \\
+            & + \frac{2}{55} k_6 \label{eq:rk6} \\
+            \text{com } j&=0,1,\ldots,n-1 \nonumber
+        \end{align}
+
+        Esta versão do método de Runge-Kutta tem erro de truncamento local $\mathcal{O}(h^5)$.
+
+\section{Implementação} \label{sec:implementacao}
+
+        Todo o código utilizado nesta análise foi desenvolvido em C++\footnote{Alguns detalhes de implementação foram suprimidos neste relatório para facilitar a leitura. Para maiores informações verificar o relatório anterior \cite{relatoriorungekutta}.}. Foram criados objetos próprios para cada elemento integrante do problema proposto:
+
+        \begin{description}
+            \item[IVP] Classe que define um problema de valor inicial na forma \ref{eq:pvi}.
+            \begin{itemize}
+                \item O usuário precisa especificar $f(t,y)$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y(a)$ (valor inicial).
+                \item O usuário também pode especificar a solução exata ($y=f(t)$), para calcular o erro de aproximação.
+                \item São disponibilizados diferentes métodos de resolução do PVI: Euler, Runge-Kutta, Adams-Bashforth e Adams-Moulton.
+                \item Foi implementada também uma rotina que tenta melhorar as respostas de Euler e Runge-Kutta utilizando o método de Aitken.
+            \end{itemize}
+            \item[Fetkovich] Classe que resolve o comportamento de um aquífero como proposto por Fetkovich.
+            \begin{itemize}
+                \item O usuário precisa definir as características do aquífero e prover uma função que retorne a pressão na interface do aquífero com o reservatório. Esta função depende do tempo e do influxo acumulado de água do aquífero para o reservatório ($W_e$).
+            \end{itemize}
+        \end{description}
+
+\section{Resultados}
+
+        Foram utilizados os mesmos problemas de valor inicial do relatório anterior para comparar os resultados do método de Runge-Kutta com os de Adams-Bashforth e Adams-Moulton:
+
+        \begin{enumerate}
+            \item $y' = y - t^2 + 1, \quad 0 \leq t \leq  2, \quad y(0) = 0.5$ \label{item:pvi1}
+            \item $y' = -2y + 3 e^t, \quad 0 \leq t \leq  2, \quad y(0) = 3.0$ \label{item:pvi2}
+            \item $y' = 4 cos(t) - 8 sin(t) + 2 y, \quad 0 \leq t \leq  2, \quad y(0) = 3.0$ \label{item:pvi3}
+        \end{enumerate}
+
+        Os resultados exatos de cada problema são, respectivamente:
+
+        \begin{enumerate}
+            \item $y = (t+1)^2 - 0.5 e^t$
+            \item $y = 2 e^{-2 t} + e^t$
+            \item $y = 4 sin(t) + 3 e^{2 t}$
+        \end{enumerate}
+
+        Foi aplicada a mesma lógica utilizada no relatório anterior, em que foi assumido que em uma aplicação mais computacionalmente intensiva a avaliação da função $f(t,y)$ tem o maior peso. Todas as avaliações foram feitas de forma a que o número de chamadas à função $f(t,y)$ fosse aproximadamente a mesma. Desta forma, as estimativas com os métodos de Runge-Kutta tem menos passos de tempo que as estimativas com os métodos de Adams-Moulton, que por sua vez tem menos passos de tempo que as estimativas com os métodos de Adams-Bashforth. Com cada método foram realizadas aproximadamente 200 avaliações da função $f(t,y)$.
+
+        Observa-se nos gráficos de erro relativo (figuras \ref{fig:teste1}, \ref{fig:teste2} e \ref{fig:teste3}) que os métodos de passo múltiplo conseguiram melhores resultados que os métodos de Runge-Kutta equivalentes (Runge-Kutta de $4^a$ ordem comparado com Adams-Molton de 3 passos e Adams-Bashforth de 4 passos, e Runge-Kutta de $5^a$ ordem comparado com Adams-Molton de 4 passos e Adams-Bashforth de 5 passos). Os resultados dos métodos de passo múltiplo explícitos e implicitos de mesma ordem ficaram próximos, invertendo a posição entre os diferentes testes.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(1.03,0.05)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test1_rungekutta4.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test1_rungekutta5.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test1_adams_1_imp.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=t, y=exact_error] {test1_adams_2_exp.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=t, y=exact_error] {test1_adams_2_imp.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=t, y=exact_error] {test1_adams_3_exp.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=t, y=exact_error] {test1_adams_3_imp.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=t, y=exact_error] {test1_adams_4_exp.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=t, y=exact_error] {test1_adams_4_imp.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=t, y=exact_error] {test1_adams_5_exp.txt};
+                    \legend{Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com os métodos de Runge-Kutta, Adams-Bashforth e Adams-Moulton, do PVI número \ref{item:pvi1}.}
+            \label{fig:teste1}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(1.03,-0.05)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test2_rungekutta4.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test2_rungekutta5.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test2_adams_1_imp.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=t, y=exact_error] {test2_adams_2_exp.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=t, y=exact_error] {test2_adams_2_imp.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=t, y=exact_error] {test2_adams_3_exp.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=t, y=exact_error] {test2_adams_3_imp.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=t, y=exact_error] {test2_adams_4_exp.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=t, y=exact_error] {test2_adams_4_imp.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=t, y=exact_error] {test2_adams_5_exp.txt};
+                    \legend{Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com os métodos de Runge-Kutta, Adams-Bashforth e Adams-Moulton, do PVI número \ref{item:pvi2}.}
+            \label{fig:teste2}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(1.03,0.10)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {test3_rungekutta4.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {test3_rungekutta5.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {test3_adams_1_imp.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=t, y=exact_error] {test3_adams_2_exp.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=t, y=exact_error] {test3_adams_2_imp.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=t, y=exact_error] {test3_adams_3_exp.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=t, y=exact_error] {test3_adams_3_imp.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=t, y=exact_error] {test3_adams_4_exp.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=t, y=exact_error] {test3_adams_4_imp.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=t, y=exact_error] {test3_adams_5_exp.txt};
+                    \legend{Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação com os métodos de Runge-Kutta, Adams-Bashforth e Adams-Moulton, do PVI número \ref{item:pvi3}.}
+            \label{fig:teste3}
+        \end{figure}
+
+        O mesmo teste foi feito na resolução do modelo de aquífero de Fetkovich. O número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram aproximadamente 200 avaliações. A figura \ref{fig:testeAq} mostra que apenas os métodos de Adams-Moulton de 4 passos e Adams-Bashforth de 5 passos tiveram melhor desempenho que o método de Fetkovich nos tempos iniciais, que é quando acontecem as maiores vazões.
+
+        As vazões de água nos tempos longos são baixas e de menor impacto no comportamento do reservatório. A a aparente degradação da resposta com o método de Fetkovich com o tempo perde importância. Foi feita a comparação em termos de produção acumulada de água (figura \ref{fig:testeAqWe}), e o método de Fetkovich se mostra com menores erros e mais estável que todos os demais.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|w_i-y(t)|/|y(t)|$},
+                    legend style={at={(1.03,0.05)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=orange, solid, smooth, thick] table [x=Time, y=ErrorRel] {aq1_fetkovich.txt};
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=exact_error] {aq1_rungekutta4.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=exact_error] {aq1_rungekutta5.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=exact_error] {aq1_adams_1_imp.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=t, y=exact_error] {aq1_adams_2_exp.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=t, y=exact_error] {aq1_adams_2_imp.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=t, y=exact_error] {aq1_adams_3_exp.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=t, y=exact_error] {aq1_adams_3_imp.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=t, y=exact_error] {aq1_adams_4_exp.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=t, y=exact_error] {aq1_adams_4_imp.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=t, y=exact_error] {aq1_adams_5_exp.txt};
+                    \legend{Fetkovich, Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação da vazão de água com os métodos de Fetkovich, Runge-Kutta, Adams-Bashforth e Adams-Moulton.}
+            \label{fig:testeAq}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {$t$},
+                    ylabel = {$|\int w_i- \int y(t)|/|\int y(t)|$},
+                    legend style={at={(1.03,-0.25)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=orange, solid, smooth, thick] table [x=Time, y=ErrorRelWe] {aq1_fetkovich.txt};
+                    \addplot[color=black, solid, smooth, thick] table [x=t, y=S_error] {aq1_rungekutta4.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=t, y=S_error] {aq1_rungekutta5.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=t, y=S_error] {aq1_adams_1_imp.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=t, y=S_error] {aq1_adams_2_exp.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=t, y=S_error] {aq1_adams_2_imp.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=t, y=S_error] {aq1_adams_3_exp.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=t, y=S_error] {aq1_adams_3_imp.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=t, y=S_error] {aq1_adams_4_exp.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=t, y=S_error] {aq1_adams_4_imp.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=t, y=S_error] {aq1_adams_5_exp.txt};
+                    \legend{Fetkovich, Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Erro da aproximação da vazão de água acumulada com os métodos de Fetkovich, Runge-Kutta, Adams-Bashforth e Adams-Moulton.}
+            \label{fig:testeAqWe}
+        \end{figure}
+
+        Assim como no relatório passado, foi feita uma sensibilidade do erro de estimativa da vazão de água acumulada dos diferentes métodos testados em função do número de avaliações de $f(t,y)$. Os gráficos foram montados em função do erro relativo no tempo final (Figura \ref{fig:testeaq1sens}) e do máximo erro relativo entre todos os time-steps (Figura \ref{fig:testeaq1sensmax}). Os resultados mostram que o método de Fetkovich tem melhores resultados para um número menor de de time-steps. O único método que teve resultados melhores que o de Fetkovich foi o de Runge-Kutta de quarta ordem, mas apenas para um número elevado de time-steps.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    xmax=1000,
+                    legend style={at={(1.03,1.00)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=orange, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_fetkovich_sens.txt};
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_rungekutta5_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_1_imp_sens.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_2_exp_sens.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_2_imp_sens.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_3_exp_sens.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_3_imp_sens.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_4_exp_sens.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_4_imp_sens.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=Evaluations, y=ErrorEnd] {aq1_adams_5_exp_sens.txt};
+                    \legend{Fetkovich, Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do erro relativo da aproximação da vazão de água acumulada no tempo final com os métodos de Fetkovich, Runge-Kutta, Adams-Bashforth e Adams-Moulton.}
+            \label{fig:testeAqSensEnd}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Avaliações de $f(t,y)$},
+                    ylabel = {$|w_n-y(t_{final})|/|y(t_{final})|$},
+                    xmax=1000,
+                    legend style={at={(1.03,1.00)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=orange, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_fetkovich_sens.txt};
+                    \addplot[color=black, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta4_sens.txt};
+                    \addplot[color=blue, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_rungekutta5_sens.txt};
+                    \addplot[color=red, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_1_imp_sens.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_2_exp_sens.txt};
+                    \addplot[color=green, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_2_imp_sens.txt};
+                    \addplot[color=green, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_3_exp_sens.txt};
+                    \addplot[color=cyan, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_3_imp_sens.txt};
+                    \addplot[color=cyan, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_4_exp_sens.txt};
+                    \addplot[color=yellow, solid, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_4_imp_sens.txt};
+                    \addplot[color=yellow, dashed, smooth, thick] table [x=Evaluations, y=ErrorMax] {aq1_adams_5_exp_sens.txt};
+                    \legend{Fetkovich, Runge-K. $4^a$, Runge-K. $5^a$, Adams-M. 1p, Adams-B. 2p, Adams-M. 2p, Adams-B. 3p, Adams-M. 3p, Adams-B. 4p, Adams-M. 4p, Adams-B. 5p};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Sensibilidade do erro relativo máximo da aproximação da vazão de água acumulada com os métodos de Fetkovich, Runge-Kutta, Adams-Bashforth e Adams-Moulton.}
+            \label{fig:testeAqSensMax}
+        \end{figure}
+
+        O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/08_Adams/08_Adams.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+    \section{Conclusão}
+
+
+
+    % \label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
