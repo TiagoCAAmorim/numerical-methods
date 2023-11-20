@@ -1455,7 +1455,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_euler.txt");
 
     printf(" Problem %s: Euler 1/2 Time-Steps\n", name);
@@ -1465,7 +1465,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_euler_2h.txt");
 
     printf(" Problem %s: Euler 1/4 Time-Steps\n", name);
@@ -1475,7 +1475,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_euler_4h.txt");
 
     printf(" Problem %s: Euler 1/8 Time-Steps\n", name);
@@ -1485,7 +1485,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_euler_8h.txt");
 
     printf(" Problem %s: Euler+Aitken\n", name);
@@ -1495,7 +1495,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_euler_aitken.txt");
 
     printf(" Problem %s: Euler+Aitken 2-3\n", name);
@@ -1505,7 +1505,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_euler_aitken_old.txt");
 
     printf(" Problem %s: Runge-Kutta\n", name);
@@ -1515,7 +1515,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta.txt");
 
     printf(" Problem %s: Runge-Kutta 1/2 Time-Steps\n", name);
@@ -1525,7 +1525,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_2h.txt");
 
     printf(" Problem %s: Runge-Kutta 1/4 Time-Steps\n", name);
@@ -1535,7 +1535,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_4h.txt");
 
     printf(" Problem %s: Runge-Kutta 1/8 Time-Steps\n", name);
@@ -1545,7 +1545,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_8h.txt");
 
     printf(" Problem %s: Runge-Kutta + Aikten\n", name);
@@ -1555,7 +1555,7 @@ void test_rungekutta(IVP ivp, string problemname, string filename){
     printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
     ivp.solve_integral();
     ivp.calculate_exact_error();
-    ivp.print_solution();
+    // ivp.print_solution();
     ivp.print_solution(filename+"_rungekutta_aitken.txt");
 }
 
@@ -2165,7 +2165,7 @@ void Fetkovich_tests(){
 
     aqFet.solve_aquifer_flow(200., 28*14/2);
     printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
-    aqFet.print_solution();
+    // aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
@@ -2176,7 +2176,7 @@ void Fetkovich_tests(){
     aqIVP1.set_t_end(200.);
     aqIVP1.set_exact(f_qw_instant_res);
     aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
-    // test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
+    test_rungekutta(aqIVP1, "Aquifer #1", "aq1");
 
 
     int n_tests = 11;
