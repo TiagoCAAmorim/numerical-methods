@@ -1,0 +1,12 @@
+Problem	Method	Evaluations
+Aquifer#1	Fetkovich	233
+Aquifer#1	RungeKutta4	200
+Aquifer#1	RungeKutta5	198
+Aquifer#1	Adams2Exp	200
+Aquifer#1	Adams3Exp	200
+Aquifer#1	Adams4Exp	200
+Aquifer#1	Adams5Exp	200
+Aquifer#1	Adams1Imp	201
+Aquifer#1	Adams2Imp	201
+Aquifer#1	Adams3Imp	201
+Aquifer#1	Adams4Imp	201
