@@ -1444,7 +1444,7 @@ double exact_int_test_4(double t){
 
 void test_rungekutta(IVP ivp, string problemname, string filename){
     const char* name = problemname.c_str();
-    ivp.set_relative_error(false);
+    ivp.set_relative_error(true);
 
     const int n = 14;
 
