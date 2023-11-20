@@ -1900,17 +1900,6 @@ void test_adams(IVP ivp, string problemname, string filename, FILE* evaluationsF
     ivp.set_adams_convergence_limit(1e-3);
     const int n = 10;
 
-    printf(" Problem %s: Euler\n", name);
-    ivp.set_time_steps(20*n);
-    ivp.reset_f_evaluations();
-    ivp.solve_euler();
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Euler", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_euler.txt");
-
     printf(" Problem %s: Runge-Kutta 4\n", name);
     ivp.set_time_steps(5*n);
     ivp.reset_f_evaluations();
@@ -2639,7 +2628,7 @@ void Fetkovich_tests(){
 
     aqFet.solve_aquifer_flow(200., 28*14/2);
     printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
-    aqFet.print_solution();
+    // aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
     fprintf(outFile, "%s\t%s\t%d\n", "Aquifer#1", "Fetkovich", aqFet.get_f_evaluations());
@@ -2666,7 +2655,7 @@ void Fetkovich_tests(){
 
     printf("We Error Sensibility with Fetkovich\n");
     outFile = fopen("aq1_fetkovich_sens.txt", "w");
-    printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
     fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
     for (int i=0; i<10; i++){
         aqFet.reset_f_evaluations();
@@ -2675,19 +2664,18 @@ void Fetkovich_tests(){
         error_list = aqFet.get_result_cumulative_flow_error(true);
         error_end = error_list[steps[i]];
         error_max = max_array(error_list, steps[i]+1);
-        printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+        // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
         fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
     }
     fclose(outFile);
 
-    string stringArray[9]={"rungekutta4","adams2exp","adams3exp","adams2impA","adams2impB","adams2impC","adams3impA","adams3impB","adams3impC"};
+    string stringArray[9]={"rungekutta4","adams2exp","adams3exp","adams4exp","adams5exp","adams1imp","adams2imp","adams3imp","adams4imp"};
 
     aqIVP1.set_relative_error(true);
-    aqIVP1.set_adams_convergence_iterartions(200);
     for (int j=0; j<9; j++){
         printf("We Error Sensibility with %s\n", stringArray[j].c_str());
         outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
-        printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+        // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
         fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
         for (int i=0; i<10; i++){
             aqIVP1.set_time_steps(steps[i]);
@@ -2703,28 +2691,22 @@ void Fetkovich_tests(){
                     aqIVP1.solve_adams(3,false);
                     break;
                 case 3:
-                    aqIVP1.set_adams_convergence_limit(1e-5);
-                    aqIVP1.solve_adams(2,true);
+                    aqIVP1.solve_adams(4,false);
                     break;
                 case 4:
-                    aqIVP1.set_adams_convergence_limit(1e-3);
-                    aqIVP1.solve_adams(2,true);
+                    aqIVP1.solve_adams(5,false);
                     break;
                 case 5:
-                    aqIVP1.set_adams_convergence_limit(1e-1);
-                    aqIVP1.solve_adams(2,true);
+                    aqIVP1.solve_adams(1,true);
                     break;
                 case 6:
-                    aqIVP1.set_adams_convergence_limit(1e-5);
-                    aqIVP1.solve_adams(3,true);
+                    aqIVP1.solve_adams(2,true);
                     break;
                 case 7:
-                    aqIVP1.set_adams_convergence_limit(1e-3);
                     aqIVP1.solve_adams(3,true);
                     break;
                 case 8:
-                    aqIVP1.set_adams_convergence_limit(1e-1);
-                    aqIVP1.solve_adams(3,true);
+                    aqIVP1.solve_adams(4,true);
                     break;
                 default:
                     printf("Undifined!\n");
@@ -2736,7 +2718,7 @@ void Fetkovich_tests(){
             error_list = aqIVP1.get_y_cumulative_error();
             error_end = error_list[steps[i]];
             error_max = max_array(error_list, steps[i]+1);
-            printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+            // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
             fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
         }
         fclose(outFile);
@@ -2754,5 +2736,5 @@ int main(){
     // tests_splines();
     // tests_integration();
     tests_adams();
-    // Fetkovich_tests();
+    Fetkovich_tests();
 }
