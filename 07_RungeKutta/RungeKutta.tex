@@ -546,7 +546,7 @@ country={Brasil}}
             \label{fig:teste3rk}
         \end{figure}
 
-        Na aplicação da resolução do modelo de aquífero de Fetkovich foi aplicado o mesmo expediente de ter o mesmo número de avaliações de $f(t,y)$ em cada opção. Como no método de Fetkovich não se sabe de antemão \emph{exatamente} quantas avaliações de $f(t,y)$ serão feitas, assumiu-se que em média 2 avaliações são feitas a cada passo de tempo\footnote{No problema proposto o número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram 392 avaliações. Optou-se por fazer a comparação assumindo 2 avaliações por time-step para se aproximar mais de um problema mais \emph{geral}, em que a convergência do método de Fetkovich pode ser mais lenta que a observada.}. Para o número de avaliações que foi estabelecido (392), o método de Runge-Kutta de quarta ordem parece ter um desempenho melhor que o do método de Fetkovich em termos de erro de estimativa da vazão de água (Figura \ref{fig:testeaq1erroqw}). Como as vazões de água nos tempos longos são muito baixas e de menor interesse, a aparente degradação da resposta com o método de Fetkovich perde importância. Ao fazer a comparação em termos de produção acumulada de água (Figura \ref{fig:testeaq1errowe}), o método de Fetkovich se mostra mais estável que todos os demais.
+        Na aplicação da resolução do modelo de aquífero de Fetkovich foi aplicado o mesmo expediente de ter o mesmo número de avaliações de $f(t,y)$ em cada opção. Como no método de Fetkovich não se sabe de antemão \emph{exatamente} quantas avaliações de $f(t,y)$ serão feitas, assumiu-se que em média 2 avaliações são feitas a cada passo de tempo\footnote{No problema proposto o número exato de avaliações com o método de Fetkovich foi 233, enquanto os demais métodos usaram 392 avaliações. Optou-se por fazer a comparação assumindo 2 avaliações por time-step para se aproximar mais de um problema mais \emph{geral}, em que a convergência do método de Fetkovich pode ser mais lenta que a observada.}. Para o número de avaliações que foi estabelecido (392), o método de Runge-Kutta de quarta ordem tem um desempenho melhor que o do método de Fetkovich em termos de erro de estimativa da vazão de água (Figura \ref{fig:testeaq1erroqw}) e também em termos de produção acumulada de água (Figura \ref{fig:testeaq1errowe}). O método de Runge-Kutta associado a Aitken não gerou bons resultados de vazão acumulada.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -659,7 +659,7 @@ country={Brasil}}
 
     \section{Conclusão}
 
-        Foram avaliadas diferentes possibilidades para resolver o modelo de aquífero proposto por Fetkovich com métodos de Runge-Kutta. Entre os métodos de resolução de problemas de valor inicial, o método que se mostrou mais eficaz foi o de Runge-Kutta de quarta ordem. Contudo, o método de resolução proposto por Fetkovich se mostrou mais estável e eficiente, especialmente com um número menor de avaliações da função de interesse.
+        Foram avaliadas diferentes possibilidades para resolver o modelo de aquífero proposto por Fetkovich com métodos de Runge-Kutta. Entre os métodos de resolução de problemas de valor inicial, o método que se mostrou mais eficaz foi o de Runge-Kutta de quarta ordem. Contudo, o método de resolução proposto por Fetkovich se mostrou mais eficiente com um número menor de avaliações da função de interesse.
 
     % \label{}
 
