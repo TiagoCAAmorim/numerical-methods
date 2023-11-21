@@ -8,6 +8,7 @@
 #include <functional>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
 using namespace std;
 
 const double eps = 1E-12;
@@ -2162,36 +2163,33 @@ void IVPSystem::print_solution(std::ostream& output) const{
         return;
     }
 
-    output << "i\tt\tevaluations";
+    output << std::setw(3) << "i";
+    output << "\t" << std::setw(16) << "t";
+    output << "\t" << std::setw(16) << "evaluations";
     for (size_t i = 1; i <= functions.size(); ++i) {
-        output << "\t" << "y_approx" << i;
+        output << "\t" << std::setw(16) << "y_approx" << i;
     }
     if (has_exact_error()){
         for (size_t i = 1; i <= exact_functions.size(); ++i) {
-            output << "\t" << "y_exact" << i;
+            output << "\t" << std::setw(16) << "y_exact" << i;
         }
     }
     output << "\n";
 
     for (size_t i = 0; i < t_list.size(); ++i) {
-        output << i << "\t" << t_list[i] << "\t" << f_evaluations[i];
+        output << std::setw(3) << i;
+        output << "\t" << std::setw(16) << t_list[i];
+        output << "\t" << std::setw(16) << f_evaluations[i];
         for (double value: y_aprox[i]) {
-            output << "\t" << value;
+            output << "\t" << std::setw(16) << value;
         }
         if (has_exact_error()){
             for (double value: y_exact[i]) {
-                output << "\t" << value;
+                output << "\t" << std::setw(16) << value;
             }
         }
         output << "\n";
     }
-
-    // for (const auto& innerVector : vectorOfVectors) {
-    //     for (double value : innerVector) {
-    //         output << value << "\t";
-    //     }
-    //     output << "\n";
-    // }
 }
 
 void IVPSystem::solve_rungekutta(){
