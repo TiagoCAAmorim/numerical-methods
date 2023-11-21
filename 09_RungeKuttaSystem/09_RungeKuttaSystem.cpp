@@ -2133,8 +2133,10 @@ void IVPSystem::calculate_exact_error(){
             if (relative_error){
                 if (abs(y_exact[i][j]) > eps){
                     error_single = error_single / abs(y_exact[i][j]);
-                } else{
+                } else if(error_single > eps){
                     error_single = std::numeric_limits<double>::quiet_NaN();
+                } else{
+                    error_single = 0.;
                 }
             }
             error_list.push_back(error_single);
@@ -2173,6 +2175,9 @@ void IVPSystem::print_solution(std::ostream& output) const{
         for (size_t i = 1; i <= exact_functions.size(); ++i) {
             output << "\t" << std::setw(16) << "y_exact" << i;
         }
+        for (size_t i = 1; i <= exact_functions.size(); ++i) {
+            output << "\t" << std::setw(16) << "y_error" << i;
+        }
     }
     output << "\n";
 
@@ -2185,6 +2190,9 @@ void IVPSystem::print_solution(std::ostream& output) const{
         }
         if (has_exact_error()){
             for (double value: y_exact[i]) {
+                output << "\t" << std::setw(16) << value;
+            }
+            for (double value: y_error[i]) {
                 output << "\t" << std::setw(16) << value;
             }
         }
@@ -2286,62 +2294,44 @@ double exact_test_1B(double t){
     return t*(1. + t*(1. + t/3.) ) + 0.5 *(1. - exp(t)); //y(0)=0
 }
 
-double f_test_2(double t, double y){
-    return -2.*y + 3.*exp(t);
+double f_test_2A(double t, std::vector<double> y){
+    return -2.*y[0] + 3.*exp(t);
 }
-double delfdely_test_2(double t, double y){
-    return -2. + 0*t + 0*y;
+double f_test_2B(double t, std::vector<double> y){
+    return y[0] + t*0;
 }
-double delfdelt_test_2(double t, double y){
-    return 3.*exp(t) + 0*y;
-}
-double dfdt_test_2(double t, double y){
-    return delfdely_test_2(t,y) * f_test_2(t,y) + delfdelt_test_2(t,y);
-}
-double exact_test_2(double t){
+double exact_test_2A(double t){
     return 2. * exp(-2.*t) + exp(t);  // y(0)=3
 }
-double exact_int_test_2(double t){
-    return - exp(-2.*t) + exp(t);
+double exact_test_2B(double t){
+    return - exp(-2.*t) + exp(t);  // y(0)=0
 }
 
-double f_test_3(double t, double y){
-    return 4*cos(t) - 8*sin(t) + 2*y;
+double f_test_3A(double t, std::vector<double> y){
+    return 4*cos(t) - 8*sin(t) + 2*y[0];
 }
-double delfdely_test_3(double t, double y){
-    return 2. + 0*t + 0*y;
+double f_test_3B(double t, std::vector<double> y){
+    return y[0] + t*0;
 }
-double delfdelt_test_3(double t, double y){
-    return -4*sin(t) - 8*cos(t) + 0*y;
-}
-double dfdt_test_3(double t, double y){
-    return delfdely_test_3(t,y) * f_test_3(t,y) + delfdelt_test_3(t,y);
-}
-double exact_test_3(double t){
+double exact_test_3A(double t){
     return 4*sin(t) + 3*exp(2*t);  // y(0)=3
 }
-double exact_int_test_3(double t){
-    return 4 - 4*cos(t) + 3*exp(t)*sinh(t);
+double exact_test_3B(double t){
+    return 4 - 4*cos(t) + 3*exp(t)*sinh(t); //y(0)=0
 }
 
 double a = 3.;
-double f_test_4(double t, double y){
-    return -a*y + 0*t;
+double f_test_4A(double t, std::vector<double> y){
+    return -a*y[0] + 0*t;
 }
-double delfdely_test_4(double t, double y){
-    return -a + 0*t + 0*y;
+double f_test_4B(double t, std::vector<double> y){
+    return y[0] + t*0;
 }
-double delfdelt_test_4(double t, double y){
-    return 0. + 0*t + 0*y;
-}
-double dfdt_test_4(double t, double y){
-    return delfdely_test_4(t,y) * f_test_4(t,y) + delfdelt_test_4(t,y);
-}
-double exact_test_4(double t){
+double exact_test_4A(double t){
     return 3.*exp(-a*t);  // y(0)=3
 }
-double exact_int_test_4(double t){
-    return 3/a * (1- exp(-a*t));
+double exact_test_4B(double t){
+    return 3/a * (1- exp(-a*t));  // y(0) = 0
 }
 
 void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FILE* evaluationsFile){
@@ -2357,7 +2347,6 @@ void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FI
     printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
     fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta4", ivp.get_current_f_evaluations());
     ivp.calculate_exact_error();
-    // ivp.print_solution();
     ivp.print_solution(concatenateStrings(filename,"_rungekutta4.txt"));
 }
 
@@ -2380,6 +2369,42 @@ void tests_rungekutta(){
     test1.addExact(exact_test_1A);
     test1.addExact(exact_test_1B);
     test_rungekutta(test1, "#1", "test1", outFile);
+
+    printf("### Problem #2 ###\n");
+    IVPSystem test2;
+    test2.addFunction(f_test_2A);
+    test2.add_y_initial(3.);
+    test2.addFunction(f_test_2B);
+    test2.add_y_initial(0.);
+    test2.set_t_initial(0.);
+    test2.set_t_end(2.);
+    test2.addExact(exact_test_2A);
+    test2.addExact(exact_test_2B);
+    test_rungekutta(test2, "#2", "test2", outFile);
+
+    printf("### Problem #3 ###\n");
+    IVPSystem test3;
+    test3.addFunction(f_test_3A);
+    test3.add_y_initial(3.);
+    test3.addFunction(f_test_3B);
+    test3.add_y_initial(0.);
+    test3.set_t_initial(0.);
+    test3.set_t_end(2.);
+    test3.addExact(exact_test_3A);
+    test3.addExact(exact_test_3B);
+    test_rungekutta(test3, "#3", "test3", outFile);
+
+    printf("### Problem #4 ###\n");
+    IVPSystem test4;
+    test4.addFunction(f_test_4A);
+    test4.add_y_initial(3.);
+    test4.addFunction(f_test_4B);
+    test4.add_y_initial(0.);
+    test4.set_t_initial(0.);
+    test4.set_t_end(2.);
+    test4.addExact(exact_test_4A);
+    test4.addExact(exact_test_4B);
+    test_rungekutta(test4, "#4", "test4", outFile);
 
     fclose(outFile);
 }
