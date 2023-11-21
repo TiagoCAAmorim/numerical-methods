@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <vector>
 #include <functional>
+#include <cstring>
+#include <fstream>
 using namespace std;
 
 const double eps = 1E-12;
@@ -101,6 +103,22 @@ std::vector<double> weightedMean(const std::vector<std::vector<double>>& vectors
     }
 }
 
+char* concatenateStrings(const char* str1, const char* str2) {
+    // Calculate the lengths of the input strings
+    size_t len1 = strlen(str1);
+    size_t len2 = strlen(str2);
+
+    // Allocate memory for the concatenated string
+    char* concatenatedStr = new char[len1 + len2 + 1];
+
+    // Copy the first string to the concatenated string
+    strcpy(concatenatedStr, str1);
+
+    // Append the second string to the concatenated string
+    strcat(concatenatedStr, str2);
+
+    return concatenatedStr;
+}
 class Spline{
     public:
         Spline();
@@ -1872,7 +1890,8 @@ class IVPSystem{
         void initialize_problem();
 
         void calculate_exact_error();
-        // void print_solution(string filename);
+        void print_solution() const;
+        void print_solution(const char* filename) const;
 
         void solve_rungekutta();
         void solve_rungekutta(int n);
@@ -1894,6 +1913,8 @@ class IVPSystem{
         bool has_y_initial() const;
 
         void calculate_exact();
+
+        void print_solution(std::ostream& output) const;
 
         std::vector<FunctionType> functions;
         std::vector<ExactType> exact_functions;
@@ -2121,6 +2142,58 @@ void IVPSystem::calculate_exact_error(){
     }
 }
 
+void IVPSystem::print_solution() const{
+    print_solution(std::cout);
+}
+
+void IVPSystem::print_solution(const char* filename) const{
+    std::ofstream outputFile(filename);
+    if (outputFile.is_open()) {
+        print_solution(outputFile);
+        outputFile.close();
+    } else {
+        std::cerr << "Unable to open the file for writing.\n";
+    }
+}
+
+void IVPSystem::print_solution(std::ostream& output) const{
+    if (!has_solution()){
+        std::cout << "There is no solution to print." << std::endl;
+        return;
+    }
+
+    output << "i\tt\tevaluations";
+    for (size_t i = 1; i <= functions.size(); ++i) {
+        output << "\t" << "y_approx" << i;
+    }
+    if (has_exact_error()){
+        for (size_t i = 1; i <= exact_functions.size(); ++i) {
+            output << "\t" << "y_exact" << i;
+        }
+    }
+    output << "\n";
+
+    for (size_t i = 0; i < t_list.size(); ++i) {
+        output << i << "\t" << t_list[i] << "\t" << f_evaluations[i];
+        for (double value: y_aprox[i]) {
+            output << "\t" << value;
+        }
+        if (has_exact_error()){
+            for (double value: y_exact[i]) {
+                output << "\t" << value;
+            }
+        }
+        output << "\n";
+    }
+
+    // for (const auto& innerVector : vectorOfVectors) {
+    //     for (double value : innerVector) {
+    //         output << value << "\t";
+    //     }
+    //     output << "\n";
+    // }
+}
+
 void IVPSystem::solve_rungekutta(){
     solve_rungekutta(4);
 }
@@ -2163,7 +2236,7 @@ std::vector<double> IVPSystem::calculate_rungekutta_k(double t, const std::vecto
 
 void IVPSystem::solve_rungekutta4(bool one_step){
     if (!has_f()){
-        printf("Function f(t,y) not defined. Cannot continue.\n");
+        std::cout << "Functions f(t,y) not defined. Cannot continue." << std::endl;
         return;
     }
 
@@ -2174,13 +2247,13 @@ void IVPSystem::solve_rungekutta4(bool one_step){
     }
     int steps = time_steps;
     if (one_step){
-        steps = current_step;
+        steps = current_step+1;
     }
     std::vector<std::vector<double>> k;
     std::vector<double> w;
     double t;
-    for (int i=(current_step-1); i<steps; i++){
-        t = t_initial + (i+1)*h_current;
+    for (int i=current_step; i<steps; i++){
+        t = t_initial + i*h_current;
         k.clear();
         k.push_back(calculate_rungekutta_k(t, {}, 0.));
         k.push_back(calculate_rungekutta_k(t+h_current/2., k.back(), 1./2.));
@@ -2191,7 +2264,7 @@ void IVPSystem::solve_rungekutta4(bool one_step){
         w = addVectors(y_aprox.back(), w);
 
         f_evaluations.push_back(f_evaluations.back() + 4);
-        t_list.push_back(t);
+        t_list.push_back(t+h_current);
         y_aprox.push_back(w);
     }
     reset_error_estimate();
@@ -2201,63 +2274,18 @@ void IVPSystem::solve_rungekutta4(bool one_step){
 
 // ############# Tests #############
 
-void tests_splines(){
-    Spline spl;
-    double* x = new double[3];
-    double* y = new double[3];
-    x[0] = 1;
-    y[0] = 2;
-    x[1] = 2;
-    y[1] = 3;
-    x[2] = 3;
-    y[2] = 5;
-    spl.add_points(x,y,3);
-    printf("Added points\n");
-    spl.build_natural();
-    printf("Built natural spline\n");
-    if (fabs(spl.get_y(2.4) - 3.704) > eps){
-        printf("Error in y spline evaluation!\n");
-    }
-    if (fabs(spl.get_y_prime(2.4) - 1.98) > eps){
-        printf("Error in y prime spline evaluation!\n");
-    }
-    if (fabs(spl.get_y_prime2(2.4) - 0.9) > eps){
-        printf("Error in y prime2 spline evaluation!\n");
-    }
-    if (fabs(spl.get_int_y(2.4) - 3.7718999999999996) > eps){
-        printf("Error in integral(y) spline evaluation!\n");
-    }
-    spl.add_y_prime(2,1);
-    spl.build_fixed();
-    printf("Built fixed spline\n");
-    if (fabs(spl.get_y(2.4) - 3.824) > eps){
-        printf("Error in y spline evaluation!\n");
-    }
-    if (fabs(spl.get_y_prime(2.4) - 2.38) > eps){
-        printf("Error in y prime spline evaluation!\n");
-    }
-    if (fabs(spl.get_y_prime2(2.4) - 0.4) > eps){
-        printf("Error in y prime2 spline evaluation!\n");
-    }
-    if (fabs(spl.get_int_y(2.4) - 3.8947333333333329) > eps){
-        printf("Error in integral(y) spline evaluation!\n");
-    }
+double f_test_1A(double t, std::vector<double> y){
+    return y[0] - t*t + 1;
+}
+double f_test_1B(double t, std::vector<double> y){
+    return y[0] + 0*t;
 }
 
-double f_test_1(double t, double y){
-    return y - t*t + 1;
-}
-double dfdt_test_1(double t, double y){
-    return y - t*t + 1 - 2*t; // or delf_dely * f + delf_delt
-}
-double delfdely_test_1(double t, double y){
-    return 1 + t*0 + y*0; // zero multiplication to avoid compilation warnings
-}
-double exact_test_1(double t){
+double exact_test_1A(double t){
     return pow(t+1, 2) - 0.5 * exp(t); // y(0)=0.5
 }
-double exact_int_test_1(double t){
-    return t*(1. + t*(1. + t/3.) ) + 0.5 *(1. - exp(t));
+double exact_test_1B(double t){
+    return t*(1. + t*(1. + t/3.) ) + 0.5 *(1. - exp(t)); //y(0)=0
 }
 
 double f_test_2(double t, double y){
@@ -2318,125 +2346,24 @@ double exact_int_test_4(double t){
     return 3/a * (1- exp(-a*t));
 }
 
-void test_adams(IVP ivp, string problemname, string filename, FILE* evaluationsFile){
+void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FILE* evaluationsFile){
     const char* name = problemname.c_str();
     ivp.set_relative_error(true);
 
-    ivp.set_adams_convergence_limit(1e-3);
     const int n = 10;
 
     printf(" Problem %s: Runge-Kutta 4\n", name);
     ivp.set_time_steps(5*n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta(4);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta4", ivp.get_f_evaluations());
-    ivp.solve_integral();
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta4", ivp.get_current_f_evaluations());
     ivp.calculate_exact_error();
     // ivp.print_solution();
-    ivp.print_solution(filename+"_rungekutta4.txt");
-
-    printf(" Problem %s: Runge-Kutta 5\n", name);
-    ivp.set_time_steps(n*5*2/3);
-    ivp.reset_f_evaluations();
-    ivp.solve_rungekutta(5);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta5", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_rungekutta5.txt");
-
-    printf(" Problem %s: Adams 2 step explicit\n", name);
-    ivp.set_time_steps(20*n-1);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(2, false);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams2Exp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_2_exp.txt");
-
-    printf(" Problem %s: Adams 3 step explicit\n", name);
-    ivp.set_time_steps(20*n-4);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(3, false);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams3Exp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_3_exp.txt");
-
-    printf(" Problem %s: Adams 4 step explicit\n", name);
-    ivp.set_time_steps(20*n-9);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(4, false);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams4Exp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_4_exp.txt");
-
-    printf(" Problem %s: Adams 5 step explicit\n", name);
-    ivp.set_time_steps(20*n-20);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(5, false);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams5Exp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_5_exp.txt");
-
-    printf(" Problem %s: Adams 1 step implicit\n", name);
-    ivp.set_time_steps(10*n);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(1, true);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams1Imp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_1_imp.txt");
-
-    printf(" Problem %s: Adams 2 step implicit\n", name);
-    ivp.set_time_steps(10*n-1);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(2, true);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams2Imp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_2_imp.txt");
-
-    printf(" Problem %s: Adams 3 step implicit\n", name);
-    ivp.set_time_steps(10*n-3);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(3, true);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams3Imp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_3_imp.txt");
-
-    printf(" Problem %s: Adams 4 step implicit\n", name);
-    ivp.set_time_steps(10*n-8);
-    ivp.reset_f_evaluations();
-    ivp.solve_adams(4, true);
-    printf("    'f' evaluations: %d\n", ivp.get_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Adams4Imp", ivp.get_f_evaluations());
-    ivp.solve_integral();
-    ivp.calculate_exact_error();
-    // ivp.print_solution();
-    ivp.print_solution(filename+"_adams_4_imp.txt");
+    ivp.print_solution(concatenateStrings(filename,"_rungekutta4.txt"));
 }
 
-void tests_adams(){
+void tests_rungekutta(){
 
     FILE* outFile = fopen("evaluations.txt", "w");
     if (outFile == nullptr) {
@@ -2445,44 +2372,16 @@ void tests_adams(){
     fprintf(outFile, "%s\t%s\t%s\n", "Problem", "Method", "Evaluations");
 
     printf("### Problem #1 ###\n");
-    IVP test1;
-    test1.set_f(f_test_1);
-    test1.set_y_initial(0.5);
+    IVPSystem test1;
+    test1.addFunction(f_test_1A);
+    test1.add_y_initial(0.5);
+    test1.addFunction(f_test_1B);
+    test1.add_y_initial(0.0);
     test1.set_t_initial(0.);
     test1.set_t_end(2.);
-    test1.set_exact(exact_test_1);
-    test1.set_exact_cumulative(exact_int_test_1);
-    test_adams(test1, "#1", "test1", outFile);
-
-    printf("### Problem #2 ###\n");
-    IVP test2;
-    test2.set_f(f_test_2);
-    test2.set_y_initial(3.);
-    test2.set_t_initial(0.);
-    test2.set_t_end(2.);
-    test2.set_exact(exact_test_2);
-    test2.set_exact_cumulative(exact_int_test_2);
-    test_adams(test2, "#2", "test2", outFile);
-
-    printf("### Problem #3 ###\n");
-    IVP test3;
-    test3.set_f(f_test_3);
-    test3.set_y_initial(3.);
-    test3.set_t_initial(0.);
-    test3.set_t_end(2.);
-    test3.set_exact(exact_test_3);
-    test3.set_exact_cumulative(exact_int_test_3);
-    test_adams(test3, "#3", "test3", outFile);
-
-    printf("### Problem #4 ###\n");
-    IVP test4;
-    test4.set_f(f_test_4);
-    test4.set_y_initial(3.);
-    test4.set_t_initial(0.);
-    test4.set_t_end(2.);
-    test4.set_exact(exact_test_4);
-    test4.set_exact_cumulative(exact_int_test_4);
-    test_adams(test4, "#4", "test4", outFile);
+    test1.addExact(exact_test_1A);
+    test1.addExact(exact_test_1B);
+    test_rungekutta(test1, "#1", "test1", outFile);
 
     fclose(outFile);
 }
@@ -3060,14 +2959,14 @@ void Fetkovich_tests(){
 
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
     IVP aqIVP1;
-    aqIVP1.set_f(f_instant_res);
-    aqIVP1.set_y_initial(400.);
-    aqIVP1.set_t_initial(0.);
-    aqIVP1.set_t_end(200.);
-    aqIVP1.set_exact(f_qw_instant_res);
-    aqIVP1.set_exact_cumulative(f_qw_cumulative_res);
+    // aqIVP1.add_f(f_instant_res);
+    // aqIVP1.add_y_initial(400.);
+    // aqIVP1.set_t_initial(0.);
+    // aqIVP1.set_t_end(200.);
+    // aqIVP1.add_exact(f_qw_instant_res);
+    // aqIVP1.add_exact_cumulative(f_qw_cumulative_res);
 
-    test_adams(aqIVP1, "Aquifer#1", "aq1", outFile);
+    // test_rungekutta(aqIVP1, "Aquifer#1", "aq1", outFile);
     fclose(outFile);
 
     int n_tests = 11;
@@ -3162,6 +3061,7 @@ int main(){
     #endif
     // tests_splines();
     // tests_integration();
-    tests_adams();
-    Fetkovich_tests();
+    // tests_adams();
+    // Fetkovich_tests();
+    tests_rungekutta();
 }
