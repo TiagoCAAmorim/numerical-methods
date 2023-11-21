@@ -78,7 +78,7 @@ std::vector<double> multiplyVector(const std::vector<double>& vector1, const dou
     return result;
 }
 
-std::vector<double> weightedMean(const std::vector<std::vector<double>>& vectors, const std::vector<double>& weights) {
+std::vector<double> weightedSum(const std::vector<std::vector<double>>& vectors, const std::vector<double>& weights, double mutiplier) {
     if (vectors.size() == weights.size() && !vectors.empty()) {
         std::vector<double> result(vectors[0].size(), 0.0);
 
@@ -88,13 +88,8 @@ std::vector<double> weightedMean(const std::vector<std::vector<double>>& vectors
             }
         }
 
-        double sumOfWeights = 0.0;
-        for (double weight : weights) {
-            sumOfWeights += weight;
-        }
-
         for (double& value : result) {
-            value /= sumOfWeights;
+            value *= mutiplier;
         }
 
         return result;
@@ -103,21 +98,20 @@ std::vector<double> weightedMean(const std::vector<std::vector<double>>& vectors
         return {};
     }
 }
+std::vector<double> weightedMean(const std::vector<std::vector<double>>& vectors, const std::vector<double>& weights) {
+    double sumOfWeights = 0.0;
+    for (double weight : weights) {
+        sumOfWeights += weight;
+    }
+    return weightedSum(vectors, weights, 1./sumOfWeights);
+}
 
 char* concatenateStrings(const char* str1, const char* str2) {
-    // Calculate the lengths of the input strings
     size_t len1 = strlen(str1);
     size_t len2 = strlen(str2);
-
-    // Allocate memory for the concatenated string
     char* concatenatedStr = new char[len1 + len2 + 1];
-
-    // Copy the first string to the concatenated string
     strcpy(concatenatedStr, str1);
-
-    // Append the second string to the concatenated string
     strcat(concatenatedStr, str2);
-
     return concatenatedStr;
 }
 class Spline{
@@ -1894,6 +1888,7 @@ class IVPSystem{
         void print_solution() const;
         void print_solution(const char* filename) const;
 
+        void solve_euler();
         void solve_rungekutta();
         void solve_rungekutta(int n);
     private:
@@ -1901,11 +1896,17 @@ class IVPSystem{
         void reset_error_estimate();
         bool check_vector_sizes();
 
-        std::vector<double> calculate_rungekutta_k(double t, const std::vector<double>& k, double alpha_k) const;
+        std::vector<double> calculate_rungekutta_k(double t, const std::vector<std::vector<double>>& k, std::vector<double> k_multipliers) const;
+        void solve_rungekuttaN(bool one_step, const std::vector<double> h_multipliers, const std::vector<std::vector<double>> k_multipliers, const std::vector<double> sum_weights);
+        void solve_euler(bool one_step);
+        void solve_rungekutta2();
+        void solve_rungekutta2(bool one_step);
+        void solve_rungekutta3();
+        void solve_rungekutta3(bool one_step);
         void solve_rungekutta4();
         void solve_rungekutta4(bool one_step);
-        // void solve_rungekutta5();
-        // void solve_rungekutta5(bool one_step);
+        void solve_rungekutta5();
+        void solve_rungekutta5(bool one_step);
 
         bool has_f() const;
         bool has_exact() const;
@@ -2207,30 +2208,76 @@ void IVPSystem::solve_rungekutta(int n){
     initialize_problem();
     switch (n)
     {
+    case 1:
+        solve_euler();
+        break;
+    case 2:
+        solve_rungekutta2();
+        break;
+    case 3:
+        solve_rungekutta3();
+        break;
     case 4:
         solve_rungekutta4();
         break;
-    // case 5:
-    //     solve_rungekutta5();
-    //     break;
+    case 5:
+        solve_rungekutta5();
+        break;
     default:
         std::cout << "No Runge-Kutta method with order " << n << " was implemented.\n";
         break;
     }
 }
 
+void IVPSystem::solve_euler(){
+    initialize_problem();
+    solve_euler(false);
+}
+void IVPSystem::solve_euler(bool one_step){
+    solve_rungekuttaN(one_step, {1.}, {{}}, {1.});
+}
+void IVPSystem::solve_rungekutta2(){
+    initialize_problem();
+    solve_rungekutta2(false);
+}
+void IVPSystem::solve_rungekutta2(bool one_step){
+    solve_rungekuttaN(one_step, {0, 0.5}, {{},{0.5}}, {0., 1.});
+}
+void IVPSystem::solve_rungekutta3(){
+    initialize_problem();
+    solve_rungekutta3(false);
+}
+void IVPSystem::solve_rungekutta3(bool one_step){
+    solve_rungekuttaN(one_step, {0, 1./3., 2./3.}, {{},{1./3.},{0.,2./3.}}, {0.25, 0., 0.75});
+}
 void IVPSystem::solve_rungekutta4(){
     initialize_problem();
     solve_rungekutta4(false);
 }
+void IVPSystem::solve_rungekutta4(bool one_step){
+    solve_rungekuttaN(one_step, {0, 0.5, 0.5, 1}, {{},{0.5},{0.,0.5},{0.,0.,1.}}, {1., 2., 2., 1.});
+}
+void IVPSystem::solve_rungekutta5(){
+    initialize_problem();
+    solve_rungekutta5(false);
+}
+void IVPSystem::solve_rungekutta5(bool one_step){
+    std::vector<std::vector<double>> k_multiplier;
+    k_multiplier.clear();
+    k_multiplier.push_back({});
+    k_multiplier.push_back({0.25});
+    k_multiplier.push_back({3./32., 9./32.});
+    k_multiplier.push_back({1932./2197., -7200./2197., 7296./2197.});
+    k_multiplier.push_back({439./216., -8., 3680./513., -845./4104.});
+    k_multiplier.push_back({-8./27., 2., -3544./2565., 1859./4104., -11./40.});
+    solve_rungekuttaN(one_step, {0, 0.25, 3./8., 12./13., 1., 0.5}, k_multiplier, {16./135., 0., 6656./12825., 28561./56430., -9./50., 2./55.});
+}
 
-std::vector<double> IVPSystem::calculate_rungekutta_k(double t, const std::vector<double>& k, double alpha_k) const{
-    std::vector<double> results;
-    std::vector<double> values;
+std::vector<double> IVPSystem::calculate_rungekutta_k(double t, const std::vector<std::vector<double>>& k, std::vector<double> k_multipliers) const{
+    std::vector<double> results, values, k_in;
     values = y_aprox.back();
-    if (!k.empty()){
-        std::vector<double> k_in;
-        k_in = multiplyVector(k, alpha_k);
+    for (size_t i = 0; i < k_multipliers.size(); ++i){
+        k_in = multiplyVector(k[i], k_multipliers[i]);
         values = addVectors(values, k_in);
     }
     for (const auto& func: functions) {
@@ -2240,7 +2287,7 @@ std::vector<double> IVPSystem::calculate_rungekutta_k(double t, const std::vecto
     return results;
 }
 
-void IVPSystem::solve_rungekutta4(bool one_step){
+void IVPSystem::solve_rungekuttaN(bool one_step, const std::vector<double> h_multipliers, const std::vector<std::vector<double>> k_multipliers, const std::vector<double> sum_weights){
     if (!has_f()){
         std::cout << "Functions f(t,y) not defined. Cannot continue." << std::endl;
         return;
@@ -2257,25 +2304,23 @@ void IVPSystem::solve_rungekutta4(bool one_step){
     }
     std::vector<std::vector<double>> k;
     std::vector<double> w;
-    double t;
+    double t, t_rk;
     for (int i=current_step; i<steps; i++){
         t = t_initial + i*h_current;
         k.clear();
-        k.push_back(calculate_rungekutta_k(t, {}, 0.));
-        k.push_back(calculate_rungekutta_k(t+h_current/2., k.back(), 1./2.));
-        k.push_back(calculate_rungekutta_k(t+h_current/2., k.back(), 1./2.));
-        k.push_back(calculate_rungekutta_k(t+h_current, k.back(), 1.));
-
-        w = weightedMean(k, {1., 2., 2., 1.});
+        for (size_t j = 0; j < h_multipliers.size(); ++j){
+            t_rk = t + h_current * h_multipliers[j];
+            k.push_back(calculate_rungekutta_k(t_rk, k, k_multipliers[j]));
+        }
+        w = weightedMean(k, sum_weights);
         w = addVectors(y_aprox.back(), w);
 
-        f_evaluations.push_back(f_evaluations.back() + 4);
+        f_evaluations.push_back(f_evaluations.back() + static_cast<int>(h_multipliers.size()));
         t_list.push_back(t+h_current);
         y_aprox.push_back(w);
     }
     reset_error_estimate();
 }
-
 
 
 // ############# Tests #############
@@ -2340,14 +2385,50 @@ void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FI
 
     const int n = 10;
 
+    printf(" Problem %s: Euler\n", name);
+    ivp.set_time_steps(24*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(1);
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Euler", ivp.get_current_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution(concatenateStrings(filename,"_euler.txt"));
+
+    printf(" Problem %s: Runge-Kutta 2\n", name);
+    ivp.set_time_steps(12*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(2);
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta2", ivp.get_current_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution(concatenateStrings(filename,"_rungekutta2.txt"));
+
+    printf(" Problem %s: Runge-Kutta 3\n", name);
+    ivp.set_time_steps(8*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(3);
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta3", ivp.get_current_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution(concatenateStrings(filename,"_rungekutta3.txt"));
+
     printf(" Problem %s: Runge-Kutta 4\n", name);
-    ivp.set_time_steps(5*n);
+    ivp.set_time_steps(6*n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta(4);
     printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
     fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta4", ivp.get_current_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution(concatenateStrings(filename,"_rungekutta4.txt"));
+
+    printf(" Problem %s: Runge-Kutta 5\n", name);
+    ivp.set_time_steps(4*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(5);
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta5", ivp.get_current_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution(concatenateStrings(filename,"_rungekutta5.txt"));
 }
 
 void tests_rungekutta(){
