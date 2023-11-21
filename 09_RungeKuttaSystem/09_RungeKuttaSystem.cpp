@@ -2325,57 +2325,48 @@ void IVPSystem::solve_rungekuttaN(bool one_step, const std::vector<double> h_mul
 
 // ############# Tests #############
 
-double f_test_1A(double t, std::vector<double> y){
-    return y[0] - t*t + 1;
-}
-double f_test_1B(double t, std::vector<double> y){
+double f_cumulative(double t, std::vector<double> y){
     return y[0] + 0*t;
 }
 
-double exact_test_1A(double t){
+double f_test_1(double t, std::vector<double> y){
+    return y[0] - t*t + 1;
+}
+double exact_test_1(double t){
     return pow(t+1, 2) - 0.5 * exp(t); // y(0)=0.5
 }
-double exact_test_1B(double t){
+double exact_test_1_cum(double t){
     return t*(1. + t*(1. + t/3.) ) + 0.5 *(1. - exp(t)); //y(0)=0
 }
 
-double f_test_2A(double t, std::vector<double> y){
+double f_test_2(double t, std::vector<double> y){
     return -2.*y[0] + 3.*exp(t);
 }
-double f_test_2B(double t, std::vector<double> y){
-    return y[0] + t*0;
-}
-double exact_test_2A(double t){
+double exact_test_2(double t){
     return 2. * exp(-2.*t) + exp(t);  // y(0)=3
 }
-double exact_test_2B(double t){
+double exact_test_2_cum(double t){
     return - exp(-2.*t) + exp(t);  // y(0)=0
 }
 
-double f_test_3A(double t, std::vector<double> y){
+double f_test_3(double t, std::vector<double> y){
     return 4*cos(t) - 8*sin(t) + 2*y[0];
 }
-double f_test_3B(double t, std::vector<double> y){
-    return y[0] + t*0;
-}
-double exact_test_3A(double t){
+double exact_test_3(double t){
     return 4*sin(t) + 3*exp(2*t);  // y(0)=3
 }
-double exact_test_3B(double t){
+double exact_test_3_cum(double t){
     return 4 - 4*cos(t) + 3*exp(t)*sinh(t); //y(0)=0
 }
 
 double a = 3.;
-double f_test_4A(double t, std::vector<double> y){
+double f_test_4(double t, std::vector<double> y){
     return -a*y[0] + 0*t;
 }
-double f_test_4B(double t, std::vector<double> y){
-    return y[0] + t*0;
-}
-double exact_test_4A(double t){
+double exact_test_4(double t){
     return 3.*exp(-a*t);  // y(0)=3
 }
-double exact_test_4B(double t){
+double exact_test_4_cum(double t){
     return 3/a * (1- exp(-a*t));  // y(0) = 0
 }
 
@@ -2384,33 +2375,6 @@ void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FI
     ivp.set_relative_error(true);
 
     const int n = 10;
-
-    printf(" Problem %s: Euler\n", name);
-    ivp.set_time_steps(24*n);
-    ivp.reset_f_evaluations();
-    ivp.solve_rungekutta(1);
-    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "Euler", ivp.get_current_f_evaluations());
-    ivp.calculate_exact_error();
-    ivp.print_solution(concatenateStrings(filename,"_euler.txt"));
-
-    printf(" Problem %s: Runge-Kutta 2\n", name);
-    ivp.set_time_steps(12*n);
-    ivp.reset_f_evaluations();
-    ivp.solve_rungekutta(2);
-    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta2", ivp.get_current_f_evaluations());
-    ivp.calculate_exact_error();
-    ivp.print_solution(concatenateStrings(filename,"_rungekutta2.txt"));
-
-    printf(" Problem %s: Runge-Kutta 3\n", name);
-    ivp.set_time_steps(8*n);
-    ivp.reset_f_evaluations();
-    ivp.solve_rungekutta(3);
-    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
-    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta3", ivp.get_current_f_evaluations());
-    ivp.calculate_exact_error();
-    ivp.print_solution(concatenateStrings(filename,"_rungekutta3.txt"));
 
     printf(" Problem %s: Runge-Kutta 4\n", name);
     ivp.set_time_steps(6*n);
@@ -2441,50 +2405,50 @@ void tests_rungekutta(){
 
     printf("### Problem #1 ###\n");
     IVPSystem test1;
-    test1.addFunction(f_test_1A);
+    test1.addFunction(f_test_1);
     test1.add_y_initial(0.5);
-    test1.addFunction(f_test_1B);
+    test1.addFunction(f_cumulative);
     test1.add_y_initial(0.0);
     test1.set_t_initial(0.);
     test1.set_t_end(2.);
-    test1.addExact(exact_test_1A);
-    test1.addExact(exact_test_1B);
+    test1.addExact(exact_test_1);
+    test1.addExact(exact_test_1_cum);
     test_rungekutta(test1, "#1", "test1", outFile);
 
     printf("### Problem #2 ###\n");
     IVPSystem test2;
-    test2.addFunction(f_test_2A);
+    test2.addFunction(f_test_2);
     test2.add_y_initial(3.);
-    test2.addFunction(f_test_2B);
+    test2.addFunction(f_cumulative);
     test2.add_y_initial(0.);
     test2.set_t_initial(0.);
     test2.set_t_end(2.);
-    test2.addExact(exact_test_2A);
-    test2.addExact(exact_test_2B);
+    test2.addExact(exact_test_2);
+    test2.addExact(exact_test_2_cum);
     test_rungekutta(test2, "#2", "test2", outFile);
 
     printf("### Problem #3 ###\n");
     IVPSystem test3;
-    test3.addFunction(f_test_3A);
+    test3.addFunction(f_test_3);
     test3.add_y_initial(3.);
-    test3.addFunction(f_test_3B);
+    test3.addFunction(f_cumulative);
     test3.add_y_initial(0.);
     test3.set_t_initial(0.);
     test3.set_t_end(2.);
-    test3.addExact(exact_test_3A);
-    test3.addExact(exact_test_3B);
+    test3.addExact(exact_test_3);
+    test3.addExact(exact_test_3_cum);
     test_rungekutta(test3, "#3", "test3", outFile);
 
     printf("### Problem #4 ###\n");
     IVPSystem test4;
-    test4.addFunction(f_test_4A);
+    test4.addFunction(f_test_4);
     test4.add_y_initial(3.);
-    test4.addFunction(f_test_4B);
+    test4.addFunction(f_cumulative);
     test4.add_y_initial(0.);
     test4.set_t_initial(0.);
     test4.set_t_end(2.);
-    test4.addExact(exact_test_4A);
-    test4.addExact(exact_test_4B);
+    test4.addExact(exact_test_4);
+    test4.addExact(exact_test_4_cum);
     test_rungekutta(test4, "#4", "test4", outFile);
 
     fclose(outFile);
@@ -3009,7 +2973,7 @@ double f_qw_cumulative_res(double t){
     double alpha = ( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor));
     return (1 - exp(-J * t *alpha)) * (pi - pr) / alpha;
 }
-double f_instant_res(double t, double qw){
+double f_instant_res(double t, std::vector<double> qw){
     double api = 25.;
     double dg = 0.6;
     double rgo = 60.;
@@ -3033,7 +2997,7 @@ double f_instant_res(double t, double qw){
     // double pi = 250.;
     // double pr = 230.;
 
-    return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw + 0*t;
+    return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw[0] + 0*t;
 }
 
 void Fetkovich_tests(){
@@ -3056,103 +3020,82 @@ void Fetkovich_tests(){
 
     aqFet.solve_aquifer_flow(200., 28*14/2);
     printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
-    // aqFet.print_solution();
     aqFet.print_solution("aq1_fetkovich.txt");
 
     fprintf(outFile, "%s\t%s\t%d\n", "Aquifer#1", "Fetkovich", aqFet.get_f_evaluations());
 
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
-    IVP aqIVP1;
-    // aqIVP1.add_f(f_instant_res);
-    // aqIVP1.add_y_initial(400.);
-    // aqIVP1.set_t_initial(0.);
-    // aqIVP1.set_t_end(200.);
-    // aqIVP1.add_exact(f_qw_instant_res);
-    // aqIVP1.add_exact_cumulative(f_qw_cumulative_res);
+    IVPSystem aqIVP1;
+    aqIVP1.addFunction(f_instant_res);
+    aqIVP1.add_y_initial(400.);
+    aqIVP1.addExact(f_qw_instant_res);
+    aqIVP1.addFunction(f_cumulative);
+    aqIVP1.add_y_initial(0.);
+    aqIVP1.addExact(f_qw_cumulative_res);
+    aqIVP1.set_t_initial(0.);
+    aqIVP1.set_t_end(200.);
 
-    // test_rungekutta(aqIVP1, "Aquifer#1", "aq1", outFile);
+    test_rungekutta(aqIVP1, "Aquifer#1", "aq1", outFile);
     fclose(outFile);
 
-    int n_tests = 11;
-    int* steps = new int[n_tests]{5, 10, 20, 50, 80, 100, 150, 200, 250, 500, 1000};
+    return;
 
-    double* error_list = new double;
-    double error_end, error_max;
-    int evaluations;
+    // int n_tests = 11;
+    // int* steps = new int[n_tests]{5, 10, 20, 50, 80, 100, 150, 200, 250, 500, 1000};
 
-    printf("We Error Sensibility with Fetkovich\n");
-    outFile = fopen("aq1_fetkovich_sens.txt", "w");
-    // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-    fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-    for (int i=0; i<10; i++){
-        aqFet.reset_f_evaluations();
-        aqFet.solve_aquifer_flow(200., steps[i]);
-        evaluations = aqFet.get_f_evaluations();
-        error_list = aqFet.get_result_cumulative_flow_error(true);
-        error_end = error_list[steps[i]];
-        error_max = max_array(error_list, steps[i]+1);
-        // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-        fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-    }
-    fclose(outFile);
+    // double* error_list = new double;
+    // double error_end, error_max;
+    // int evaluations;
 
-    string stringArray[10]={"rungekutta4","rungekutta5","adams_2_exp","adams_3_exp","adams_4_exp","adams_5_exp","adams_1_imp","adams_2_imp","adams_3_imp","adams_4_imp"};
+    // printf("We Error Sensibility with Fetkovich\n");
+    // outFile = fopen("aq1_fetkovich_sens.txt", "w");
+    // // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    // fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    // for (int i=0; i<10; i++){
+    //     aqFet.reset_f_evaluations();
+    //     aqFet.solve_aquifer_flow(200., steps[i]);
+    //     evaluations = aqFet.get_f_evaluations();
+    //     error_list = aqFet.get_result_cumulative_flow_error(true);
+    //     error_end = error_list[steps[i]];
+    //     error_max = max_array(error_list, steps[i]+1);
+    //     // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+    //     fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+    // }
+    // fclose(outFile);
 
-    aqIVP1.set_relative_error(true);
-    for (int j=0; j<10; j++){
-        printf("We Error Sensibility with %s\n", stringArray[j].c_str());
-        outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
-        // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-        fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-        for (int i=0; i<10; i++){
-            aqIVP1.set_time_steps(steps[i]);
-            aqIVP1.reset_f_evaluations();
-            switch (j) {
-                case 0:
-                    aqIVP1.solve_rungekutta(4);
-                    break;
-                case 1:
-                    aqIVP1.solve_rungekutta(5);
-                    break;
-                case 2:
-                    aqIVP1.solve_adams(2,false);
-                    break;
-                case 3:
-                    aqIVP1.solve_adams(3,false);
-                    break;
-                case 4:
-                    aqIVP1.solve_adams(4,false);
-                    break;
-                case 5:
-                    aqIVP1.solve_adams(5,false);
-                    break;
-                case 6:
-                    aqIVP1.solve_adams(1,true);
-                    break;
-                case 7:
-                    aqIVP1.solve_adams(2,true);
-                    break;
-                case 8:
-                    aqIVP1.solve_adams(3,true);
-                    break;
-                case 9:
-                    aqIVP1.solve_adams(4,true);
-                    break;
-                default:
-                    printf("Undifined!\n");
-                    return;
-            }
-            evaluations = aqIVP1.get_f_evaluations();
-            aqIVP1.solve_integral();
-            aqIVP1.calculate_exact_error();
-            error_list = aqIVP1.get_y_cumulative_error();
-            error_end = error_list[steps[i]];
-            error_max = max_array(error_list, steps[i]+1);
-            // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-            fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-        }
-        fclose(outFile);
-    }
+    // string stringArray[2]={"rungekutta4","rungekutta5"};
+
+    // aqIVP1.set_relative_error(true);
+    // for (int j=0; j<2; j++){
+    //     printf("We Error Sensibility with %s\n", stringArray[j].c_str());
+    //     outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
+    //     // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    //     fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
+    //     for (int i=0; i<2; i++){
+    //         aqIVP1.set_time_steps(steps[i]);
+    //         aqIVP1.reset_f_evaluations();
+    //         switch (j) {
+    //             case 0:
+    //                 aqIVP1.solve_rungekutta(4);
+    //                 break;
+    //             case 1:
+    //                 aqIVP1.solve_rungekutta(5);
+    //                 break;
+    //             default:
+    //                 printf("Undifined!\n");
+    //                 return;
+    //         }
+    //         evaluations = aqIVP1.get_f_evaluations();
+    //         aqIVP1.solve_integral();
+    //         aqIVP1.calculate_exact_error();
+    //         error_list = aqIVP1.get_y_cumulative_error();
+    //         error_end = error_list[steps[i]];
+    //         error_max = max_array(error_list, steps[i]+1);
+    //         // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+    //         fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
+    //     }
+    //     fclose(outFile);
+    // }
 }
 
 int main(){
@@ -3163,9 +3106,6 @@ int main(){
     #else
         std::cout << "Running on an unknown system" << std::endl;
     #endif
-    // tests_splines();
-    // tests_integration();
-    // tests_adams();
-    // Fetkovich_tests();
-    tests_rungekutta();
+    // tests_rungekutta();
+    Fetkovich_tests();
 }
