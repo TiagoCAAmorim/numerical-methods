@@ -2370,6 +2370,33 @@ double exact_test_4_cum(double t){
     return 3/a * (1- exp(-a*t));  // y(0) = 0
 }
 
+double f_test_5A(double t, std::vector<double> y){
+    return -4.*y[0] + 3.*y[1] + 6. + 0*t;
+}
+double f_test_5B(double t, std::vector<double> y){
+    return -2.4*y[0] + 1.6*y[1] + 3.6 + 0*t;
+}
+double exact_test_5A(double t){
+    return -3.375*exp(-2.*t) + 1.875*exp(-0.4*t) + 1.5;  // y(0)=0
+}
+double exact_test_5B(double t){
+    return -2.25*exp(-2.*t) + 2.25*exp(-0.4*t);  // y(0)=0
+}
+
+double f_test_6A(double t, std::vector<double> y){
+    return y[1] + 0.*t;
+}
+double f_test_6B(double t, std::vector<double> y){
+    return exp(2.*t) * sin(t) - 2.*y[0] + 2.*y[1];
+}
+double exact_test_6A(double t){
+    return 0.2*exp(2.*t) * (sin(t) - 2.*cos(t));  // y(0)=-0.4
+}
+double exact_test_6B(double t){
+    return 0.2*exp(2.*t) * (4.*sin(t) - 3.*cos(t));  // y(0)=-0.6
+}
+
+
 void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FILE* evaluationsFile){
     const char* name = problemname.c_str();
     ivp.set_relative_error(true);
@@ -2450,6 +2477,30 @@ void tests_rungekutta(){
     test4.addExact(exact_test_4);
     test4.addExact(exact_test_4_cum);
     test_rungekutta(test4, "#4", "test4", outFile);
+
+    printf("### Problem #5 ###\n");
+    IVPSystem test5;
+    test5.addFunction(f_test_5A);
+    test5.add_y_initial(0.);
+    test5.addFunction(f_test_5B);
+    test5.add_y_initial(0.);
+    test5.set_t_initial(0.);
+    test5.set_t_end(2.);
+    test5.addExact(exact_test_5A);
+    test5.addExact(exact_test_5B);
+    test_rungekutta(test5, "#5", "test5", outFile);
+
+    printf("### Problem #6 ###\n");
+    IVPSystem test6;
+    test6.addFunction(f_test_6A);
+    test6.add_y_initial(-0.4);
+    test6.addFunction(f_test_6B);
+    test6.add_y_initial(-0.6);
+    test6.set_t_initial(0.);
+    test6.set_t_end(2.);
+    test6.addExact(exact_test_6A);
+    test6.addExact(exact_test_6B);
+    test_rungekutta(test6, "#6", "test6", outFile);
 
     fclose(outFile);
 }
@@ -2572,12 +2623,12 @@ void Fetkovich::set_reservoir_pressure_function(double (*f)(double, double)){
 bool Fetkovich::has_f_pr() const{
     return f_pr_pointer != nullptr;
 }
-double Fetkovich::get_f_pr(double We, double t) const{
+double Fetkovich::get_f_pr(double t, double We) const{
     if (!has_f_pr()){
         printf("Reservoir pressure function not defined.\n");
         return std::numeric_limits<double>::quiet_NaN();
     }
-    return f_pr_pointer(We,t);
+    return f_pr_pointer(t,We);
 }
 
 void Fetkovich::set_exact_water_flow_function(double (*f)(double)){
@@ -2648,7 +2699,7 @@ void Fetkovich::solve_aquifer_flow(double t_end, int steps){
             dWe = get_aquifer_delta_cumulative_flow(dt, p_aq[i-1], pr_avg);
             f_evaluations++;
             We[i] = We[i-1] + dWe;
-            p_res[i] = get_f_pr(We[i], t[i]);
+            p_res[i] = get_f_pr(t[i], We[i]);
             pr_avg = (p_res[i] + p_res[i-1])/2;
             count++;
         }
@@ -2900,7 +2951,7 @@ double f_qw_pr_cte_230(double t){
     return aqIVP1.get_aquifer_flow_rate(t, 230.);
 }
 
-double f_pr_instant_res(double We, double t){
+double f_pr_instant_res(double t, double We){
     double api = 25.;
     double dg = 0.6;
     double rgo = 60.;
@@ -2994,11 +3045,101 @@ double f_instant_res(double t, std::vector<double> qw){
     double J = 20.;
     double ct = Newman_Consolidated_Sandstone(0.03);
     double Wi = 1*1E6;
-    // double pi = 250.;
-    // double pr = 230.;
 
     return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw[0] + 0*t;
 }
+
+double qo_problem_1(double t){
+    if (t < 30.){
+        return 500.;
+    } else{
+        return 0.;
+    }
+}
+double np_problem_1(double t){
+    if (t < 30.){
+        return 500.*t;
+    } else{
+        return 500.*30.;
+    }
+}
+
+double reservoir_problem_1(int var_number, double t, std::vector<double> parameters){
+    // Common parameters: oil reservoir
+    double api = 25.;
+    double dg = 0.6;
+    double rgo = 60.;
+    double temp = 65.;
+    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
+    double Cob = Standing_co_bubble(api, dg, rgo, temp);
+    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
+    double Cpor = Newman_Consolidated_Sandstone(0.2);
+    double Bw = 1.;
+    double Voil = 0.8 * 1*1E6;
+    double Vwat = 0.2 * 1*1E6;
+    double p_ini = 230.;
+
+    double VoilIP_0 = Voil * Bob * (1 + Cob*(Pb - p_ini));
+    double VwatIP_0 = Vwat * Bw;
+    double Vpor_0 = VoilIP_0 + VwatIP_0;
+
+    // Common parameters: aquifer
+    double J = 20.;
+    double ct = Newman_Consolidated_Sandstone(0.03);
+    double Wi = 1.*1E6;
+    double paq_ini = p_ini;
+    double We_max = Wi * ct * paq_ini;
+
+    double Qw = parameters[0]; // Qw (water flow from aquifer to reservoir)
+    double We = parameters[1]; // We (cumulative Qw)
+    // double Pr = parameters[2]; // Pr (pressure at the interface)
+    double Qo = qo_problem_1(t); // Qo (oil flow from reservoir)
+    double Np = np_problem_1(t); // Np (cumulative Qo)
+
+    double beta = (Voil - Np) * Bob * (1. + Cob * Pb) + (Vwat + We) * Bw - Vpor_0 * (1. - Cpor * p_ini);
+    double alpha = (Voil - Np) * Bob * Cob + Vpor_0 * Cpor;
+    double beta_p = -Qo * Bob * (1. + Cob * Pb) + Qw * Bw;
+    double alpha_p = -Qo * Bob * Cob;
+
+    double d_pres_dt = 1./alpha*(beta_p - beta/alpha * alpha_p);
+
+    // Initial conditions
+    if (t<0){
+        if (var_number == 0){
+            return J * (paq_ini - p_ini);
+        } if (var_number == 1){
+            return 0.;
+        }if (var_number == 2){
+            return p_ini;
+        }
+    }
+
+    if (var_number == -1){
+        // interface pressure for Fetkovich method
+        return beta / alpha;
+    } else if (var_number == 0){
+        return -J * paq_ini / We_max * Qw - J * d_pres_dt;
+    } if (var_number == 1){
+        return Qw;
+    }if (var_number == 2){
+        return d_pres_dt;
+    } else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+double f_pres_problem_1(double t, double We){
+    return reservoir_problem_1(-1, t, {0., We, 0., 0.});
+}
+double f_pres_problem_1_Qw(double t, std::vector<double> parameters){
+    return reservoir_problem_1(0, t, parameters);
+}
+double f_pres_problem_1_We(double t, std::vector<double> parameters){
+    return reservoir_problem_1(1, t, parameters);
+}
+double f_pres_problem_1_Pr(double t, std::vector<double> parameters){
+    return reservoir_problem_1(2, t, parameters);
+}
+
 
 void Fetkovich_tests(){
     FILE* outFile = fopen("evaluationsAquifer.txt", "w");
@@ -3010,13 +3151,11 @@ void Fetkovich_tests(){
     printf("Instant Pressure Equilibrium Reservoir with Fetkovich\n");
     Fetkovich aqFet;
     aqFet.set_aquifer_initial_pore_volume(1*1E6);
-    aqFet.set_aquifer_initial_pressure(250.);
+    aqFet.set_aquifer_initial_pressure(230.);
     aqFet.set_aquifer_productivity_index(20.);
     aqFet.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
     aqFet.set_reservoir_initial_pressure(230.);
-    aqFet.set_reservoir_pressure_function(f_pr_instant_res);
-    aqFet.set_exact_water_flow_function(f_qw_instant_res);
-    aqFet.set_exact_water_cumulative_function(f_qw_cumulative_res);
+    aqFet.set_reservoir_pressure_function(f_pres_problem_1);
 
     aqFet.solve_aquifer_flow(200., 28*14/2);
     printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
@@ -3026,12 +3165,13 @@ void Fetkovich_tests(){
 
     printf("Instant Pressure Equilibrium Reservoir as an IVP\n");
     IVPSystem aqIVP1;
-    aqIVP1.addFunction(f_instant_res);
-    aqIVP1.add_y_initial(400.);
-    aqIVP1.addExact(f_qw_instant_res);
-    aqIVP1.addFunction(f_cumulative);
-    aqIVP1.add_y_initial(0.);
-    aqIVP1.addExact(f_qw_cumulative_res);
+    aqIVP1.addFunction(f_pres_problem_1_Qw);
+    aqIVP1.add_y_initial(f_pres_problem_1_Qw(-1.,{0.,0.,0.}));
+    aqIVP1.addFunction(f_pres_problem_1_We);
+    aqIVP1.add_y_initial(f_pres_problem_1_We(-1.,{0.,0.,0.}));
+    aqIVP1.addFunction(f_pres_problem_1_Pr);
+    aqIVP1.add_y_initial(f_pres_problem_1_Pr(-1.,{0.,0.,0.}));
+
     aqIVP1.set_t_initial(0.);
     aqIVP1.set_t_end(200.);
 
@@ -3106,6 +3246,6 @@ int main(){
     #else
         std::cout << "Running on an unknown system" << std::endl;
     #endif
-    // tests_rungekutta();
+    tests_rungekutta();
     Fetkovich_tests();
 }
