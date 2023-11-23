@@ -993,7 +993,7 @@ void Fetkovich::solve_aquifer_flow(double t_end, int steps){
 
         pr_avg_old = 0;
         count = 0;
-        while (abs(pr_avg_old - pr_avg) > 1E-1 && count<=20){
+        while (abs(pr_avg_old - pr_avg) > 1E-1 && count<=0){
             pr_avg_old = pr_avg;
             dWe = get_aquifer_delta_cumulative_flow(dt, p_aq[i-1], pr_avg);
             f_evaluations++;
@@ -1344,7 +1344,7 @@ void Fetkovich_tests(){
     aqFet.set_reservoir_initial_pressure(230.);
     aqFet.set_reservoir_pressure_function(f_pres_problem_1);
 
-    aqFet.solve_aquifer_flow(200., 28*14/2);
+    aqFet.solve_aquifer_flow(200., 240);
     printf("    'f' evaluations: %d\n", aqFet.get_f_evaluations());
     aqFet.print_solution("aq1_fetkovich.txt");
 
