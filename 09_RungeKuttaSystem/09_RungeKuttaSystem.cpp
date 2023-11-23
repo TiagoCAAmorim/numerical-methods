@@ -103,6 +103,7 @@ class IVPSystem{
         void set_t_end(double t);
         void set_time_steps(int n);
         void set_relative_error(bool relative);
+        void set_estimate_exact(bool relative);
 
         void addFunction(const FunctionType& func);
         void addExact(const ExactType& func);
@@ -118,7 +119,7 @@ class IVPSystem{
         std::vector<double> get_exact(double t) const;
 
         std::vector<double> get_t() const;
-        std::vector<std::vector<double>> get_y_aprox() const;
+        std::vector<std::vector<double>> get_y_approx() const;
         std::vector<std::vector<double>> get_y_exact() const;
         std::vector<std::vector<double>> get_y_error() const;
         std::vector<int> get_f_evaluations() const;
@@ -171,9 +172,10 @@ class IVPSystem{
         int time_steps;
         double h_current;
         bool relative_error;
+        bool estimate_exact;
 
         std::vector<double> t_list;
-        std::vector<std::vector<double>> y_aprox;
+        std::vector<std::vector<double>> y_approx;
         std::vector<std::vector<double>> y_exact;
         std::vector<std::vector<double>> y_error;
         std::vector<int> f_evaluations;
@@ -189,8 +191,9 @@ IVPSystem::IVPSystem():
     time_steps(100),
     h_current(1.),
     relative_error(false),
+    estimate_exact(false),
     t_list(),
-    y_aprox(),
+    y_approx(),
     y_exact(),
     y_error(),
     f_evaluations()
@@ -198,7 +201,7 @@ IVPSystem::IVPSystem():
 
 void IVPSystem::reset_results(){
     t_list.clear();
-    y_aprox.clear();
+    y_approx.clear();
     reset_error_estimate();
     reset_f_evaluations();
 }
@@ -212,7 +215,7 @@ void IVPSystem::reset_error_estimate(){
 void IVPSystem::initialize_problem(){
     reset_results();
     t_list.push_back(t_initial);
-    y_aprox.push_back(y_initial);
+    y_approx.push_back(y_initial);
     f_evaluations.push_back(0);
     h_current = (t_end - t_initial) / time_steps;
 }
@@ -229,7 +232,7 @@ bool IVPSystem::check_vector_sizes(){
         }
     }
     if (has_solution()){
-        if (t_list.size() != y_aprox.size()){
+        if (t_list.size() != y_approx.size()){
             std::cout << "Number of functions (" << functions.size() << ") does not match the number of exact functions (" << y_initial.size() << ")." << std::endl;
             result = false;
         }
@@ -267,6 +270,9 @@ void IVPSystem::set_relative_error(bool relative){
         y_error.clear();
     }
 }
+void IVPSystem::set_estimate_exact(bool estimate){
+    estimate_exact = estimate;
+}
 
 void IVPSystem::addFunction(const FunctionType& func){
     functions.push_back(func);
@@ -300,7 +306,7 @@ bool IVPSystem::has_exact() const{
     return !exact_functions.empty();
 }
 bool IVPSystem::has_solution() const{
-    return !y_aprox.empty();
+    return !y_approx.empty();
 }
 bool IVPSystem::has_exact_error() const{
     return !y_error.empty();
@@ -329,8 +335,8 @@ std::vector<double> IVPSystem::get_exact(double t) const{
 std::vector<double> IVPSystem::get_t() const{
     return t_list;
 }
-std::vector<std::vector<double>> IVPSystem::get_y_aprox() const{
-    return y_aprox;
+std::vector<std::vector<double>> IVPSystem::get_y_approx() const{
+    return y_approx;
 }
 std::vector<std::vector<double>> IVPSystem::get_y_exact() const{
     return y_exact;
@@ -351,13 +357,34 @@ int IVPSystem::get_current_f_evaluations() const{
 }
 
 void IVPSystem::calculate_exact(){
-    if (!has_exact()){
+    if (!has_exact() && !estimate_exact){
         std::cout << "Exact solution not defined. Cannot continue." << std::endl;
         return;
     }
     y_exact.clear();
-    for (const auto& t: t_list){
-        y_exact.push_back(get_exact(t));
+    if (has_exact()){
+        for (const auto& t: t_list){
+            y_exact.push_back(get_exact(t));
+        }
+    } else{
+        int current_time_steps = time_steps;
+        double current_h_current = h_current;
+        std::vector<double> current_t_list(t_list);
+        std::vector<std::vector<double>> current_y_approx(y_approx);
+        std::vector<int> current_f_evaluations(f_evaluations);
+
+        set_time_steps(100*current_time_steps);
+        solve_rungekutta5();
+        std::vector<std::vector<double>> new_y_exact(y_approx);
+
+        time_steps = current_time_steps;
+        h_current = current_h_current;
+        t_list = current_t_list;
+        y_approx = current_y_approx;
+        f_evaluations = current_f_evaluations;
+        for (size_t i=0; i<t_list.size(); i++){
+            y_exact.push_back(new_y_exact[100*i]);
+        }
     }
 }
 
@@ -366,7 +393,7 @@ void IVPSystem::calculate_exact_error(){
         std::cout << "No solutions found. Cannot continue." << std::endl;
         return;
     }
-    if (!has_exact()){
+    if (!has_exact() && !estimate_exact){
         std::cout << "Exact solution not defined. Cannot continue." << std::endl;
         return;
     }
@@ -378,10 +405,10 @@ void IVPSystem::calculate_exact_error(){
     y_error.clear();
     std::vector<double> error_list;
     double error_single;
-    for (size_t i = 0; i < y_aprox.size(); ++i){
+    for (size_t i = 0; i < y_approx.size(); ++i){
         error_list.clear();
-        for (size_t j = 0; j < y_aprox[i].size(); ++j){
-            error_single = abs(y_aprox[i][j] - y_exact[i][j]);
+        for (size_t j = 0; j < y_approx[i].size(); ++j){
+            error_single = abs(y_approx[i][j] - y_exact[i][j]);
             if (relative_error){
                 if (abs(y_exact[i][j]) > eps){
                     error_single = error_single / abs(y_exact[i][j]);
@@ -431,15 +458,15 @@ void IVPSystem::print_solution(std::ostream& output) const{
         }
     }
 
-    for (size_t i = 1; i <= functions.size(); ++i) {
+    for (size_t i = 1; i <= names.size(); ++i) {
         output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"_appr");
     }
     if (has_exact_error()){
-        for (size_t i = 1; i <= exact_functions.size(); ++i) {
-            output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"y_exct");
+        for (size_t i = 1; i <= names.size(); ++i) {
+            output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"_exct");
         }
-        for (size_t i = 1; i <= exact_functions.size(); ++i) {
-            output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"y_err");
+        for (size_t i = 1; i <= names.size(); ++i) {
+            output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"_err");
         }
     }
     output << "\n";
@@ -448,7 +475,7 @@ void IVPSystem::print_solution(std::ostream& output) const{
         output << std::setw(3) << i;
         output << "\t" << std::setw(16) << t_list[i];
         output << "\t" << std::setw(16) << f_evaluations[i];
-        for (double value: y_aprox[i]) {
+        for (double value: y_approx[i]) {
             output << "\t" << std::setw(16) << value;
         }
         if (has_exact_error()){
@@ -537,7 +564,7 @@ void IVPSystem::solve_rungekutta5(bool one_step){
 
 std::vector<double> IVPSystem::calculate_rungekutta_k(double t, const std::vector<std::vector<double>>& k, std::vector<double> k_multipliers) const{
     std::vector<double> results, values, k_in;
-    values = y_aprox.back();
+    values = y_approx.back();
     for (size_t i = 0; i < k_multipliers.size(); ++i){
         k_in = multiplyVector(k[i], k_multipliers[i]);
         values = addVectors(values, k_in);
@@ -575,11 +602,11 @@ void IVPSystem::solve_rungekuttaN(bool one_step, const std::vector<double> h_mul
             k.push_back(calculate_rungekutta_k(t_rk, k, k_multipliers[j]));
         }
         w = weightedMean(k, sum_weights);
-        w = addVectors(y_aprox.back(), w);
+        w = addVectors(y_approx.back(), w);
 
         f_evaluations.push_back(f_evaluations.back() + static_cast<int>(h_multipliers.size()));
         t_list.push_back(t+h_current);
-        y_aprox.push_back(w);
+        y_approx.push_back(w);
     }
     reset_error_estimate();
 }
@@ -684,6 +711,7 @@ void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FI
     ivp.print_solution(concatenateStrings(filename,"_rungekutta5.txt"));
 
     printf(" Problem %s: Runge-Kutta 5 'Best'\n", name);
+    ivp.set_estimate_exact(false);
     ivp.set_time_steps(100*n);
     ivp.reset_f_evaluations();
     ivp.solve_rungekutta(5);
@@ -1336,7 +1364,7 @@ void Fetkovich_tests(){
 
     aqIVP1.set_t_initial(0.);
     aqIVP1.set_t_end(200.);
-
+    aqIVP1.set_estimate_exact(true);
     test_rungekutta(aqIVP1, "Aquifer#1", "aq1", outFile);
     fclose(outFile);
 
