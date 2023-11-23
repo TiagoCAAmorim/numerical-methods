@@ -2420,6 +2420,15 @@ void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FI
     fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta5", ivp.get_current_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution(concatenateStrings(filename,"_rungekutta5.txt"));
+
+    printf(" Problem %s: Runge-Kutta 5 'Best'\n", name);
+    ivp.set_time_steps(100*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(5);
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta5Best", ivp.get_current_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution(concatenateStrings(filename,"_rungekutta5Best.txt"));
 }
 
 void tests_rungekutta(){
@@ -2936,118 +2945,6 @@ double Standing_bo_bubble(double api, double dg, double gor, double t){
     return 0.9759 +  12E-5 * pow(x + y, 1.2);
 }
 
-
-double f_pr_cte_230(double We, double t){
-    return 230. + 0*We + 0*t;
-}
-double f_qw_pr_cte_230(double t){
-    Fetkovich aqIVP1;
-    aqIVP1.set_aquifer_initial_pore_volume(1*1E6);
-    aqIVP1.set_aquifer_initial_pressure(250.);
-    aqIVP1.set_aquifer_productivity_index(20.);
-    aqIVP1.set_aquifer_total_compressibility(Newman_Consolidated_Sandstone(0.03));
-    aqIVP1.set_reservoir_initial_pressure(230.);
-
-    return aqIVP1.get_aquifer_flow_rate(t, 230.);
-}
-
-double f_pr_instant_res(double t, double We){
-    double api = 25.;
-    double dg = 0.6;
-    double rgo = 60.;
-    double temp = 65.;
-    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
-    double Cob = Standing_co_bubble(api, dg, rgo, temp);
-    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newman_Consolidated_Sandstone(0.2);
-    double Bw = 1.;
-    double Voil = 0.8 * 1*1E6;
-    double Vwat = 0.2 * 1*1E6;
-    double p_ini = 230.;
-
-    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
-    double VwatIP_0 = Vwat * Bw;
-    double Vpor_0 = VoilIP_0 + VwatIP_0;
-
-    return (Voil * Bob * (1 + Cob*Pb) + (Vwat + We) * Bw - Vpor_0 * (1 - Cpor*(p_ini)) ) / (Vpor_0*Cpor + Voil * Bob * Cob) + 0*t;
-}
-double f_qw_instant_res(double t){
-    double api = 25.;
-    double dg = 0.6;
-    double rgo = 60.;
-    double temp = 65.;
-    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
-    double Cob = Standing_co_bubble(api, dg, rgo, temp);
-    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newman_Consolidated_Sandstone(0.2);
-    double Bw = 1.;
-    double Voil = 0.8 * 1*1E6;
-    double Vwat = 0.2 * 1*1E6;
-    double p_ini = 230.;
-
-    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
-    double VwatIP_0 = Vwat * Bw;
-    double Vpor_0 = VoilIP_0 + VwatIP_0;
-
-    double J = 20.;
-    double ct = Newman_Consolidated_Sandstone(0.03);
-    double Wi = 1*1E6;
-    double pi = 250.;
-    double pr = 230.;
-
-    return exp(-J * t *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor))) * J * (pi - pr);
-}
-double f_qw_cumulative_res(double t){
-    double api = 25.;
-    double dg = 0.6;
-    double rgo = 60.;
-    double temp = 65.;
-    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
-    double Cob = Standing_co_bubble(api, dg, rgo, temp);
-    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newman_Consolidated_Sandstone(0.2);
-    double Bw = 1.;
-    double Voil = 0.8 * 1*1E6;
-    double Vwat = 0.2 * 1*1E6;
-    double p_ini = 230.;
-
-    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
-    double VwatIP_0 = Vwat * Bw;
-    double Vpor_0 = VoilIP_0 + VwatIP_0;
-
-    double J = 20.;
-    double ct = Newman_Consolidated_Sandstone(0.03);
-    double Wi = 1*1E6;
-    double pi = 250.;
-    double pr = 230.;
-
-    double alpha = ( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor));
-    return (1 - exp(-J * t *alpha)) * (pi - pr) / alpha;
-}
-double f_instant_res(double t, std::vector<double> qw){
-    double api = 25.;
-    double dg = 0.6;
-    double rgo = 60.;
-    double temp = 65.;
-    double Bob = Standing_bo_bubble(api, dg, rgo, temp);
-    double Cob = Standing_co_bubble(api, dg, rgo, temp);
-    double Pb  = Standing_p_bubble(api, dg, rgo, temp);
-    double Cpor = Newman_Consolidated_Sandstone(0.2);
-    double Bw = 1.;
-    double Voil = 0.8 * 1*1E6;
-    double Vwat = 0.2 * 1*1E6;
-    double p_ini = 230.;
-
-    double VoilIP_0 = Voil * Bob * (1 - Cob*(p_ini - Pb));
-    double VwatIP_0 = Vwat * Bw;
-    double Vpor_0 = VoilIP_0 + VwatIP_0;
-
-    double J = 20.;
-    double ct = Newman_Consolidated_Sandstone(0.03);
-    double Wi = 1*1E6;
-
-    return -J *( 1. / (ct * Wi) + Bw / (Voil * Bob * Cob + Vpor_0 * Cpor)) * qw[0] + 0*t;
-}
 
 double qo_problem_1(double t){
     if (t < 30.){
