@@ -13,28 +13,6 @@ using namespace std;
 
 const double eps = 1E-12;
 
-double* copy_array(double *original, int number_points){
-    if (number_points < 1){
-        return nullptr;
-    }
-    double* out = new double[number_points];
-    for(int i=0; i<number_points; i++){
-        out[i] = original[i];
-    }
-    return out;
-}
-
-int* copy_array(int *original, int number_points){
-    if (number_points < 1){
-        return nullptr;
-    }
-    int* out = new int[number_points];
-    for(int i=0; i<number_points; i++){
-        out[i] = original[i];
-    }
-    return out;
-}
-
 double max_array(double *vector, int number_points){
     if (number_points < 1){
         return std::numeric_limits<double>::quiet_NaN();
@@ -129,10 +107,12 @@ class IVPSystem{
         void addFunction(const FunctionType& func);
         void addExact(const ExactType& func);
         void add_y_initial(double value);
+        void add_y_name(char* value);
 
         void resetFunctions();
         void resetExactFunctions();
         void reset_y_initial();
+        void reset_y_names();
 
         std::vector<double> get_f(double t, const std::vector<double>& values) const;
         std::vector<double> get_exact(double t) const;
@@ -184,6 +164,7 @@ class IVPSystem{
         std::vector<FunctionType> functions;
         std::vector<ExactType> exact_functions;
         std::vector<double> y_initial;
+        std::vector<char*> y_names;
 
         double t_initial;
         double t_end;
@@ -202,6 +183,7 @@ IVPSystem::IVPSystem():
     functions(),
     exact_functions(),
     y_initial(),
+    y_names(),
     t_initial(0),
     t_end(1),
     time_steps(100),
@@ -295,6 +277,9 @@ void IVPSystem::addExact(const ExactType& func){
 void IVPSystem::add_y_initial(double value){
     y_initial.push_back(value);
 }
+void IVPSystem::add_y_name(char* value){
+    y_names.push_back(value);
+}
 void IVPSystem::resetFunctions(){
     functions.clear();
 }
@@ -303,6 +288,9 @@ void IVPSystem::resetExactFunctions(){
 }
 void IVPSystem::reset_y_initial(){
     y_initial.clear();
+}
+void IVPSystem::reset_y_names(){
+    y_names.clear();
 }
 
 bool IVPSystem::has_f() const{
@@ -432,15 +420,26 @@ void IVPSystem::print_solution(std::ostream& output) const{
     output << std::setw(3) << "i";
     output << "\t" << std::setw(16) << "t";
     output << "\t" << std::setw(16) << "evaluations";
+    std::vector<char*> names;
+    if (y_names.size() == functions.size()){
+        names = y_names;
+    } else{
+        std::string iString;
+        for (size_t i = 1; i <= functions.size(); ++i) {
+            iString = std::to_string(i);
+            names.push_back(concatenateStrings("y",iString.c_str()));
+        }
+    }
+
     for (size_t i = 1; i <= functions.size(); ++i) {
-        output << "\t" << std::setw(16) << "y_approx" << i;
+        output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"_appr");
     }
     if (has_exact_error()){
         for (size_t i = 1; i <= exact_functions.size(); ++i) {
-            output << "\t" << std::setw(16) << "y_exact" << i;
+            output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"y_exct");
         }
         for (size_t i = 1; i <= exact_functions.size(); ++i) {
-            output << "\t" << std::setw(16) << "y_error" << i;
+            output << "\t" << std::setw(16) << concatenateStrings(names[i-1],"y_err");
         }
     }
     output << "\n";
@@ -1327,10 +1326,13 @@ void Fetkovich_tests(){
     IVPSystem aqIVP1;
     aqIVP1.addFunction(f_pres_problem_1_Qw);
     aqIVP1.add_y_initial(f_pres_problem_1_Qw(-1.,{0.,0.,0.}));
+    aqIVP1.add_y_name("Qw");
     aqIVP1.addFunction(f_pres_problem_1_We);
     aqIVP1.add_y_initial(f_pres_problem_1_We(-1.,{0.,0.,0.}));
+    aqIVP1.add_y_name("We");
     aqIVP1.addFunction(f_pres_problem_1_Pr);
     aqIVP1.add_y_initial(f_pres_problem_1_Pr(-1.,{0.,0.,0.}));
+    aqIVP1.add_y_name("Pr");
 
     aqIVP1.set_t_initial(0.);
     aqIVP1.set_t_end(200.);
