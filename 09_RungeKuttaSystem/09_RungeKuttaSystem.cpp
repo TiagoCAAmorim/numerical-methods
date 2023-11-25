@@ -719,6 +719,17 @@ void test_rungekutta(IVPSystem ivp, string problemname, const char* filename, FI
     fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta5Best", ivp.get_current_f_evaluations());
     ivp.calculate_exact_error();
     ivp.print_solution(concatenateStrings(filename,"_rungekutta5Best.txt"));
+
+    printf(" Problem %s: Runge-Kutta 4 No Exact\n", name);
+    ivp.resetExactFunctions();
+    ivp.set_estimate_exact(true);
+    ivp.set_time_steps(6*n);
+    ivp.reset_f_evaluations();
+    ivp.solve_rungekutta(4);
+    printf("    'f' evaluations: %d\n", ivp.get_current_f_evaluations());
+    fprintf(evaluationsFile, "%s\t%s\t%d\n", name, "RungeKutta4Est", ivp.get_current_f_evaluations());
+    ivp.calculate_exact_error();
+    ivp.print_solution(concatenateStrings(filename,"_rungekutta4Est.txt"));
 }
 
 void tests_rungekutta(){
@@ -1367,65 +1378,6 @@ void Fetkovich_tests(){
     aqIVP1.set_estimate_exact(true);
     test_rungekutta(aqIVP1, "Aquifer#1", "aq1", outFile);
     fclose(outFile);
-
-    return;
-
-    // int n_tests = 11;
-    // int* steps = new int[n_tests]{5, 10, 20, 50, 80, 100, 150, 200, 250, 500, 1000};
-
-    // double* error_list = new double;
-    // double error_end, error_max;
-    // int evaluations;
-
-    // printf("We Error Sensibility with Fetkovich\n");
-    // outFile = fopen("aq1_fetkovich_sens.txt", "w");
-    // // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-    // fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-    // for (int i=0; i<10; i++){
-    //     aqFet.reset_f_evaluations();
-    //     aqFet.solve_aquifer_flow(200., steps[i]);
-    //     evaluations = aqFet.get_f_evaluations();
-    //     error_list = aqFet.get_result_cumulative_flow_error(true);
-    //     error_end = error_list[steps[i]];
-    //     error_max = max_array(error_list, steps[i]+1);
-    //     // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-    //     fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-    // }
-    // fclose(outFile);
-
-    // string stringArray[2]={"rungekutta4","rungekutta5"};
-
-    // aqIVP1.set_relative_error(true);
-    // for (int j=0; j<2; j++){
-    //     printf("We Error Sensibility with %s\n", stringArray[j].c_str());
-    //     outFile = fopen(("aq1_" + stringArray[j] + "_sens.txt").c_str(), "w");
-    //     // printf("%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-    //     fprintf(outFile,"%10s\t%16s\t%16s\t%16s\n","Steps", "Evaluations", "ErrorEnd", "ErrorMax");
-    //     for (int i=0; i<2; i++){
-    //         aqIVP1.set_time_steps(steps[i]);
-    //         aqIVP1.reset_f_evaluations();
-    //         switch (j) {
-    //             case 0:
-    //                 aqIVP1.solve_rungekutta(4);
-    //                 break;
-    //             case 1:
-    //                 aqIVP1.solve_rungekutta(5);
-    //                 break;
-    //             default:
-    //                 printf("Undifined!\n");
-    //                 return;
-    //         }
-    //         evaluations = aqIVP1.get_f_evaluations();
-    //         aqIVP1.solve_integral();
-    //         aqIVP1.calculate_exact_error();
-    //         error_list = aqIVP1.get_y_cumulative_error();
-    //         error_end = error_list[steps[i]];
-    //         error_max = max_array(error_list, steps[i]+1);
-    //         // printf("%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-    //         fprintf(outFile,"%10d\t%16d\t%16.10g\t%16.10g\n",steps[i], evaluations, error_end, error_max);
-    //     }
-    //     fclose(outFile);
-    // }
 }
 
 int main(){

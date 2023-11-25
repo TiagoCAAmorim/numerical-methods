@@ -1,0 +1,3 @@
+Problem	Method	Evaluations
+Aquifer#1	Fetkovich	240
+Aquifer#1	RungeKutta4	200
