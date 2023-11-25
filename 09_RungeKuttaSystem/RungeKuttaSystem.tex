@@ -547,7 +547,7 @@ country={Brasil}}
                     ]
                     \addplot[color=blue, solid, smooth, thick] table [x=Time, y=Cumulative] {aq1_fetkovich.txt};
                     \addplot[color=black, solid, smooth, thick] table [x=t, y=We_appr] {aq1_rungekutta4.txt};
-                    \addplot[color=black, solid, smooth, thick] table [x=t, y=We_appr] {aq1_rungekutta5Best.txt};
+                    \addplot[color=red, dashed, smooth, thick] table [x=t, y=We_appr] {aq1_rungekutta5Best.txt};
                     \legend{Fetkovich, Runge-Kutta $4^a$, Runge-Kutta $5^a$};
                 \end{axis}
             \end{tikzpicture}
