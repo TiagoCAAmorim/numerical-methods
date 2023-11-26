@@ -1,3 +1,6 @@
 Problem	Method	Evaluations
 Aquifer#1	Fetkovich	240
-Aquifer#1	RungeKutta4	200
+Aquifer#1	RungeKutta4	240
+Aquifer#1	RungeKutta5	240
+Aquifer#1	RungeKutta5Best	6000
+Aquifer#1	RungeKutta4Est	240
