@@ -1,7 +1,0 @@
-Problem	Method	Evaluations
-#1	RungeKutta4	200
-#2	RungeKutta4	200
-#3	RungeKutta4	200
-#4	RungeKutta4	200
-#5	RungeKutta4	200
-#6	RungeKutta4	200
