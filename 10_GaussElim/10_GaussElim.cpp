@@ -12,24 +12,24 @@ namespace fs = std::filesystem;
 const double eps = 1e-17;
 
 
-void printMatrix(std::vector<std::vector<double>> matrix){
+void printMatrix(std::vector<std::vector<double>> matrix, std::ostream& output){
     for (size_t r=0; r<matrix.size(); r++){
         std::string sep = "| ";
         for (size_t c=0; c<matrix[r].size(); c++){
-            std::cout << sep << matrix[r][c];
+            output << sep << matrix[r][c];
             sep = ", ";
         }
-        std::cout << " |" << std::endl;
+        output << " |" << std::endl;
     }
 }
 
-void printVector(std::vector<double> vector){
+void printVector(std::vector<double> vector, std::ostream& output){
     std::string sep = "{";
     for (size_t i=0; i<vector.size(); i++){
-        std::cout << sep << vector[i];
+        output << sep << vector[i];
         sep = ", ";
     }
-    std::cout << "}" << std::endl;
+    output << "}" << std::endl;
 }
 
 std::vector<std::vector<double>> readCSV(const std::string& filePath) {
@@ -271,30 +271,31 @@ void check_result(
     const std::vector<std::vector<double>>& a_mat,
     const std::vector<double>& b_vec,
     std::vector<double>& x_out,
-    const std::vector<double>& x_true){
+    const std::vector<double>& x_true,
+    std::ostream& output){
 
 
-    std::cout << "Response" << std::endl;
+    output << "Response" << std::endl;
     std::vector<double> error = vecDif(b_vec, matMult(a_mat, x_out));
-    // printVector(x_out);
-    // printVector(error);
-    std::cout << "  Maximum residual: " << error[MaxAbs(error)] << std::endl;
-    std::cout << "  ||residual||^2: " << vecNorm2(error) << std::endl;
+    // printVector(x_out, output);
+    // printVector(error, output);
+    output << "  Maximum residual: " << error[MaxAbs(error)] << std::endl;
+    output << "  ||residual||^2: " << vecNorm2(error) << std::endl;
 
-    std::cout << "Provided True Response" << std::endl;
+    output << "Provided True Response" << std::endl;
     std::vector<double> error_true = vecDif(b_vec, matMult(a_mat, x_true));
-    // printVector(x_true);
-    // printVector(error_true);
-    std::cout << "  Maximum residual: " << error_true[MaxAbs(error_true)] << std::endl;
-    std::cout << "  ||residual||^2: " << vecNorm2(error_true) << std::endl;
+    // printVector(x_true, output);
+    // printVector(error_true, output);
+    output << "  Maximum residual: " << error_true[MaxAbs(error_true)] << std::endl;
+    output << "  ||residual||^2: " << vecNorm2(error_true) << std::endl;
 
-    std::cout << "Delta Responses" << std::endl;
+    output << "Delta Responses" << std::endl;
     std::vector<double> x_delta = vecDif(x_true, x_out);
-    // printVector(x_delta);
-    std::cout << "  ||delta||^2: " << vecNorm2(x_delta) << std::endl;
-    std::cout << "  Maximum difference: " << x_delta[MaxAbs(x_delta)] << std::endl;
-    std::cout << "  Maximum difference odd: " << x_delta[MaxAbs(x_delta, 0, x_delta.size(), 2)] << std::endl;
-    std::cout << "  Maximum difference even: " << x_delta[MaxAbs(x_delta, 1, x_delta.size(), 2)] << std::endl;
+    // printVector(x_delta, output);
+    output << "  ||delta||^2: " << vecNorm2(x_delta) << std::endl;
+    output << "  Maximum difference: " << x_delta[MaxAbs(x_delta)] << std::endl;
+    output << "  Maximum difference odd: " << x_delta[MaxAbs(x_delta, 0, x_delta.size(), 2)] << std::endl;
+    output << "  Maximum difference even: " << x_delta[MaxAbs(x_delta, 1, x_delta.size(), 2)] << std::endl;
 
 }
 
@@ -318,7 +319,7 @@ void test01(){
     }
     std::cout << "}" << std::endl;
 
-    check_result(matrix, vector, x_out, x_true);
+    check_result(matrix, vector, x_out, x_true, std::cout);
 }
 
 void tests_1D(){
@@ -337,22 +338,22 @@ void tests_1D(){
     std::vector<double> x_est;
     std::vector<double> x_out;
 
-    std::vector<int> a = {3, 5, 9, 10, 20, 40, 50, 100, 200};
+    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
     for (int i : a) {
         n = std::to_string(i);
         std::cout << "Number of cells: " << n << " x 1" << std::endl;
 
-        k_filename = currentPath / ("matrix/k_" + n + "_1.csv");
-        f_filename = currentPath / ("matrix/f_" + n + "_1.csv");
-        x_true_filename = currentPath / ("matrix/x_" + n + "_1.csv");
-        x_est_filename = currentPath / ("matrix/x_prev_" + n + "_1.csv");
+        k_filename = currentPath / ("no_sync/matrix/k_" + n + "_1.csv");
+        f_filename = currentPath / ("no_sync/matrix/f_" + n + "_1.csv");
+        x_true_filename = currentPath / ("no_sync/matrix/x_" + n + "_1.csv");
+        x_est_filename = currentPath / ("no_sync/matrix/x_prev_" + n + "_1.csv");
 
         k_matrix = readCSV(k_filename.string());
         f_vector = flattenMatrix(readCSV(f_filename.string()));
         x_true = flattenMatrix(readCSV(x_true_filename.string()));
         x_est = flattenMatrix(readCSV(x_est_filename.string()));
 
-        // std::cout << "  K matrix = " << k_matrix.size() << " x " << k_matrix[0].size() << std::endl;
+        std::cout << "  K matrix = " << k_matrix.size() << " x " << k_matrix[0].size() << std::endl;
         // std::cout << "  F vector = " << f_vector.size() << " x 1" << std::endl;
         // std::cout << "  X vector = " << x_true.size() << " x 1" << std::endl;
         // std::cout << "  X est vector = " << x_est.size() << " x 1" << std::endl;
@@ -363,20 +364,21 @@ void tests_1D(){
         auto duration = duration_cast<milliseconds>(stop - start);
         std::cout << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
 
-        check_result(k_matrix, f_vector, x_out, x_true);
+        check_result(k_matrix, f_vector, x_out, x_true, std::cout);
         std::cout << std::endl;
     }
 }
 
-void tests_2D(){
+void tests(std::ostream& output, bool is_2D){
     std::string n;
+    std::string n2 = "1";
     fs::path k_filename;
     fs::path f_filename;
     fs::path x_true_filename;
     fs::path x_est_filename;
 
     fs::path currentPath = fs::current_path();
-    std::cout << currentPath.string() << std::endl;
+    // output << currentPath.string() << std::endl;
 
     std::vector<std::vector<double>> k_matrix;
     std::vector<double> f_vector;
@@ -384,36 +386,39 @@ void tests_2D(){
     std::vector<double> x_est;
     std::vector<double> x_out;
 
-    std::vector<int> a = {3, 5, 9, 10, 20, 40, 50, 100, 200};
+    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
     for (int i : a) {
         n = std::to_string(i);
-        std::cout << "Number of cells: " << n << " x " << n << std::endl;
+        if (is_2D){
+            n2 = n;
+        }
+        output << "Number of cells: " << n << " x " << n2 << std::endl;
 
-        k_filename = currentPath / ("matrix/k_" + n + "_" + n + ".csv");
-        f_filename = currentPath / ("matrix/f_" + n + "_" + n + ".csv");
-        x_true_filename = currentPath / ("matrix/x_" + n + "_" + n + ".csv");
-        x_est_filename = currentPath / ("matrix/x_prev_" + n + "_" + n + ".csv");
+        k_filename = currentPath / ("no_sync/matrix/k_" + n + "_" + n2 + ".csv");
+        f_filename = currentPath / ("no_sync/matrix/f_" + n + "_" + n2 + ".csv");
+        x_true_filename = currentPath / ("no_sync/matrix/x_" + n + "_" + n2 + ".csv");
+        x_est_filename = currentPath / ("no_sync/matrix/x_prev_" + n + "_" + n2 + ".csv");
 
-        std::cout << "Reading cvs files..";
+        std::cout << "Reading csv files (" << n << " x " << n2 << ")..";
         k_matrix = readCSV(k_filename.string());
         f_vector = flattenMatrix(readCSV(f_filename.string()));
         x_true = flattenMatrix(readCSV(x_true_filename.string()));
         x_est = flattenMatrix(readCSV(x_est_filename.string()));
         std::cout << " Done!" << std::endl;
 
-        // std::cout << "  K matrix = " << k_matrix.size() << " x " << k_matrix[0].size() << std::endl;
-        // std::cout << "  F vector = " << f_vector.size() << " x 1" << std::endl;
-        // std::cout << "  X vector = " << x_true.size() << " x 1" << std::endl;
-        // std::cout << "  X est vector = " << x_est.size() << " x 1" << std::endl;
+        output << "  K matrix = " << k_matrix.size() << " x " << k_matrix[0].size() << std::endl;
+        // output << "  F vector = " << f_vector.size() << " x 1" << std::endl;
+        // output << "  X vector = " << x_true.size() << " x 1" << std::endl;
+        // output << "  X est vector = " << x_est.size() << " x 1" << std::endl;
 
         auto start = high_resolution_clock::now();
         x_out = SolveGauss(k_matrix, f_vector);
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
-        std::cout << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
+        output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
 
-        check_result(k_matrix, f_vector, x_out, x_true);
-        std::cout << std::endl;
+        check_result(k_matrix, f_vector, x_out, x_true, output);
+        output << std::endl;
     }
 }
 
@@ -429,5 +434,12 @@ int main(){
     #endif
     // test01();
     // tests_1D();
-    tests_2D();
+    std::ofstream outputFile("results.txt");
+    if (outputFile.is_open()) {
+        tests(outputFile, false);
+        tests(outputFile, true);
+        outputFile.close();
+    } else {
+        std::cerr << "Unable to open the file for writing.\n";
+    }
 }
