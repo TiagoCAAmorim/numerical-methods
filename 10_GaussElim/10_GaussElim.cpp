@@ -76,6 +76,48 @@ std::vector<std::vector<double>> combineMatrixAndVector(
     return result;
 }
 
+std::vector<double> matMult(
+    const std::vector<std::vector<double>>& matrix,
+    const std::vector<double>& vector) {
+
+    size_t numRows = matrix.size();
+    size_t numCols = matrix[0].size();
+    if (numCols != vector.size()) {
+        throw std::invalid_argument("Error: Matrix and vector dimensions are incompatible for multiplication");
+    }
+
+    std::vector<double> result(numRows, 0.0);
+    for (size_t i = 0; i < numRows; ++i) {
+        for (size_t j = 0; j < numCols; ++j) {
+            result[i] += matrix[i][j] * vector[j];
+        }
+    }
+    return result;
+}
+
+std::vector<double> vecDif(
+    const std::vector<double>& vector1,
+    const std::vector<double>& vector2) {
+
+    if (vector1.size() != vector2.size()) {
+        throw std::invalid_argument("Error: Vectors must have the same size for subtraction");
+    }
+
+    std::vector<double> result(vector1.size());
+    for (size_t i = 0; i < vector1.size(); ++i) {
+        result[i] = vector1[i] - vector2[i];
+    }
+    return result;
+}
+
+double vecNorm2(const std::vector<double>& vector) {
+    double sum = 0.0;
+    for (const auto& value : vector) {
+        sum += value * value;
+    }
+    return sum;
+}
+
 std::vector<double> getColumn(const std::vector<std::vector<double>>& matrix, size_t colIndex) {
     if (colIndex >= matrix[0].size() - 1) {
         throw std::out_of_range("Error: Invalid column index");
@@ -87,14 +129,14 @@ std::vector<double> getColumn(const std::vector<std::vector<double>>& matrix, si
     return column;
 }
 
-size_t MaxAbs(const std::vector<double>& x, size_t i_init, size_t i_max){
+size_t MaxAbs(const std::vector<double>& x, size_t i_init, size_t i_max, size_t i_step){
     if (i_init+1 >= x.size()) {
         throw std::out_of_range("Error: Invalid index");
     }
     double max_v = std::abs(x[i_init]);
     size_t max_i = i_init;
     double v;
-    for (size_t i=i_init+1; i < i_max; i++){
+    for (size_t i=i_init+1; i < i_max; i += i_step){
         v = std::abs(x[i]);
         if (v > max_v){
             max_v = v;
@@ -104,6 +146,9 @@ size_t MaxAbs(const std::vector<double>& x, size_t i_init, size_t i_max){
     return max_i;
 }
 
+size_t MaxAbs(const std::vector<double>& x, size_t i_init, size_t i_max){
+    return MaxAbs(x, i_init, i_max, 1);
+}
 size_t MaxAbs(const std::vector<double>& x){
     return MaxAbs(x, 0, x.size());
 }
@@ -168,7 +213,7 @@ std::vector<double> SolveGauss(
         max_v = std::abs(a[n_line[i]][i]) / s[n_line[i]];
         p = i;
         for (size_t j=i+1; j<n; j++){
-            v = std::abs(a[n_line[j]][i]) / s[n_line[i]];
+            v = std::abs(a[n_line[j]][i]) / s[n_line[j]];
             if (v > max_v){
                 max_v = v;
                 p = j;
@@ -178,29 +223,57 @@ std::vector<double> SolveGauss(
             std::cerr << "Input matrix has a column of zeros. Response is non-unique! Cannot continue." << std::endl;
         } else if (n_line[i] != n_line[p]){
             std::swap(n_line[i], n_line[p]);
+            // std::swap(s[i], s[p]);
         }
         for (size_t j=i+1; j<n; j++){
             m = a[n_line[j]][i] / a[n_line[i]][i];
-            for (size_t k=1; k<=n; k++){
-                a[n_line[i]][k] = a[n_line[j]][k] - m * a[n_line[i]][k];
+            for (size_t k=0; k<=n; k++){
+                a[n_line[j]][k] = a[n_line[j]][k] - m * a[n_line[i]][k];
             }
         }
     }
-    if (std::abs(a[n-1][n-1]) < eps){
+    if (std::abs(a[n_line[n-1]][n-1]) < eps){
         std::cerr << "Equations are not lineally independent. Response is non-unique! Cannot continue." << std::endl;
     }
+
+    // for (size_t r=0; r<n; r++){
+    //     for (size_t c=0; c<=n; c++){
+    //         std::cout << a[n_line[r]][c] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     std::vector<double> x(n);
     double s_xa;
     x[n-1] = a[n_line[n-1]][n] / a[n_line[n-1]][n-1];
-    for (size_t i=n-2; i>-1; i--){
+    for (size_t i=n-1; i>0; i--){
         s_xa = 0.;
-        for (size_t j=i+1; i>n; i++){
-            s_xa += a[n_line[i]][j] * x[j];
+        for (size_t j=i+1; j<=n; j++){
+            s_xa += a[n_line[i-1]][j-1] * x[j-1];
         }
-        x[i] = (a[n_line[i]][n] * s_xa)/ a[n_line[i]][i];
+        x[i-1] = (a[n_line[i-1]][n] - s_xa)/ a[n_line[i-1]][i-1];
     }
     return x;
+}
+
+void check_result(
+    const std::vector<std::vector<double>>& a_mat,
+    const std::vector<double>& b_vec,
+    std::vector<double>& x_out,
+    const std::vector<double>& x_true){
+
+
+    std::vector<double> error = vecDif(b_vec, matMult(a_mat, x_out));
+    std::cout << "Response" << std::endl;
+    std::cout << "  Maximum residual: " << MaxAbs(error) << std::endl;
+    std::cout << "  ||residual||^2: " << vecNorm2(error) << std::endl;
+
+    std::vector<double> error_true = vecDif(b_vec, matMult(a_mat, x_true));
+    std::cout << "Provided True Response" << std::endl;
+    std::cout << "  Maximum residual: " << MaxAbs(error_true) << std::endl;
+    std::cout << "  ||residual||^2: " << vecNorm2(error_true) << std::endl;
+
+
 }
 
 void tests_1D(){
@@ -256,9 +329,34 @@ void tests_1D(){
 
         std::cout << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
 
+        check_result(k_matrix, f_vector, x_out, x_est);
+        std::cout << std::endl;
+
     }
 }
 
+void test01(){
+    std::vector<std::vector<double>> matrix = {
+        {30., 591400.},
+        {5.291, -6.130}
+    };
+
+    std::vector<double> vector = {591700., 46.78}; // Example vector
+    std::vector<double> x_true = {10., 1.}; // Example vector
+
+    std::vector<double> x_out;
+    x_out = SolveGauss(matrix, vector);
+
+    std::cout << "x = ";
+    std::string sep = "{";
+    for (const auto& v : x_out) {
+        std::cout << sep<< v ;
+        sep = ", ";
+    }
+    std::cout << "}" << std::endl;
+
+    check_result(matrix, vector, x_out, x_true);
+}
 
 int main(){
     #ifdef _WIN32
@@ -268,6 +366,6 @@ int main(){
     #else
         std::cout << "Running on an unknown system" << std::endl;
     #endif
-
-    // tests_1D();
+    // test01();
+    tests_1D();
 }
