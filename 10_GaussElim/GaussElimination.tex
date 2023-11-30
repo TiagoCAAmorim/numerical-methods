@@ -1,0 +1,428 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics}
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Performance do Método de Eliminação de Gauss para Resolver Sistema de Equações de Problemas de Fluxo em Meio Poroso\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 10 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28},
+city={Rio de Janeiro},
+postcode={20231-030},
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método de Eliminação de Gauss \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+
+
+\section{Metodologia}
+
+    \subsection{Método de Eliminação de Gauss}
+
+
+    Dado um sistema de $m$ equações diferenciais na forma:
+
+    \begin{align}
+        \frac{dy_1}{dt} &= f_1(t, \overrightarrow{y}) \nonumber \\
+        \frac{dy_2}{dt} &= f_2(t, \overrightarrow{y}) \nonumber \\
+        \vdots \nonumber \\
+        \frac{dy_m}{dt} &= f_m(t, \overrightarrow{y}) \label{eq:pvi}
+    \end{align}
+    \noindent com
+    \begin{align}
+        \overrightarrow{y} = \left\{ y_1, y_2, \ldots, y_m \right\} \nonumber
+    \end{align}
+    \noindent e condições iniciais
+    \begin{align}
+        y_1(t_0) = \alpha_1, \; y_1(t_0) = \alpha_2, \; \ldots, \; y_m(t_0) = \alpha_m \nonumber
+    \end{align}
+
+
+    utilizado. Usualmente são apresentados de forma tabular:
+
+    \bigskip
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{c|ccccc}
+        0         &                &                &          &                  &    \\
+        $\beta_2$ & $\gamma_{2,1}$ &                &          &                  &    \\
+        $\beta_3$ & $\gamma_{3,1}$ & $\gamma_{3,2}$ &          &                  &    \\
+        $\vdots$  & $\vdots$       &                & $\ddots$ &                  &    \\
+        $\beta_r$ & $\gamma_{r,1}$ & $\gamma_{r,2}$ & $\cdots$ & $\gamma_{r,r-1}$ &    \\
+        \hline
+        & $\lambda_1$    & $\lambda_2$    & $\cdots$ & $\lambda_{r-1}$  & $\lambda_r$ \\
+    \end{tabular}
+    \bigskip
+
+    \subsection{Fluxo Bifásico Incompressível em Meio Poroso}
+
+        As equações que regem o problema de fluxo em meio poroso deriva fundamentalmente da equação de conservação de massa \ref{eq:consmassa} com a equação de fluxo em meio poroso\ref{eq:darcy}, a lei de Darcy \cite{dake1983fundamentals}.
+
+        \begin{align}
+            &\sum_{p} \nabla \cdot  (y_{cp} \rho_p v_p) + \sum_{p} (y_{cp} \rho_p q_p) + \sum_{p} \frac{\partial}{\partial t} \left( \phi y_{cp} \rho_p S_p\right) = 0 \label{eq:consmassa} \\
+            &v_p = - \frac{k k_{rp}}{\mu_p} \left( \frac{\partial p_p}{\partial x} - \gamma_p \frac{\partial D}{\partial x} \right) = - \frac{k k_{rp}}{\mu_p} \left( \frac{\partial \Phi_p}{\partial x} \right)\label{eq:darcy}
+        \end{align}
+
+        A maioria dos simuladores de fluxo comerciais utilizam diferenças finitas \cite{computer2022cmg}\cite{schlumberger2009technical}. Podemos acoplar as equações \ref{eq:consmassa} e \ref{eq:darcy}, e aplicar uma discretização no tempo ($\Delta t$) e no espaço ($\Delta x$) para um volume de controle ($V = \Delta x \Delta y \Delta z$). A forma unidimensional desta equação discretizada é apresentada a seguir \ref{eq:geralumd}.
+
+        \begin{align}
+            \sum_{p} & \left( \frac{\Delta y \Delta z}{\Delta x} y_{cp} \rho_p \frac{k k_{rp}}{\mu_p} \right)_{i+\tfrac{1}{2}} (\Phi_{p,i+1} - \Phi_{p,i})  \nonumber \\
+            & + \left( \frac{\Delta y \Delta z}{\Delta x} y_{cp} \rho_p \frac{k k_{rp}}{\mu_p} \right)_{i-\tfrac{1}{2}} (\Phi_{p,i-1} - \Phi_{p,i}) \nonumber \\
+            & + q_{cp}^{w} = \frac{1}{\Delta t} \sum_{p} (V \phi y_{cp} \rho_p S_p)_i^{t_i+\Delta t} - (V \phi y_{cp} \rho_p S_p)_i^{t_i} \label{eq:geralumd}
+        \end{align}
+
+        Na sua forma mais geral o problema de fluxo em meio poroso precisa ser resolvido para cada um dos componentes que constituem as fases envolvidas. É comum utilizar uma abordagem simplificada, em que poucos componentes são utilizados para representar os fluidos envolvidos. Esta simplificação é usualmente aplicada quando as trocas de fase são \emph{bem comportadas} e passíveis de serem representadas por um conjunto de tabelas, em substituição às equações de estado. Esta abordagem é conhecida como \emph{Black-Oil}. As equações também se simplificam ao substituir as densidades ($\rho_p$) e concentrações de componentes ($y_{cp}$) pelo fator volume de formação da fase ($B$) e as relações volumétricas entre as fases e os componentes ($R$)\footnote{Ver dedução completa em \cite{dake1983fundamentals}.}.
+
+        Quando apenas água e óleo estão envolvidos na simulação, apenas duas equações de conservação de massa são necessárias. Como a soma das saturações é igual à unidade ($S_w + S_o = 1$) e negligenciando a tensão interfacial entre a água e o óleo ($p_o = p_w = p$), para cada volume de controle é preciso resolver apenas duas variáveis: $p$ e $S_w$.
+
+        \begin{align}
+            \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)&_{i+\tfrac{1}{2}} (p_{w,i+1} - p_{w,i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            + \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)&_{i-\tfrac{1}{2}} (\Phi_{w,i-1} - \Phi_{w,i}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i+\Delta t} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i} + q^{std}_w\label{eq:blackoilumd}
+        \end{align}
+
+        \noindent com:
+        \begin{align}
+            \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
+        \end{align}
+
+
+
+
+
+    \subsection{Modelo de Reservatório Proposto}
+
+        necessárias apenas duas equações diferenciais. Para um problema em que a vazão de óleo é função da pressão no reservatório, duas novas equações diferenciais são adicionadas, governando $\frac{dNp}{dt}$ e $Np$.
+
+\section{Implementação} \label{sec:implementacao}
+
+        Todo o código utilizado nesta análise foi desenvolvido em C++. Foram criados objetos próprios para cada elemento integrante do problema proposto:
+
+        \begin{description}
+            \item[IVPSystem] Classe que define um problema de valor inicial na forma.
+            \begin{itemize}
+                \item O usuário precisa especificar $f_i(t,\overrightarrow{y})$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y_i(a)$ (valores iniciais).
+                \item O usuário também pode especificar as soluções exatas ($y_i=f_i(t)$), para calcular o erro de aproximação.
+            \end{itemize}
+            \item[Fetkovich] Classe que resolve o comportamento de um aquífero como proposto por Fetkovich.
+            \begin{itemize}
+                \item O usuário precisa definir as características do aquífero e prover uma função que retorne a pressão na interface do aquífero com o reservatório. Esta função depende do tempo e do influxo acumulado de água do aquífero para o reservatório ($W_e$).
+                \item Uma modificação foi feita na Implementação do Método de Fetkovich com relação aos testes apresentados nos relatórios anteriores.
+                \begin{itemize}
+                    \item Como existe um termo implícito a ser resolvido no método, anteriormente foi admitido realizar um cálculo com até 20 iterações.
+                    \item Aplicando a mesma filosofia dos métodos preditor-corretor, este limite agora é de apenas uma iteração. E nos testes realizados os resultados foram muito parecidos.
+                    \item Desta forma o Método de Fetkovich agora tem apenas duas avaliações da função de pressão a cada passo de tempo.
+                \end{itemize}
+            \end{itemize}
+        \end{description}
+
+\section{Resultados}
+
+        de $y(t)$ incluída nos cálculos de Runge-Kutta tem um comportamento mais suave, sem as oscilações da integração numérico com Simpson e Trapézio composto.
+
+        % \begin{figure}[hbt!]
+        %     \begin{tikzpicture}
+        %         \begin{semilogyaxis}[
+        %             grid=both,
+        %             xlabel = {$t$},
+        %             ylabel = {$|w_i-y(t)|/|y(t)|$},
+        %             legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+        %             ]
+        %             \addplot[color=blue, solid, smooth, thick] table [x=t, y=S_error] {test1_rungekutta4_intN.txt};
+        %             \addplot[color=black, solid, smooth, thick] table [x=t, y=y2_err] {test1_rungekutta4_intRK.txt};
+        %             \legend{Simpson+Trapézio, Runge-Kutta};
+        %         \end{semilogyaxis}
+        %     \end{tikzpicture}
+        %     \caption{Erro da aproximação da acumulada de $y(t)$ com o método de Runge-Kutta de quarta ordem e por integração numérica com Simpson e Trapézio Composto, do PVI número \ref{item:pvi1}.}
+        %     \label{fig:teste1}
+        % \end{figure}
+
+
+        O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/10_GaussElim/10_GaussElim.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+    \section{Conclusão}
+
+        Foi possível testar problemas mais desafiadores ao passar de métodos de aproximação numérica de uma equação diferencial de primeira ordem para métodos que resolvem um sistema de equações. Para o problema proposto o Método de Runge-Kutta teve desempenho pior que o do Método de Fetkovich.
+
+    % \label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+\section{Lista de Variáveis}
+
+\begin{description}
+    \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3$).
+    \item[$Bw$:]Fator volume de formação da água no reservatório ($m^3/m^3$).
+    \item[$\Delta x$:]Discretização espacial na direção $i$.
+    \item[$\Delta y$:]Discretização espacial na direção $j$.
+    \item[$\Delta z$:]Discretização espacial na direção $k$.
+    \item[$\Delta t$:]Discretização temporal.
+    \item[$\gamma_p$:]Peso específico da fase $p$ ($\gamma_p = \rho_p g$).
+    \item[$k$:]Permeabilidade absoluta do meio poroso.
+    \item[$k_{rp}$:]Permeabilidade relativa da fase $p$.
+    \item[$\mu_p$:]Viscosidade da fase $p$.
+    \item[$p_p$:]Pressão da fase $p$.
+    \item[$\phi$:]Porosidade da rocha.
+    \item[$q_p$:]Vazão volumétrica da fase $p$.
+    \item[$q^w_{cp}$:]Vazão mássica do componente $c$ na fase $p$.
+    \item[$\rho_p$:]Densidade da fase $p$.
+    \item[$S_p$:]Saturação da fase $p$ no meio poroso.
+    \item[$V$:]Volume total do volume de controle.
+    \item[$v_p$:]Velocidade da fase $p$.
+    \item[$y_{cp}$:]Concentração do componente $c$ na fase $p$.
+
+
+    % \item[$c_r$:]Compressibilidade do volume poroso ($1/bar$).
+    % \item[$c_{o,b}$:]Compressibilidade do óleo na pressão de bolha ($1/bar$).
+    % \item[$c_{aq}$:]Compressibilidade total do aquífero ($1/bar$).
+    % \item[$J$:]Índice de produtividade do aquífero ($m^3/d/bar$).
+    % \item[$N$:]Volume de óleo no reservatório, medido em condições padrão ($m^3$).
+    % \item[$N_i$:]Volume de óleo no reservatório inicial, medido em condições padrão ($m^3$).
+    % \item[$Np$:]Volume de óleo produzido, medido em condições padrão ($m^3$).
+    % \item[$p_{aq}$:]Pressão média do aquífero ($bar$).
+    % \item[$p_{i,aq}$:]Pressão inicial do aquífero ($bar$).
+    % \item[$p_b$:]Pressão de bolha do óleo ($bar$).
+    % \item[$p_{res}$:]Pressão na interface entre o aquífero e o reservatório ($bar$).
+    % \item[$p_{i,res}$:]Pressão inicial na interface entre o aquífero e o reservatório ($bar$).
+    % \item[$Pv$:]Volume poroso no reservatório ($m^3$).
+    % \item[$Pv_i$:]Volume poroso no reservatório na pressão inicial ($m^3$).
+    % \item[$Q_o$ ou $\frac{dNp}{dt}$:]Vazão de óleo produzido ($m^3/d$).
+    % \item[$Q_w$ ou $\frac{dW_e}{dt}$:]Vazão de água do aquífero para o reservatório ($m^3/d$).
+    % \item[$\Delta t_j$:]Diferença entre os tempos $t_{j-1}$ e $t_j$ ($d$).
+    % \item[$W_e$:]Volume de água acumulado do aquífero para o reservatório ($m^3$).
+    % \item[$W_{e,max}$:]Máximo influxo de água \emph{possível} do aquífero para o reservatório ($m^3$).
+    % \item[$(\Delta W_e)_j$:]Influxo de água entre os tempos $t_{j-1}$ e $t_j$ ($m^3$).
+    % \item[$W_{i,aq}$:]Volume inicial do aquífero ($m^3$).
+    % \item[$W_{res}$:]Volume de água no reservatório ($m^3$).
+    % \item[$W_{i,res}$:]Volume inicial de água no reservatório ($m^3$).
+\end{description}
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
