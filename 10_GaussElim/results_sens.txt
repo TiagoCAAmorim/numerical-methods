@@ -1,0 +1,480 @@
+Number of cells: 3 x 1
+  K matrix = 6 x 6
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 0
+  ||residual||^2: 0
+Provided True Response
+  Maximum residual: 0
+  ||residual||^2: 0
+Delta Responses
+  ||delta||^2: 1.29247e-26
+  Maximum difference: -1.13687e-13
+  Maximum difference odd: -1.13687e-13
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 0
+  ||residual||^2: 0
+Provided True Response
+  Maximum residual: 0
+  ||residual||^2: 0
+Delta Responses
+  ||delta||^2: 1.29247e-26
+  Maximum difference: -1.13687e-13
+  Maximum difference odd: -1.13687e-13
+  Maximum difference even: 0
+
+Number of cells: 5 x 1
+  K matrix = 10 x 10
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: -2.91038e-11
+  ||residual||^2: 4.23516e-21
+Provided True Response
+  Maximum residual: -5.82077e-11
+  ||residual||^2: 6.77626e-21
+Delta Responses
+  ||delta||^2: 7.27601e-20
+  Maximum difference: -1.34492e-10
+  Maximum difference odd: -1.34492e-10
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: -2.91038e-11
+  ||residual||^2: 4.23516e-21
+Provided True Response
+  Maximum residual: -5.82077e-11
+  ||residual||^2: 6.77626e-21
+Delta Responses
+  ||delta||^2: 7.27601e-20
+  Maximum difference: -1.34492e-10
+  Maximum difference odd: -1.34492e-10
+  Maximum difference even: 0
+
+Number of cells: 9 x 1
+  K matrix = 18 x 18
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 1.45519e-11
+  ||residual||^2: 6.35275e-22
+Provided True Response
+  Maximum residual: 1.45519e-11
+  ||residual||^2: 4.23516e-22
+Delta Responses
+  ||delta||^2: 1.33053e-20
+  Maximum difference: -5.25233e-11
+  Maximum difference odd: -5.25233e-11
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 1.45519e-11
+  ||residual||^2: 6.35275e-22
+Provided True Response
+  Maximum residual: 1.45519e-11
+  ||residual||^2: 4.23516e-22
+Delta Responses
+  ||delta||^2: 1.33053e-20
+  Maximum difference: -5.25233e-11
+  Maximum difference odd: -5.25233e-11
+  Maximum difference even: 0
+
+Number of cells: 10 x 1
+  K matrix = 20 x 20
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 2.18279e-11
+  ||residual||^2: 5.82335e-22
+Provided True Response
+  Maximum residual: -4.36557e-11
+  ||residual||^2: 2.0117e-21
+Delta Responses
+  ||delta||^2: 3.22319e-19
+  Maximum difference: -2.68983e-10
+  Maximum difference odd: -2.68983e-10
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 2.18279e-11
+  ||residual||^2: 5.82335e-22
+Provided True Response
+  Maximum residual: -4.36557e-11
+  ||residual||^2: 2.0117e-21
+Delta Responses
+  ||delta||^2: 3.22319e-19
+  Maximum difference: -2.68983e-10
+  Maximum difference odd: -2.68983e-10
+  Maximum difference even: 0
+
+Number of cells: 15 x 1
+  K matrix = 30 x 30
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: -7.27596e-12
+  ||residual||^2: 1.45584e-22
+Provided True Response
+  Maximum residual: -7.27596e-12
+  ||residual||^2: 1.85288e-22
+Delta Responses
+  ||delta||^2: 4.58125e-21
+  Maximum difference: -2.81943e-11
+  Maximum difference odd: -2.81943e-11
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: -7.27596e-12
+  ||residual||^2: 1.45584e-22
+Provided True Response
+  Maximum residual: -7.27596e-12
+  ||residual||^2: 1.85288e-22
+Delta Responses
+  ||delta||^2: 4.58125e-21
+  Maximum difference: -2.81943e-11
+  Maximum difference odd: -2.81943e-11
+  Maximum difference even: 0
+
+Number of cells: 20 x 1
+  K matrix = 40 x 40
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 1.45519e-11
+  ||residual||^2: 2.15067e-22
+Provided True Response
+  Maximum residual: -5.45697e-12
+  ||residual||^2: 2.21684e-22
+Delta Responses
+  ||delta||^2: 1.94616e-18
+  Maximum difference: -4.47017e-10
+  Maximum difference odd: -4.47017e-10
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 1.45519e-11
+  ||residual||^2: 2.15067e-22
+Provided True Response
+  Maximum residual: -5.45697e-12
+  ||residual||^2: 2.21684e-22
+Delta Responses
+  ||delta||^2: 1.94616e-18
+  Maximum difference: -4.47017e-10
+  Maximum difference odd: -4.47017e-10
+  Maximum difference even: 0
+
+Number of cells: 25 x 1
+  K matrix = 50 x 50
+  Gauss Elimination with Partial Pivot
+Elapsed time: 1 milliseconds
+Response
+  Maximum residual: 3.63798e-12
+  ||residual||^2: 3.63959e-23
+Provided True Response
+  Maximum residual: -3.63798e-12
+  ||residual||^2: 1.32349e-23
+Delta Responses
+  ||delta||^2: 4.47688e-20
+  Maximum difference: -6.73026e-11
+  Maximum difference odd: -6.73026e-11
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 1 milliseconds
+Response
+  Maximum residual: 3.63798e-12
+  ||residual||^2: 3.63959e-23
+Provided True Response
+  Maximum residual: -3.63798e-12
+  ||residual||^2: 1.32349e-23
+Delta Responses
+  ||delta||^2: 4.47688e-20
+  Maximum difference: -6.73026e-11
+  Maximum difference odd: -6.73026e-11
+  Maximum difference even: 0
+
+Number of cells: 30 x 1
+  K matrix = 60 x 60
+  Gauss Elimination with Partial Pivot
+Elapsed time: 2 milliseconds
+Response
+  Maximum residual: 3.63798e-12
+  ||residual||^2: 3.06057e-23
+Provided True Response
+  Maximum residual: -3.63798e-12
+  ||residual||^2: 2.06795e-23
+Delta Responses
+  ||delta||^2: 3.0013e-20
+  Maximum difference: -5.54792e-11
+  Maximum difference odd: -5.54792e-11
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 2 milliseconds
+Response
+  Maximum residual: 3.63798e-12
+  ||residual||^2: 3.06057e-23
+Provided True Response
+  Maximum residual: -3.63798e-12
+  ||residual||^2: 2.06795e-23
+Delta Responses
+  ||delta||^2: 3.0013e-20
+  Maximum difference: -5.54792e-11
+  Maximum difference odd: -5.54792e-11
+  Maximum difference even: 0
+
+Number of cells: 3 x 3
+  K matrix = 18 x 18
+  Gauss Elimination with Partial Pivot
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 2.32831e-10
+  ||residual||^2: 2.03288e-19
+Provided True Response
+  Maximum residual: -2.32831e-10
+  ||residual||^2: 2.1684e-19
+Delta Responses
+  ||delta||^2: 1.79272e-20
+  Maximum difference: 6.7871e-11
+  Maximum difference odd: 6.7871e-11
+  Maximum difference even: -2.77556e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 0 milliseconds
+Response
+  Maximum residual: 2.32831e-10
+  ||residual||^2: 2.03288e-19
+Provided True Response
+  Maximum residual: -2.32831e-10
+  ||residual||^2: 2.1684e-19
+Delta Responses
+  ||delta||^2: 1.79272e-20
+  Maximum difference: 6.7871e-11
+  Maximum difference odd: 6.7871e-11
+  Maximum difference even: -2.77556e-17
+
+Number of cells: 5 x 5
+  K matrix = 50 x 50
+  Gauss Elimination with Partial Pivot
+Elapsed time: 1 milliseconds
+Response
+  Maximum residual: 1.16415e-10
+  ||residual||^2: 4.40457e-20
+Provided True Response
+  Maximum residual: -1.45519e-10
+  ||residual||^2: 5.84453e-20
+Delta Responses
+  ||delta||^2: 3.52924e-19
+  Maximum difference: 1.75419e-10
+  Maximum difference odd: 1.75419e-10
+  Maximum difference even: 0
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 1 milliseconds
+Response
+  Maximum residual: 1.16415e-10
+  ||residual||^2: 4.40457e-20
+Provided True Response
+  Maximum residual: -1.45519e-10
+  ||residual||^2: 5.84453e-20
+Delta Responses
+  ||delta||^2: 3.52924e-19
+  Maximum difference: 1.75419e-10
+  Maximum difference odd: 1.75419e-10
+  Maximum difference even: 0
+
+Number of cells: 9 x 9
+  K matrix = 162 x 162
+  Gauss Elimination with Partial Pivot
+Elapsed time: 43 milliseconds
+Response
+  Maximum residual: 5.82077e-11
+  ||residual||^2: 3.64224e-20
+Provided True Response
+  Maximum residual: 7.27596e-11
+  ||residual||^2: 5.06102e-20
+Delta Responses
+  ||delta||^2: 1.98783e-17
+  Maximum difference: 5.65478e-10
+  Maximum difference odd: 5.65478e-10
+  Maximum difference even: 5.55112e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 39 milliseconds
+Response
+  Maximum residual: 5.82077e-11
+  ||residual||^2: 3.64224e-20
+Provided True Response
+  Maximum residual: 7.27596e-11
+  ||residual||^2: 5.06102e-20
+Delta Responses
+  ||delta||^2: 1.98783e-17
+  Maximum difference: 5.65478e-10
+  Maximum difference odd: 5.65478e-10
+  Maximum difference even: 5.55112e-17
+
+Number of cells: 10 x 10
+  K matrix = 200 x 200
+  Gauss Elimination with Partial Pivot
+Elapsed time: 72 milliseconds
+Response
+  Maximum residual: 4.36557e-11
+  ||residual||^2: 3.72165e-20
+Provided True Response
+  Maximum residual: -4.36557e-11
+  ||residual||^2: 1.94818e-20
+Delta Responses
+  ||delta||^2: 2.46193e-17
+  Maximum difference: -5.56724e-10
+  Maximum difference odd: -5.56724e-10
+  Maximum difference even: -2.77556e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 70 milliseconds
+Response
+  Maximum residual: 4.36557e-11
+  ||residual||^2: 3.72165e-20
+Provided True Response
+  Maximum residual: -4.36557e-11
+  ||residual||^2: 1.94818e-20
+Delta Responses
+  ||delta||^2: 2.46193e-17
+  Maximum difference: -5.56724e-10
+  Maximum difference odd: -5.56724e-10
+  Maximum difference even: -2.77556e-17
+
+Number of cells: 15 x 15
+  K matrix = 450 x 450
+  Gauss Elimination with Partial Pivot
+Elapsed time: 807 milliseconds
+Response
+  Maximum residual: -2.54659e-11
+  ||residual||^2: 1.71657e-20
+Provided True Response
+  Maximum residual: -2.18279e-11
+  ||residual||^2: 1.121e-20
+Delta Responses
+  ||delta||^2: 6.77818e-17
+  Maximum difference: 6.02654e-10
+  Maximum difference odd: 6.02654e-10
+  Maximum difference even: 2.77556e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 867 milliseconds
+Response
+  Maximum residual: -2.54659e-11
+  ||residual||^2: 1.71657e-20
+Provided True Response
+  Maximum residual: -2.18279e-11
+  ||residual||^2: 1.121e-20
+Delta Responses
+  ||delta||^2: 6.77818e-17
+  Maximum difference: 6.02654e-10
+  Maximum difference odd: 6.02654e-10
+  Maximum difference even: 2.77556e-17
+
+Number of cells: 20 x 20
+  K matrix = 800 x 800
+  Gauss Elimination with Partial Pivot
+Elapsed time: 5354 milliseconds
+Response
+  Maximum residual: -2.00089e-11
+  ||residual||^2: 1.82972e-20
+Provided True Response
+  Maximum residual: -1.27329e-11
+  ||residual||^2: 6.99133e-21
+Delta Responses
+  ||delta||^2: 8.55432e-17
+  Maximum difference: -5.06816e-10
+  Maximum difference odd: -5.06816e-10
+  Maximum difference even: -2.77556e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 5290 milliseconds
+Response
+  Maximum residual: -2.00089e-11
+  ||residual||^2: 1.82972e-20
+Provided True Response
+  Maximum residual: -1.27329e-11
+  ||residual||^2: 6.99133e-21
+Delta Responses
+  ||delta||^2: 8.55432e-17
+  Maximum difference: -5.06816e-10
+  Maximum difference odd: -5.06816e-10
+  Maximum difference even: -2.77556e-17
+
+Number of cells: 25 x 25
+  K matrix = 1250 x 1250
+  Gauss Elimination with Partial Pivot
+Elapsed time: 21088 milliseconds
+Response
+  Maximum residual: 1.81899e-11
+  ||residual||^2: 1.58521e-20
+Provided True Response
+  Maximum residual: -1.27329e-11
+  ||residual||^2: 8.67216e-21
+Delta Responses
+  ||delta||^2: 4.58159e-18
+  Maximum difference: -1.01636e-10
+  Maximum difference odd: -1.01636e-10
+  Maximum difference even: 8.32667e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 21082 milliseconds
+Response
+  Maximum residual: 1.81899e-11
+  ||residual||^2: 1.58521e-20
+Provided True Response
+  Maximum residual: -1.27329e-11
+  ||residual||^2: 8.67216e-21
+Delta Responses
+  ||delta||^2: 4.58159e-18
+  Maximum difference: -1.01636e-10
+  Maximum difference odd: -1.01636e-10
+  Maximum difference even: 8.32667e-17
+
+Number of cells: 30 x 30
+  K matrix = 1800 x 1800
+  Gauss Elimination with Partial Pivot
+Elapsed time: 63912 milliseconds
+Response
+  Maximum residual: -1.63709e-11
+  ||residual||^2: 1.6049e-20
+Provided True Response
+  Maximum residual: -8.18545e-12
+  ||residual||^2: 4.65951e-21
+Delta Responses
+  ||delta||^2: 3.06788e-16
+  Maximum difference: 6.23913e-10
+  Maximum difference odd: 6.23913e-10
+  Maximum difference even: -2.77556e-17
+
+  Gauss Elimination with Partial Pivot and Scaling
+Elapsed time: 63153 milliseconds
+Response
+  Maximum residual: -1.63709e-11
+  ||residual||^2: 1.6049e-20
+Provided True Response
+  Maximum residual: -8.18545e-12
+  ||residual||^2: 4.65951e-21
+Delta Responses
+  ||delta||^2: 3.06788e-16
+  Maximum difference: 6.23913e-10
+  Maximum difference odd: 6.23913e-10
+  Maximum difference even: -2.77556e-17
+

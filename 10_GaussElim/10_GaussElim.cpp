@@ -150,7 +150,7 @@ std::vector<double> getColumn(const std::vector<std::vector<double>>& matrix, si
 }
 
 size_t MaxAbs(const std::vector<double>& x, size_t i_init, size_t i_max, size_t i_step){
-    if (i_init+1 >= x.size()) {
+    if (i_init >= x.size()) {
         throw std::out_of_range("Error: Invalid index");
     }
     double max_v = std::abs(x[i_init]);
@@ -192,7 +192,7 @@ std::vector<size_t> MaxAbsLine(const std::vector<std::vector<double>>& x){
 std::vector<size_t> MaxAbsCol(const std::vector<std::vector<double>>& x, bool cumulative, size_t col_max){
     std::vector<size_t> i_list;
     size_t i_init = 0;
-    for (size_t i=0; i < col_max; i++){
+    for (size_t i=0; i < std::min(col_max, x[0].size()); i++){
         if (cumulative){
             i_init = i;
         }
@@ -206,20 +206,26 @@ std::vector<size_t> MaxAbsCol(const std::vector<std::vector<double>>& x){
 
 std::vector<double> SolveGauss(
     const std::vector<std::vector<double>>& a_mat,
-    const std::vector<double>& b_vec){
+    const std::vector<double>& b_vec,
+    bool with_scaling){
 
     if (a_mat.size() != b_vec.size() || a_mat.size() != a_mat[0].size()) {
         throw std::invalid_argument("Error: Invalid matrix or vector dimensions");
     }
 
     size_t n = a_mat.size();
-    std::vector<size_t> n_line = MaxAbsLine(a_mat);
+    std::vector<size_t> n_line(n);
     std::vector<double> s;
-    for (size_t i=0; i<n; i++){
-        if (std::abs(a_mat[i][n_line[i]]) < eps){
-            std::cerr << "Input matrix has a line of zeros. Response is non-unique! Cannot continue." << std::endl;
+    if (with_scaling){
+        n_line = MaxAbsLine(a_mat);
+        for (size_t i=0; i<n; i++){
+            if (std::abs(a_mat[i][n_line[i]]) < eps){
+                std::cerr << "Input matrix has a line of zeros. Response is non-unique! Cannot continue." << std::endl;
+            }
+            s.push_back(std::abs(a_mat[i][n_line[i]]));
         }
-        s.push_back(std::abs(a_mat[i][n_line[i]]));
+    }
+    for (size_t i=0; i<n; i++){
         n_line[i] = i;
     }
 
@@ -229,10 +235,16 @@ std::vector<double> SolveGauss(
     double v;
     double m;
     for (size_t i=0; i<n-1; i++){
-        max_v = std::abs(a[n_line[i]][i]) / s[n_line[i]];
+        max_v = std::abs(a[n_line[i]][i]);
+        if (with_scaling){
+            max_v /= s[n_line[i]];
+        }
         p = i;
         for (size_t j=i+1; j<n; j++){
-            v = std::abs(a[n_line[j]][i]) / s[n_line[j]];
+            v = std::abs(a[n_line[j]][i]);
+            if (with_scaling){
+                v /= s[n_line[j]];;
+            }
             if (v > max_v){
                 max_v = v;
                 p = j;
@@ -267,13 +279,18 @@ std::vector<double> SolveGauss(
     return x;
 }
 
+std::vector<double> SolveGauss(
+    const std::vector<std::vector<double>>& a_mat,
+    const std::vector<double>& b_vec){
+    return SolveGauss(a_mat, b_vec, true);
+}
+
 void check_result(
     const std::vector<std::vector<double>>& a_mat,
     const std::vector<double>& b_vec,
     std::vector<double>& x_out,
     const std::vector<double>& x_true,
     std::ostream& output){
-
 
     output << "Response" << std::endl;
     std::vector<double> error = vecDif(b_vec, matMult(a_mat, x_out));
@@ -309,7 +326,7 @@ void test01(){
     std::vector<double> x_true = {10., 1.}; // Example vector
 
     std::vector<double> x_out;
-    x_out = SolveGauss(matrix, vector);
+    x_out = SolveGauss(matrix, vector, false);
 
     std::cout << "x = ";
     std::string sep = "{";
@@ -320,53 +337,6 @@ void test01(){
     std::cout << "}" << std::endl;
 
     check_result(matrix, vector, x_out, x_true, std::cout);
-}
-
-void tests_1D(){
-    std::string n;
-    fs::path k_filename;
-    fs::path f_filename;
-    fs::path x_true_filename;
-    fs::path x_est_filename;
-
-    fs::path currentPath = fs::current_path();
-    std::cout << currentPath.string() << std::endl;
-
-    std::vector<std::vector<double>> k_matrix;
-    std::vector<double> f_vector;
-    std::vector<double> x_true;
-    std::vector<double> x_est;
-    std::vector<double> x_out;
-
-    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
-    for (int i : a) {
-        n = std::to_string(i);
-        std::cout << "Number of cells: " << n << " x 1" << std::endl;
-
-        k_filename = currentPath / ("no_sync/matrix/k_" + n + "_1.csv");
-        f_filename = currentPath / ("no_sync/matrix/f_" + n + "_1.csv");
-        x_true_filename = currentPath / ("no_sync/matrix/x_" + n + "_1.csv");
-        x_est_filename = currentPath / ("no_sync/matrix/x_prev_" + n + "_1.csv");
-
-        k_matrix = readCSV(k_filename.string());
-        f_vector = flattenMatrix(readCSV(f_filename.string()));
-        x_true = flattenMatrix(readCSV(x_true_filename.string()));
-        x_est = flattenMatrix(readCSV(x_est_filename.string()));
-
-        std::cout << "  K matrix = " << k_matrix.size() << " x " << k_matrix[0].size() << std::endl;
-        // std::cout << "  F vector = " << f_vector.size() << " x 1" << std::endl;
-        // std::cout << "  X vector = " << x_true.size() << " x 1" << std::endl;
-        // std::cout << "  X est vector = " << x_est.size() << " x 1" << std::endl;
-
-        auto start = high_resolution_clock::now();
-        x_out = SolveGauss(k_matrix, f_vector);
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
-        std::cout << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
-
-        check_result(k_matrix, f_vector, x_out, x_true, std::cout);
-        std::cout << std::endl;
-    }
 }
 
 void tests(std::ostream& output, bool is_2D){
@@ -386,7 +356,7 @@ void tests(std::ostream& output, bool is_2D){
     std::vector<double> x_est;
     std::vector<double> x_out;
 
-    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
+    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30}; //, 35, 40, 45, 50, 60, 70, 80, 90, 100};
     for (int i : a) {
         n = std::to_string(i);
         if (is_2D){
@@ -411,10 +381,21 @@ void tests(std::ostream& output, bool is_2D){
         // output << "  X vector = " << x_true.size() << " x 1" << std::endl;
         // output << "  X est vector = " << x_est.size() << " x 1" << std::endl;
 
+        output << "  Gauss Elimination with Partial Pivot" << std::endl;
         auto start = high_resolution_clock::now();
-        x_out = SolveGauss(k_matrix, f_vector);
+        x_out = SolveGauss(k_matrix, f_vector, false);
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
+        output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
+
+        check_result(k_matrix, f_vector, x_out, x_true, output);
+        output << std::endl;
+
+        output << "  Gauss Elimination with Partial Pivot and Scaling" << std::endl;
+        start = high_resolution_clock::now();
+        x_out = SolveGauss(k_matrix, f_vector, true);
+        stop = high_resolution_clock::now();
+        duration = duration_cast<milliseconds>(stop - start);
         output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
 
         check_result(k_matrix, f_vector, x_out, x_true, output);
@@ -432,8 +413,8 @@ int main(){
     #else
         std::cout << "Running on an unknown system" << std::endl;
     #endif
+
     // test01();
-    // tests_1D();
     std::ofstream outputFile("results.txt");
     if (outputFile.is_open()) {
         tests(outputFile, false);
