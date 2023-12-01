@@ -1,0 +1,601 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics}
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+\newcommand*{\squareb}{\textcolor{black}{\rule{0.5em}{0.5em}}}
+\newcommand*{\squareg}{\textcolor{gray}{\rule{0.5em}{0.5em}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Performance do Método de Eliminação de Gauss para Resolver Sistema de Equações de Problemas de Fluxo em Meio Poroso Incompressíveis\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 10 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28},
+city={Rio de Janeiro},
+postcode={20231-030},
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+    Uma simulação de fluxo em meio poroso depende da resolução de um conjunto de equações não lineares a cada passo de tempo. Para modelos incompressíveis este conjunto de equações é \emph{fracamente} não linear, e o Método do Ponto Fixo é uma opção de método de solução. A cada iteração do Método do Ponto Fixo é preciso resolver um sistema de equações lineares, e foi avaliado o uso do Método de Eliminação de Gauss com Pivotamento Parcial com Escala para realizar esta etapa dos cálculos.
+    Os testes realizados mostraram que o Método de Eliminação de Gauss gera bons resultados. O uso de escala não afetou a qualidade das respostas. Também ficou evidente que é um método computacionalmente lento.
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método de Eliminação de Gauss \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+    Ao longo de uma simulação de fluxo em meio poroso é preciso repetidamente resolver sistemas de equações não lineares. Diferentes métodos podem ser utilizados nesta resolução, como o método de Newton-Raphson ou o do Ponto Fixo. Ambos métodos precisam resolver sistemas de equações lineares a cada iteração.
+
+    Este trabalho avalia a aplicabilidade do Método de Eliminação de Gaus com Pivotamento Parcial com Escala para resolver o sistema de equações lineares de uma iteração do Método do Ponto Fixo. A avaliação é feita para um modelo de fluxo em meio poroso incompressível com duas fases (água e óleo).
+
+\section{Metodologia}
+
+    \subsection{Método de Eliminação de Gauss}
+
+        Dado um sistema de $n$ equações lineares na forma:
+
+        \begin{align}
+            \left[
+                \begin{array}{cccc}
+                    a_{1,1}    & a_{1,2}    & \ldots & a_{1,n} \\
+                    a_{2,1}    & a_{2,2}    & \ldots & a_{2,n} \\
+                    \vdots     & \vdots     &        & \vdots  \\
+                    a_{n,1}    & a_{n,2}    & \ldots & a_{n,n}
+                \end{array}
+            \right]
+            \begin{bmatrix}
+                x_{1}  \\
+                x_{2}  \\
+                \vdots \\
+                x_{n}
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                b_{1}  \\
+                b_{2}  \\
+                \vdots \\
+                b_{n}
+            \end{bmatrix}
+        \end{align}
+
+
+            O Método de Eliminação de Gauss consiste em realizar sucessivas operações de soma e multiplicação com as equações de forma a formar um novo conjunto de equações lineares equivalentes em forma triangular:
+
+            \begin{align}
+                \left[
+                    \begin{array}{cccc}
+                        a'_{1,1}   & a'_{1,2}   & \ldots & a'_{1,n} \\
+                        0          & a'_{2,2}   & \ldots & a'_{2,n} \\
+                        \vdots     & \vdots     &        & \vdots   \\
+                        0          & \ldots     & 0      & a'_{n,n}
+                    \end{array}
+                \right]
+                \begin{bmatrix}
+                    x_{1}  \\
+                    x_{2}  \\
+                    \vdots \\
+                    x_{n}
+                \end{bmatrix}
+                =
+                \begin{bmatrix}
+                    b'_{1}  \\
+                    b'_{2}  \\
+                    \vdots \\
+                    b'_{n}
+                \end{bmatrix}
+        \end{align}
+
+            Em geral, à exceção da primeira equação, os parâmetros $a'$ e $b'$ serão diferentes dos parâmetros $a$ e $b$ do sistema original, mas o vetor de respostas $\overrightarrow{x}=\{x_1,x_2,\ldots,x_n\}$ será o mesmo. A vantagem da forma triangular é que os valores de $x_i$ podem ser encontrados por substituição regressiva (de $x_n$ para $x_1$):
+
+            \begin{align}
+                x_{i} = \frac{b'_i - \sum_{j=i+1}^{n} a'_{i,j} x_j}{a'_{i,i}}, \; \text{com} \; i=n,n-2,\ldots,1 \label{eq:subsregressiva}
+            \end{align}
+
+            O processo de eliminação de Gauss, para transformar o sistema de equações original em um sistema de forma triangular, é feito de maneira sucessiva, anulando os valores da i-ésima coluna de todas as linhas abaixo da i-ésima linha.
+            O algoritmo de eliminação de Gauss segue a seguinte lógica:
+
+            \begin{subequations}
+                \begin{align}
+                    a^{(k+1)}_{i,j} &= a^{(k)}_{i,j} - \frac{a^{(k)}_{i,k}}{a^{(k)}_{k,k}} a^{(k)}_{k,j}  \\
+                    b^{(k+1)}_{i} &= b^{(k)}_{i} - \frac{a^{(k)}_{i,k}}{a^{(k)}_{k,k}} b^{(k)}_{k}
+                \end{align} \label{eq:atualizacao}
+            \end{subequations}
+
+            \noindent com
+            \begin{align}
+                k &= 1,2,\ldots,n-1 \nonumber \\
+                i &= k+1,k+2,\ldots,n \nonumber \\
+                j &= k,k+1,\ldots,n \nonumber
+            \end{align}
+
+            \noindent onde
+            \begin{itemize}
+                \item[] $a^{(k)}_{i,j}$ é o valor da matriz de coeficientes na posição $(i,j)$ após o k-ésimo passo\footnote{Seguindo esta notação: $a'_{i,j} = a^{(i-1)}_{i,j}$.}
+                \item[] $b^{(k)}_{i}$ é o valor do vetor de constantes na posição $(i)$ após o k-ésimo passo\footnote{De forma correspondente: $b'_i = b^{(i-1)}_i$.}
+            \end{itemize}
+
+            Como em \ref{eq:atualizacao} o termo $a^{(k)}_{k,k}$ (pivô) não pode ser nulo, pode ser necessário trocar a ordem de algumas das equações. Esta operação é o pivotamento parcial. Mesmo quando o termo não é nulo, é uma boa estratégia fazer o pivotamento para reduzir erros de arredondamento (e.g.: $a^{(k)}_{k,k}$ muito pequeno). Diferentes estratégias podem ser utilizadas para escolher que equações que devem trocar de lugar (em ordem de menos para mais sofisticada):
+
+            \begin{enumerate}
+                \item Eliminação de Gauss com Substituição Regressiva
+                \begin{itemize}
+                    \item [] Quando $a^{(k)}_{k,k}=0$, trocar com a \emph{próxima} linha (menor $p$, tal que $k \leq p \leq n$) com $a^{(k)}_{p,k} \neq 0$.
+                \end{itemize}
+                \item Eliminação de Gauss com Pivotamento Parcial
+                \begin{itemize}
+                    \item[] Trocar com a \emph{próxima} linha que maximiza o módulo do pivô: $|a^{(k)}_{p,k}|=\max_{k \leq i \leq n} |a^{(k)}_{i,k}|$
+                \end{itemize}
+                \item Eliminação de Gauss com Pivotamento Parcial com Escala
+                \begin{itemize}
+                    \item[] Trocar com a \emph{próxima} linha que maximiza o módulo do pivô com relação aos elementos da sua linha:
+                    \item[] $\frac{|a^{(k)}_{p,k}|}{\max_{1 \leq j \leq n} |a_{p,j}|}=\max_{k \leq i \leq n} \frac{|a^{(k)}_{i,k}|}{\max_{1 \leq j \leq n} |a_{i,j}|}$
+                \end{itemize}
+            \end{enumerate}
+
+            Se, após a troca, $a^{(k)}_{k,k}$ continuar nulo, o sistema não tem resposta única. O algoritmo deve retornar que não consegue resolver o sistema de equações.
+
+            Resumindo, o Método de Eliminação de Gauss se resume a:
+
+            \begin{enumerate}
+                \item Da primeira à penúltima linha ($k = 1,2,\ldots,n-1$):
+                \begin{enumerate}
+                    \item Realizar pivotamento em função de algum dos critérios enumerados acima (1,2 ou 3).
+                    \item Se $a^{(k)}_{k,k}=0$, emitir mensagem de erro e sair do código.
+                    \item Aplicar \ref{eq:atualizacao} aos elementos das linhas seguintes ($i = k+1,k+2,\ldots,n$).
+                \end{enumerate}
+                \item Aplicar \ref{eq:subsregressiva} e retornar o vetor de respostas $\overrightarrow{x}=\{x_1,x_2,\ldots,x_n\}$.
+            \end{enumerate}
+
+            Como o método realiza, a cada passo, operações em todas as linhas abaixo da linha atual, é de se esperar que as operações necessárias cresçam muito rapidamente com o número de variáveis\footnote{Maiores discussões em \cite{burden2016analise}.}.
+
+    \subsection{Fluxo Bifásico Incompressível em Meio Poroso}
+
+        As equações que regem o problema de fluxo em meio poroso derivam fundamentalmente da equação de conservação de massa \ref{eq:consmassa} e da equação de fluxo em meio poroso \ref{eq:darcy}, a lei de Darcy \cite{dake1983fundamentals}.
+
+        \begin{align}
+            &\sum_{p} \nabla \cdot  (y_{cp} \rho_p v_p) + \sum_{p} (y_{cp} \rho_p q_p) + \sum_{p} \frac{\partial}{\partial t} \left( \phi y_{cp} \rho_p S_p\right) = 0 \label{eq:consmassa} \\
+            &v_p = - \frac{k k_{rp}}{\mu_p} \left( \frac{\partial p_p}{\partial x} - \gamma_p \frac{\partial D}{\partial x} \right) = - \frac{k k_{rp}}{\mu_p} \left( \frac{\partial \Phi_p}{\partial x} \right)\label{eq:darcy}
+        \end{align}
+
+        A maioria dos simuladores de fluxo comerciais utilizam diferenças finitas \cite{computer2022cmg}\cite{schlumberger2009technical}. Podemos acoplar as equações \ref{eq:consmassa} e \ref{eq:darcy}, e aplicar uma discretização no tempo ($\Delta t$) e no espaço ($\Delta x$) para um volume de controle ($V = \Delta x \Delta y \Delta z$)\footnote{Usualmente chamado de célula.}. A forma unidimensional desta equação discretizada é apresentada a seguir \ref{eq:geralumd}.
+
+        \begin{align}
+            \sum_{p} & \left( \frac{\Delta y \Delta z}{\Delta x} y_{cp} \rho_p \frac{k k_{rp}}{\mu_p} \right)_{i+\tfrac{1}{2}} (\Phi_{p,i+1} - \Phi_{p,i})  \nonumber \\
+            & + \left( \frac{\Delta y \Delta z}{\Delta x} y_{cp} \rho_p \frac{k k_{rp}}{\mu_p} \right)_{i-\tfrac{1}{2}} (\Phi_{p,i-1} - \Phi_{p,i}) \nonumber \\
+            & + q_{cp}^{w} = \frac{1}{\Delta t} \sum_{p} (V \phi y_{cp} \rho_p S_p)_i^{t_i+\Delta t} - (V \phi y_{cp} \rho_p S_p)_i^{t_i} \label{eq:geralumd}
+        \end{align}
+
+        Na sua forma mais geral o problema de fluxo em meio poroso precisa ser resolvido para cada um dos componentes que constituem as fases envolvidas. É comum utilizar uma abordagem simplificada, em que poucos componentes são utilizados para representar os fluidos envolvidos. Esta simplificação é usualmente aplicada quando as trocas de fase são \emph{bem comportadas} e passíveis de serem representadas por um conjunto de tabelas, em substituição às equações de estado. Esta abordagem é conhecida como \emph{Black-Oil}.
+
+        As equações também se simplificam ao substituir as densidades ($\rho_p$) e concentrações de componentes ($y_{cp}$) pelo fator volume de formação da fase ($B$) e as relações volumétricas entre as fases e os componentes ($R$)\footnote{Ver dedução completa em \cite{dake1983fundamentals}.}.
+
+        Quando apenas água e óleo estão envolvidos na simulação, apenas duas equações de conservação de massa são necessárias. Como a soma das saturações é igual à unidade ($S_w + S_o = 1$) e negligenciando a tensão interfacial entre a água e o óleo ($p_o = p_w = p$), para cada célula é preciso resolver apenas duas variáveis: $p$ e $S_w$:
+
+        \begin{align}
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_w \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i+\Delta t} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i} + q^{std}_w \label{eq:blackoilumdw} \\
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_o \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_o \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_i+\Delta t} - \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_i} + q^{std}_o \label{eq:blackoilumdo}
+        \end{align}
+
+        \noindent com:
+        \begin{align}
+            \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
+        \end{align}
+
+        Observa-se que a pressão ($p$) e a saturação de água ($S_w$) da i-ésima célula tem influência apenas na própria célula e nas células vizinhas. Desta forma, a matriz dos coeficientes deste problema tem termos não nulos em três \emph{bandas} ao redor da diagonal principal (tabela \ref{tab:unidimensional}\footnote{Os quadrados em preto e cinza indicam os valores não nulos da matriz, associados, respectivamente, aos termos das equações com os parâmetros da própria célula e com os parâmetros das células vizinhas.}).
+
+        \begin{table}
+            \centering
+            \caption{Formato da matrix de coeficientes para modelo unidimensional.}
+            \label{tab:unidimensional}
+            \bigskip
+            \renewcommand{\arraystretch}{0.8}
+            \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
+                \squareb & \squareb & \squareg &          &          &          &           &          &          &          \\
+                \squareb & \squareb & \squareg &          &          &          &           &          &          &          \\
+                \squareg &           & \squareb & \squareb & \squareg &          &           &          &          &          \\
+                \squareg &           & \squareb & \squareb & \squareg &          &           &          &          &          \\
+                         &           & \squareg &          & \squareb & \squareb & \squareg  &          &          &          \\
+                         &           & \squareg &          & \squareb & \squareb & \squareg  &          &          &          \\
+                         &           &          & $\ddots$ &          &          & $\ddots$  & $\ddots$ &          &          \\
+                         &           &          &          &          &          &           &          &          &          \\
+                         &           &          &          &          &          & \squareg  &          & \squareb & \squareb \\
+                         &           &          &          &          &          & \squareg  &          & \squareb & \squareb \\
+            \end{tabularx}
+        \end{table}
+
+        Na forma bi e tridimensional de \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} são adicionados termos de conexão com as células vizinhas nas direções $j$ e $k$, utilizando termos equivalentes aos apresentados para a direção $i$. Na matriz de coeficientes aparecem novos valores não nulos fora da diagonal principal (tabela \ref{tab:bidimensional}).
+        \begin{table}
+            \centering
+            \caption{Formato da matrix de coeficientes para modelo bidimensional.}
+            \label{tab:bidimensional}
+            \bigskip
+            \renewcommand{\arraystretch}{0.8}
+            \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
+                \squareb & \squareb & \squareg &          &          &          & \squareg &          &          &          \\
+                \squareb & \squareb & \squareg &          &          &          & \squareg &          &          &          \\
+                \squareg &          & \squareb & \squareb & \squareg &          &          & $\ddots$ &          &          \\
+                \squareg &          & \squareb & \squareb & \squareg &          &          &          &          &          \\
+                         &          & \squareg &          & \squareb & \squareb & \squareg &          &          &          \\
+                         &          & \squareg &          & \squareb & \squareb & \squareg &          &          &          \\
+                \squareg &          &          & $\ddots$ &          &          & $\ddots$ & $\ddots$ &          &          \\
+                \squareg &          &          &          &          &          &          &          &          &          \\
+                         & $\ddots$ &          &          &          &          & \squareg &          & \squareb & \squareb \\
+                         &          &          &          &          &          & \squareg &          & \squareb & \squareb \\
+            \end{tabularx}
+        \end{table}
+
+        \subsection{Modelo de Reservatório Proposto}
+            O modelo de reservatório é plano, com forma quadrada e mesmo refinamento em ambas direções ($\Delta i = \Delta j$). Existe um injetor de água em um dos cantos (célula [1,1]) e um produtor na diagonal oposta (célula [n,n]). As propriedades de rocha ($\phi$ e $k$) são constantes.
+
+            Em uma simulação \emph{Black-Oil} com água e óleo, a simulação de fluxo parte de um conjunto de valores de $p$ e $S_w$ no tempo inicial, para cada uma das células, e uma série de controles de produção ($q^{std}_p$). O simulador precisa resolver o conjunto de equações não lineares \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} a cada passo de tempo.
+
+            A implementação mais conhecida para resolver este conjunto de equações não lineares é o Método de Newton-Raphson. Para sistemas incompressíveis (onde $\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não linear, e apenas os valores de $k_{ro}$ e $k_{rw}$ são função das variáveis de estado. O conjunto de equações resultantes pode ser resolvido adequadamente com o Método do Ponto Fixo. As equações são resolvidas como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
+
+            A proposta deste trabalho é avaliar a performance do Método de Eliminação de Gauss com Pivotamento Parcial com Escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador, desenvolvido em Python, encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram gerados arquivos CSV com as matrizes de coeficientes e vetores de constantes para a resolução de uma iteração do Método do Ponto Fixo, para diferentes refinamentos de malha.
+
+            Também foram exportados os resultados de cada uma das respostas destes sistemas de equações. No simulador de fluxo a resolução do sistema de equações foi feito com o pacote Numpy. Segundo a documentação do pacote, são utilizadas rotinas do LAPACK \cite{dongarra1992lapack}.
+
+\section{Implementação} \label{sec:implementacao}
+
+        Todo o código utilizado nesta análise foi desenvolvido em C++. A duas funções principais são:
+
+        \begin{description}
+            \item[readCSV] Função que recebe um \emph{string} com o camimnho de um arquivo CSV e faz a sua leitura. É assumido que é utilizado vírgula como separador. A função retorna uma matrix de \emph{double}.
+            \item[SolveGauss] Função que recebe uma matrix de \emph{double} e um vetor de \emph{double}, e resolve o sistema de equações lineares usando Eliminação de Gauss com Pivotamento Parcial. Existe a opção de realizar o pivotamento com e sem uso de escala.
+        \end{description}
+
+\section{Resultados}
+
+        Foram realizadas duas avaliações. A primeira foi da qualidade das respostas encontradas com o Método de Eliminação de Gauss. As respostas da implementação do Método de Eliminação de Gauss foram comparadas com as respostas do método de solução de sistema de equações lineares utilizado no simulador de fluxo em meio poroso (do pacote Numpy). Foram feitos testes com as duas variações do Método de Eliminação de Gauss: sem e com uso de escala.
+
+        A medida da qualidade das respostas de cada método foi baseada no residual na forma $R = Ax-B$, onde $A$ é a matriz de coeficientes, $B$ é o vetor de constantes e $x$ é o vetor da solução do sistema linear $Ax=B$. Foram avaliadas duas normas do vetor residual: $L^2$ (\ref{eq:normadois}) e $L^\infty$ (\ref{eq:normainf}).
+
+        \begin{align}
+            ||x||_2 &:= \sqrt{\sum_{i}x_i^2} \label{eq:normadois} \\
+            ||x||_\infty &:= \max_{i} |x_i| \label{eq:normainf}
+        \end{align}
+
+        As figuras \ref{fig:normaeledois} e \ref{fig:normaeleinf} comparam as normas dos residuais da solução dos sistemas de equações propostos com três métodos:
+        \begin{itemize}
+            \item Eliminação de Gauss com Pivotamento Parcial
+            \item Eliminação de Gauss com Pivotamento Parcial com Escala
+            \item \emph{Rotinas do Numpy}\footnote{Este residual foi calculado com base nas respostas geradas com as rotinas de cálculo utilizadas no simulador de fluxo. Estes resultados fazem parte desta comparação para representar respostas de \emph{melhor qualidade}.}
+        \end{itemize}
+
+        Observa-se que para o problema proposto de resolver sistemas de equações de um modelo de fluxo em meio poroso bidimensional, não há necessidade de usar escala no Método de Eliminação de Gauss. Uma segunda constatação é de que a qualidade das respostas geradas com o Método de Eliminação de Gauss é tão boa quanto a dos métodos numéricos implementados no Numpy, que seguramente são mais sofisticados que os métodos implementados para esta avaliação.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {$||x||_2$},
+                    legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=NormR] {results_sens_table.txt};
+                    \addplot[color=red, dashed, smooth, thick, mark=o] table [x=Parameters, y=NormRScl] {results_sens_table.txt};
+                    \addplot[color=black, solid, smooth, thick, mark=*] table [x=Parameters, y=NormRTrue] {results_sens_table.txt};
+                    \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Norma $L^2$ do residual das soluções de sistemas de equações lineares com diferentes métodos.}
+            \label{fig:normaeledois}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {$||x||_\infty$},
+                    legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=MaxR] {results_sens_table.txt};
+                    \addplot[color=red, dashed, smooth, thick, mark=o] table [x=Parameters, y=MaxRScl] {results_sens_table.txt};
+                    \addplot[color=black, solid, smooth, thick, mark=*] table [x=Parameters, y=MaxRTrue] {results_sens_table.txt};
+                    \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Norma $L^\infty$ do residual das soluções de sistemas de equações lineares com diferentes métodos.}
+            \label{fig:normaeleinf}
+        \end{figure}
+
+        O Método de Eliminação de Gauss com Pivotamento Parcial com Escala gera resultados de boa qualidade, mesmo para sistemas com um grande número de variáveis (figura \ref{fig:errodois}), mas, como esperado, é um método lento. A figura \ref{fig:tempo} mostra que o tempo necessário para resolver cada um dos sistemas de equações propostos cresce rapidamente. Um modelo de fluxo bidimensional com 80 divisões em cada direção tem um total de $80 \times 80 \times 2 = 12.800$ variáveis. A solução de uma iteração deste modelo tomou mais de 6 horas para ser completada\footnote{Testes realizados com uma CPU Intel Core i7-8550U.}.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {$||x||$},
+                    legend style={at={(0.90,0.65)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=NormR] {results_with_scaling_table.txt};
+                    \addplot[color=red, solid, smooth, thick, mark=*] table [x=Parameters, y=MaxR] {results_with_scaling_table.txt};
+                    \legend{$||x||_2$, $||x||_\infty$};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Normas do residual das soluções dos sistemas de equações lineares resolvidos com o Método de Eliminação de Gauss com Pivotamento Parcial com Escala.}
+            \label{fig:errodois}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {Minutos},
+                    legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=Minutes] {results_with_scaling_table.txt};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Tempo necessário para resolver sistemas de equações com o Método de Eliminação de Gauss com Pivotamento Parcial com Escala.}
+            \label{fig:tempo}
+        \end{figure}
+
+        O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/10_GaussElim/10_GaussElim.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+    \section{Conclusão}
+
+        O Método de Eliminação de Gauss com Pivotamento Parcial com Escala gerou boas respostas para os sistemas de equações lineares testados. O residual das respostas do método implementado foram da mesma ordem de grandeza dos resultados alcançados com um pacote de computação científica popular. O Método de Eliminação de Gauss se mostrou computacionalmente lento, chegando a ser inviável para resolver sistemas de equações com um número maior de variáveis.
+
+    % \label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+\section{Lista de Variáveis}
+
+\begin{description}
+    \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3$).
+    \item[$Bw$:]Fator volume de formação da água no reservatório ($m^3/m^3$).
+    \item[$D$:]Profundidade.
+    \item[$\Delta x$:]Discretização espacial na direção $i$.
+    \item[$\Delta y$:]Discretização espacial na direção $j$.
+    \item[$\Delta z$:]Discretização espacial na direção $k$.
+    \item[$\Delta t$:]Discretização temporal.
+    \item[$\gamma_p$:]Peso específico da fase $p$ ($\gamma_p = \rho_p g$).
+    \item[$k$:]Permeabilidade absoluta do meio poroso.
+    \item[$k_{rp}$:]Permeabilidade relativa da fase $p$.
+    \item[$\mu_p$:]Viscosidade da fase $p$.
+    \item[$p_p$:]Pressão da fase $p$.
+    \item[$\phi$:]Porosidade da rocha.
+    \item[$q_p$:]Vazão volumétrica da fase $p$.
+    \item[$q^w_{cp}$:]Vazão mássica do componente $c$ na fase $p$.
+    \item[$q^{std}_{cp}$:]Vazão volumétrica da fase $p$ medida em condições padrão (\emph{standard}).
+    \item[$\rho_p$:]Densidade da fase $p$.
+    \item[$S_p$:]Saturação da fase $p$ no meio poroso.
+    \item[$V$:]Volume total do volume de controle (célula).
+    \item[$v_p$:]Velocidade da fase $p$.
+    \item[$y_{cp}$:]Concentração do componente $c$ na fase $p$.
+\end{description}
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
