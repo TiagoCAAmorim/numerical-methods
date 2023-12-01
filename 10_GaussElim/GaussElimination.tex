@@ -169,6 +169,8 @@ country={Brasil}}
 
 \begin{abstract}
 
+    Uma simulação de fluxo em meio poroso depende da resolução de um conjunto de equações não lineares a cada passo de tempo. Para modelos incompressíveis este conjunto de equações é \emph{fracamente} não linear, e o Método do Ponto Fixo é uma opção de método de solução. Para resolver uma iteração do Método do Ponto Fixo foi avaliado o uso do Método de Eliminação de Gauss com Pivotamento Parcial com Escala.
+    Os testes realizados mostraram que o Método de Eliminação de Gauss gera bons resultados. O uso de escala não afetou a qualidade das respostas. Também ficou evidente que é um método computacionalmente lento.
 
 \end{abstract}
 
@@ -208,9 +210,11 @@ country={Brasil}}
 
     \subsection{Método de Eliminação de Gauss}
 
-
         Dado um sistema de $m$ equações lineares na forma:
 
+        % \begin{align}
+        %     &
+        % \end{align}
 
 
     \subsection{Fluxo Bifásico Incompressível em Meio Poroso}
@@ -325,7 +329,7 @@ country={Brasil}}
         As figuras \ref{fig:normaeledois} e \ref{fig:normaeleinf} comparam as normas dos residuais da solução dos sistemas de equações propostos com três métodos:
         \begin{itemize}
             \item Eliminação de Gauss com Pivotamento Parcial
-            \item Eliminação de Gauss com Pivotamento Parcial e Escala
+            \item Eliminação de Gauss com Pivotamento Parcial com Escala
             \item \emph{Rotinas do Numpy}\footnote{Este residual foi calculado com base nas respostas geradas com as rotinas de cálculo utilizadas no simulador de fluxo. Estes resultados fazem parte desta comparação para representar respostas de \emph{melhor qualidade}.}
         \end{itemize}
 
@@ -367,7 +371,7 @@ country={Brasil}}
             \label{fig:normaeleinf}
         \end{figure}
 
-        O Método de Eliminação de Gauss com Pivotamento Parcial e Escala gera resultados de boa qualidade, mesmo para sistemas com um grande número de variáveis (figura \ref{fig:errodois}), mas é um método lento. A figura \ref{fig:tempo} mostra que o tempo necessário para resolver cada um dos sistemas de equações propostos cresce rapidamente. Um modelo de fluxo bidimensional com 80 divisões em cada direção tem um total de $80 \times 80 \times 2 = 12.800$ variáveis. A solução de uma iteração deste modelo tomou mais de 6 horas para ser completada.
+        O Método de Eliminação de Gauss com Pivotamento Parcial com Escala gera resultados de boa qualidade, mesmo para sistemas com um grande número de variáveis (figura \ref{fig:errodois}), mas é um método lento. A figura \ref{fig:tempo} mostra que o tempo necessário para resolver cada um dos sistemas de equações propostos cresce rapidamente. Um modelo de fluxo bidimensional com 80 divisões em cada direção tem um total de $80 \times 80 \times 2 = 12.800$ variáveis. A solução de uma iteração deste modelo tomou mais de 6 horas para ser completada\footnote{Testes realizados com uma CPU Intel Core i7-8550U.}.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -382,7 +386,7 @@ country={Brasil}}
                     \legend{$||x||_2$, $||x||_\infty$};
                 \end{semilogyaxis}
             \end{tikzpicture}
-            \caption{Normas do residual das soluções dos sistemas de equações lineares resolvidos com o Método de Eliminação de Gauss com Pivotamento Parcial e Escala.}
+            \caption{Normas do residual das soluções dos sistemas de equações lineares resolvidos com o Método de Eliminação de Gauss com Pivotamento Parcial com Escala.}
             \label{fig:errodois}
         \end{figure}
 
@@ -398,7 +402,7 @@ country={Brasil}}
                     % \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
                 \end{semilogyaxis}
             \end{tikzpicture}
-            \caption{Tempo necessário para resolver sistemas de equações com o Método de Eliminação de Gauss com Pivotamento Parcial e Escala.}
+            \caption{Tempo necessário para resolver sistemas de equações com o Método de Eliminação de Gauss com Pivotamento Parcial com Escala.}
             \label{fig:tempo}
         \end{figure}
 
@@ -406,7 +410,7 @@ country={Brasil}}
 
     \section{Conclusão}
 
-        O Método de Eliminação de Gauss com Pivotamento Parcial e Escala
+        O Método de Eliminação de Gauss com Pivotamento Parcial com Escala gerou boas respostas para os sistemas de equações lineares testados. O residual das respostas do método implementado foram da mesma ordem de grandeza dos resultados alcançados com um pacote de computação científica popular. O Método de Eliminação de Gauss se mostrou computacionalmente lento, chegando a ser inviável para resolver sistemas de equações com um número maior de variáveis.
 
     % \label{}
 
