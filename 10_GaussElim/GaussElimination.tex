@@ -208,38 +208,9 @@ country={Brasil}}
     \subsection{Método de Eliminação de Gauss}
 
 
-    Dado um sistema de $m$ equações diferenciais na forma:
-
-    \begin{align}
-        \frac{dy_1}{dt} &= f_1(t, \overrightarrow{y}) \nonumber \\
-        \frac{dy_2}{dt} &= f_2(t, \overrightarrow{y}) \nonumber \\
-        \vdots \nonumber \\
-        \frac{dy_m}{dt} &= f_m(t, \overrightarrow{y}) \label{eq:pvi}
-    \end{align}
-    \noindent com
-    \begin{align}
-        \overrightarrow{y} = \left\{ y_1, y_2, \ldots, y_m \right\} \nonumber
-    \end{align}
-    \noindent e condições iniciais
-    \begin{align}
-        y_1(t_0) = \alpha_1, \; y_1(t_0) = \alpha_2, \; \ldots, \; y_m(t_0) = \alpha_m \nonumber
-    \end{align}
+        Dado um sistema de $m$ equações lineares na forma:
 
 
-    utilizado. Usualmente são apresentados de forma tabular:
-
-    \bigskip
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{c|ccccc}
-        0         &                &                &          &                  &    \\
-        $\beta_2$ & $\gamma_{2,1}$ &                &          &                  &    \\
-        $\beta_3$ & $\gamma_{3,1}$ & $\gamma_{3,2}$ &          &                  &    \\
-        $\vdots$  & $\vdots$       &                & $\ddots$ &                  &    \\
-        $\beta_r$ & $\gamma_{r,1}$ & $\gamma_{r,2}$ & $\cdots$ & $\gamma_{r,r-1}$ &    \\
-        \hline
-        & $\lambda_1$    & $\lambda_2$    & $\cdots$ & $\lambda_{r-1}$  & $\lambda_r$ \\
-    \end{tabular}
-    \bigskip
 
     \subsection{Fluxo Bifásico Incompressível em Meio Poroso}
 
@@ -250,7 +221,7 @@ country={Brasil}}
             &v_p = - \frac{k k_{rp}}{\mu_p} \left( \frac{\partial p_p}{\partial x} - \gamma_p \frac{\partial D}{\partial x} \right) = - \frac{k k_{rp}}{\mu_p} \left( \frac{\partial \Phi_p}{\partial x} \right)\label{eq:darcy}
         \end{align}
 
-        A maioria dos simuladores de fluxo comerciais utilizam diferenças finitas \cite{computer2022cmg}\cite{schlumberger2009technical}. Podemos acoplar as equações \ref{eq:consmassa} e \ref{eq:darcy}, e aplicar uma discretização no tempo ($\Delta t$) e no espaço ($\Delta x$) para um volume de controle ($V = \Delta x \Delta y \Delta z$). A forma unidimensional desta equação discretizada é apresentada a seguir \ref{eq:geralumd}.
+        A maioria dos simuladores de fluxo comerciais utilizam diferenças finitas \cite{computer2022cmg}\cite{schlumberger2009technical}. Podemos acoplar as equações \ref{eq:consmassa} e \ref{eq:darcy}, e aplicar uma discretização no tempo ($\Delta t$) e no espaço ($\Delta x$) para um volume de controle ($V = \Delta x \Delta y \Delta z$)\footnote{Usualmente chamado de célula.}. A forma unidimensional desta equação discretizada é apresentada a seguir \ref{eq:geralumd}.
 
         \begin{align}
             \sum_{p} & \left( \frac{\Delta y \Delta z}{\Delta x} y_{cp} \rho_p \frac{k k_{rp}}{\mu_p} \right)_{i+\tfrac{1}{2}} (\Phi_{p,i+1} - \Phi_{p,i})  \nonumber \\
@@ -260,12 +231,15 @@ country={Brasil}}
 
         Na sua forma mais geral o problema de fluxo em meio poroso precisa ser resolvido para cada um dos componentes que constituem as fases envolvidas. É comum utilizar uma abordagem simplificada, em que poucos componentes são utilizados para representar os fluidos envolvidos. Esta simplificação é usualmente aplicada quando as trocas de fase são \emph{bem comportadas} e passíveis de serem representadas por um conjunto de tabelas, em substituição às equações de estado. Esta abordagem é conhecida como \emph{Black-Oil}. As equações também se simplificam ao substituir as densidades ($\rho_p$) e concentrações de componentes ($y_{cp}$) pelo fator volume de formação da fase ($B$) e as relações volumétricas entre as fases e os componentes ($R$)\footnote{Ver dedução completa em \cite{dake1983fundamentals}.}.
 
-        Quando apenas água e óleo estão envolvidos na simulação, apenas duas equações de conservação de massa são necessárias. Como a soma das saturações é igual à unidade ($S_w + S_o = 1$) e negligenciando a tensão interfacial entre a água e o óleo ($p_o = p_w = p$), para cada volume de controle é preciso resolver apenas duas variáveis: $p$ e $S_w$.
+        Quando apenas água e óleo estão envolvidos na simulação, apenas duas equações de conservação de massa são necessárias. Como a soma das saturações é igual à unidade ($S_w + S_o = 1$) e negligenciando a tensão interfacial entre a água e o óleo ($p_o = p_w = p$), para cada célula é preciso resolver apenas duas variáveis: $p$ e $S_w$.
 
         \begin{align}
-            \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)&_{i+\tfrac{1}{2}} (p_{w,i+1} - p_{w,i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
-            + \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)&_{i-\tfrac{1}{2}} (\Phi_{w,i-1} - \Phi_{w,i}) \nonumber \\
-            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i+\Delta t} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i} + q^{std}_w\label{eq:blackoilumd}
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_w \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i+\Delta t} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_i} + q^{std}_w \label{eq:blackoilumdw} \\
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_o \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_o \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_i+\Delta t} - \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_i} + q^{std}_o \label{eq:blackoilumdo}
         \end{align}
 
         \noindent com:
@@ -273,39 +247,95 @@ country={Brasil}}
             \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
         \end{align}
 
+        Observa-se que a pressão ($p$) e a saturação de água ($S_w$) da i-ésima célula tem influência apenas na própria célula e nas células vizinhas. Desta forma, a matriz dos coeficientes deste problema é diagonalmente dominante (tabela \ref{tab:unidimensional}\footnote{Os quadrados em preto e cinza indicam os valores não-nulos da matriz, associados, respetivamente, às equações da própria célula e da célula com suas vizinhas.}).
 
+        \begin{table}
+            \centering
+            \caption{Formato da matrix de coeficientes para modelo unidimensional.}
+            \label{tab:unidimensional}
+            \bigskip
+            \renewcommand{\arraystretch}{0.8}
+            \begin{tabular}{|cccccccccc|}
+                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
+            \end{tabular}
+        \end{table}
 
+        Na forma bi e tridimensional de \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} são adicionados termos de conexão com as células vizinhas nas direções $j$ e $k$, utilizando termos equivalentes aos apresentados para a direção $i$. Na matriz de coeficientes aparecem novos valores não-nulos fora da diagonal (tabela \ref{tab:bidimensional}).
+        \begin{table}
+            \centering
+            \caption{Formato da matrix de coeficientes para modelo bidimensional.}
+            \label{tab:bidimensional}
+            \bigskip
+            \renewcommand{\arraystretch}{0.8}
+            \begin{tabular}{|cccccccccc|}
+                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} &  $\ddots$                              & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
+                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
+            \end{tabular}
+        \end{table}
 
+        \subsection{Modelo de Reservatório Proposto}
+            O modelo de reservatório é plano, com forma quadrada e mesmo refinamento em ambas direções ($\Delta i = \Delta j$). Existe um injetor de água em um dos cantos (célula [1,1]) e um produtor na diagonal oposta (célula [n,n]). As propriedades de rocha ($\phi$ e $k$) são constantes.
 
-    \subsection{Modelo de Reservatório Proposto}
+            Em uma simulação \emph{Black-Oil} com água e óleo, a simulação de fluxo parte de um conjunto de valores de $p$ e $S_w$ no tempo inicial, para cada uma das células, e uma série de controles de produção ($q^{std}_p$). O simulador precisa resolver o conjunto de equações não-lineares \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} a cada passo de tempo.
 
-        necessárias apenas duas equações diferenciais. Para um problema em que a vazão de óleo é função da pressão no reservatório, duas novas equações diferenciais são adicionadas, governando $\frac{dNp}{dt}$ e $Np$.
+            A implementação mais conhecida para resolver este conjunto de equações é o método de Newton-Raphson. Para sistemas incompressíveis ($\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não-linear. O conjunto de equações resultantes pode ser resolvido adequadamente como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
+
+            A proposta deste trabalho é avaliar a performance do método de eliminação de Gauss, com pivotamento parcial (troca de linhas) com escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram geradas matrizes de coeficientes e vetores de constantes da resolução de uma iteração, para diferentes refinamentos de malha.
+
+            Também foram exportados os resultados de cada uma das respostas destes sistemas de equações. No simulador de fluxo a resolução do sistema de equações foi feito com o pacote Numpy. Segundo a documentação do pacote, são utilizadas rotinas do LAPACK \cite{dongarra1992lapack}.
 
 \section{Implementação} \label{sec:implementacao}
 
-        Todo o código utilizado nesta análise foi desenvolvido em C++. Foram criados objetos próprios para cada elemento integrante do problema proposto:
+        Todo o código utilizado nesta análise foi desenvolvido em C++. A duas funções principais são:
 
         \begin{description}
-            \item[IVPSystem] Classe que define um problema de valor inicial na forma.
-            \begin{itemize}
-                \item O usuário precisa especificar $f_i(t,\overrightarrow{y})$, $a$ (tempo inicial), $b$ (tempo final), $n$ (número de passos de tempo) e $y_i(a)$ (valores iniciais).
-                \item O usuário também pode especificar as soluções exatas ($y_i=f_i(t)$), para calcular o erro de aproximação.
-            \end{itemize}
-            \item[Fetkovich] Classe que resolve o comportamento de um aquífero como proposto por Fetkovich.
-            \begin{itemize}
-                \item O usuário precisa definir as características do aquífero e prover uma função que retorne a pressão na interface do aquífero com o reservatório. Esta função depende do tempo e do influxo acumulado de água do aquífero para o reservatório ($W_e$).
-                \item Uma modificação foi feita na Implementação do Método de Fetkovich com relação aos testes apresentados nos relatórios anteriores.
-                \begin{itemize}
-                    \item Como existe um termo implícito a ser resolvido no método, anteriormente foi admitido realizar um cálculo com até 20 iterações.
-                    \item Aplicando a mesma filosofia dos métodos preditor-corretor, este limite agora é de apenas uma iteração. E nos testes realizados os resultados foram muito parecidos.
-                    \item Desta forma o Método de Fetkovich agora tem apenas duas avaliações da função de pressão a cada passo de tempo.
-                \end{itemize}
-            \end{itemize}
+            \item[readCSV] Função que recebe um \emph{string} com o camimnho de um arquivo CSV e faz a sua leitura. É assumido que é utilizado vírgula como separador. A função retorna uma matrix de \emph{double}.
+            \item[SolveGauss] Função que recebe uma matrix de \emph{double} e um vetor de \emph{double}, e resolve o sistema de equações lineares usando eliminação por Gauss com pivotamento parcial. Existe a opção de realizar o pivotamento com e sem uso de escala (opção padrão e com uso de escala).
         \end{description}
 
 \section{Resultados}
 
-        de $y(t)$ incluída nos cálculos de Runge-Kutta tem um comportamento mais suave, sem as oscilações da integração numérico com Simpson e Trapézio composto.
+        Foram realizadas duas avaliações. A primeira foi da qualidade das respostas encontradas com o método da eliminação de Gauss. Foram comparadas as respostas do método de solução de sistema de equações lineares utilizado no simulador de fluxo em meio poroso (do pacote Numpy), com as respostas da implementação do método da eliminação de Gauss. Foram feitos testes com as duas variações: sem e com uso de escala.
+
+        A medida da qualidade das respostas de cada método foi baseada no residual na forma $R = Ax-B$, onde $A$ é a matriz de coeficientes, $B$ é o vetor de constantes e $x$ é a reposta da solução do sistema linear $Ax=B$. Foram avaliadas duas normas do vetor residual: $L^2$ (\ref{eq:normadois}) e $L^\infty$ (\ref{eq:normainf}).
+
+        \begin{align}
+            ||x||_2 &:= \sqrt{\sum_{i}x_i^2} \label{eq:normadois} \\
+            ||x||_\infty &:= \max_{i} |x_i| \label{eq:normainf}
+        \end{align}
+
+
+        \begin{table}
+            \centering
+            \caption{Normas dos residuais de cada processo de solução de um sistema de equações.}
+            \label{tab:respostas}
+            \bigskip
+            % \renewcommand{\arraystretch}{1.0}
+            \small
+            \begin{tabular}{c|cc|cc|cc}
+                Num. & \multicolumn{2}{c|}{Numpy} & \multicolumn{2}{c|}{Gauss} & \multicolumn{2}{c}{G.Escala} \\
+                Param. & $||R||_2$ & $||R||_\infty$ & $||R||_2$ & $||R||_\infty$ & $||R||_2$ & $||R||_\infty$ \\
+                \hline
+                6 &
+            \end{tabular}
+        \end{table}
 
         % \begin{figure}[hbt!]
         %     \begin{tikzpicture}
@@ -329,7 +359,7 @@ country={Brasil}}
 
     \section{Conclusão}
 
-        Foi possível testar problemas mais desafiadores ao passar de métodos de aproximação numérica de uma equação diferencial de primeira ordem para métodos que resolvem um sistema de equações. Para o problema proposto o Método de Runge-Kutta teve desempenho pior que o do Método de Fetkovich.
+
 
     % \label{}
 
@@ -343,6 +373,7 @@ country={Brasil}}
 \begin{description}
     \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3$).
     \item[$Bw$:]Fator volume de formação da água no reservatório ($m^3/m^3$).
+    \item[$D$:]Profundidade.
     \item[$\Delta x$:]Discretização espacial na direção $i$.
     \item[$\Delta y$:]Discretização espacial na direção $j$.
     \item[$\Delta z$:]Discretização espacial na direção $k$.
@@ -355,36 +386,12 @@ country={Brasil}}
     \item[$\phi$:]Porosidade da rocha.
     \item[$q_p$:]Vazão volumétrica da fase $p$.
     \item[$q^w_{cp}$:]Vazão mássica do componente $c$ na fase $p$.
+    \item[$q^{std}_{cp}$:]Vazão volumétrica da fase $p$ medida em condições padrão (\emph{standard}).
     \item[$\rho_p$:]Densidade da fase $p$.
     \item[$S_p$:]Saturação da fase $p$ no meio poroso.
-    \item[$V$:]Volume total do volume de controle.
+    \item[$V$:]Volume total do volume de controle (célula).
     \item[$v_p$:]Velocidade da fase $p$.
     \item[$y_{cp}$:]Concentração do componente $c$ na fase $p$.
-
-
-    % \item[$c_r$:]Compressibilidade do volume poroso ($1/bar$).
-    % \item[$c_{o,b}$:]Compressibilidade do óleo na pressão de bolha ($1/bar$).
-    % \item[$c_{aq}$:]Compressibilidade total do aquífero ($1/bar$).
-    % \item[$J$:]Índice de produtividade do aquífero ($m^3/d/bar$).
-    % \item[$N$:]Volume de óleo no reservatório, medido em condições padrão ($m^3$).
-    % \item[$N_i$:]Volume de óleo no reservatório inicial, medido em condições padrão ($m^3$).
-    % \item[$Np$:]Volume de óleo produzido, medido em condições padrão ($m^3$).
-    % \item[$p_{aq}$:]Pressão média do aquífero ($bar$).
-    % \item[$p_{i,aq}$:]Pressão inicial do aquífero ($bar$).
-    % \item[$p_b$:]Pressão de bolha do óleo ($bar$).
-    % \item[$p_{res}$:]Pressão na interface entre o aquífero e o reservatório ($bar$).
-    % \item[$p_{i,res}$:]Pressão inicial na interface entre o aquífero e o reservatório ($bar$).
-    % \item[$Pv$:]Volume poroso no reservatório ($m^3$).
-    % \item[$Pv_i$:]Volume poroso no reservatório na pressão inicial ($m^3$).
-    % \item[$Q_o$ ou $\frac{dNp}{dt}$:]Vazão de óleo produzido ($m^3/d$).
-    % \item[$Q_w$ ou $\frac{dW_e}{dt}$:]Vazão de água do aquífero para o reservatório ($m^3/d$).
-    % \item[$\Delta t_j$:]Diferença entre os tempos $t_{j-1}$ e $t_j$ ($d$).
-    % \item[$W_e$:]Volume de água acumulado do aquífero para o reservatório ($m^3$).
-    % \item[$W_{e,max}$:]Máximo influxo de água \emph{possível} do aquífero para o reservatório ($m^3$).
-    % \item[$(\Delta W_e)_j$:]Influxo de água entre os tempos $t_{j-1}$ e $t_j$ ($m^3$).
-    % \item[$W_{i,aq}$:]Volume inicial do aquífero ($m^3$).
-    % \item[$W_{res}$:]Volume de água no reservatório ($m^3$).
-    % \item[$W_{i,res}$:]Volume inicial de água no reservatório ($m^3$).
 \end{description}
 
 %% \section{}

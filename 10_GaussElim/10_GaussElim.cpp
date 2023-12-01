@@ -4,6 +4,7 @@
 #include <vector>
 #include <filesystem>
 #include <chrono>
+#include <cmath>
 
 // using namespace std;
 using namespace std::chrono;
@@ -135,7 +136,7 @@ double vecNorm2(const std::vector<double>& vector) {
     for (const auto& value : vector) {
         sum += value * value;
     }
-    return sum;
+    return sqrt(sum);
 }
 
 std::vector<double> getColumn(const std::vector<std::vector<double>>& matrix, size_t colIndex) {
@@ -297,19 +298,19 @@ void check_result(
     // printVector(x_out, output);
     // printVector(error, output);
     output << "  Maximum residual: " << error[MaxAbs(error)] << std::endl;
-    output << "  ||residual||^2: " << vecNorm2(error) << std::endl;
+    output << "  ||residual||: " << vecNorm2(error) << std::endl;
 
     output << "Provided True Response" << std::endl;
     std::vector<double> error_true = vecDif(b_vec, matMult(a_mat, x_true));
     // printVector(x_true, output);
     // printVector(error_true, output);
     output << "  Maximum residual: " << error_true[MaxAbs(error_true)] << std::endl;
-    output << "  ||residual||^2: " << vecNorm2(error_true) << std::endl;
+    output << "  ||residual||: " << vecNorm2(error_true) << std::endl;
 
     output << "Delta Responses" << std::endl;
     std::vector<double> x_delta = vecDif(x_true, x_out);
     // printVector(x_delta, output);
-    output << "  ||delta||^2: " << vecNorm2(x_delta) << std::endl;
+    output << "  ||delta||: " << vecNorm2(x_delta) << std::endl;
     output << "  Maximum difference: " << x_delta[MaxAbs(x_delta)] << std::endl;
     output << "  Maximum difference odd: " << x_delta[MaxAbs(x_delta, 0, x_delta.size(), 2)] << std::endl;
     output << "  Maximum difference even: " << x_delta[MaxAbs(x_delta, 1, x_delta.size(), 2)] << std::endl;
