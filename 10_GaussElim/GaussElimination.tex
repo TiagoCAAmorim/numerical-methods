@@ -213,12 +213,109 @@ country={Brasil}}
 
     \subsection{Método de Eliminação de Gauss}
 
-        Dado um sistema de $m$ equações lineares na forma:
+        Dado um sistema de $n$ equações lineares na forma:
 
-        % \begin{align}
-        %     &
-        % \end{align}
+        \begin{align}
+            \left[
+                \begin{array}{cccc}
+                    a_{1,1}    & a_{1,2}    & \ldots & a_{1,n} \\
+                    a_{2,1}    & a_{2,2}    & \ldots & a_{2,n} \\
+                    \vdots     & \vdots     &        & \vdots  \\
+                    a_{n,1}    & a_{n,2}    & \ldots & a_{n,n}
+                \end{array}
+            \right]
+            \begin{bmatrix}
+                x_{1}  \\
+                x_{2}  \\
+                \vdots \\
+                x_{n}
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                b_{1}  \\
+                b_{2}  \\
+                \vdots \\
+                b_{n}
+            \end{bmatrix}
+        \end{align}
 
+
+            O Método de Eliminação de Gauss consiste em realizar sucessivas operações de soma e multiplicação com as equações de forma a formar um novo conjunto de equações lineares equivalentes em forma triangular:
+
+            \begin{align}
+                \left[
+                    \begin{array}{cccc}
+                        a'_{1,1}   & a'_{1,2}   & \ldots & a'_{1,n} \\
+                        0          & a'_{2,2}   & \ldots & a'_{2,n} \\
+                        \vdots     & \vdots     &        & \vdots   \\
+                        0          & \ldots     & 0      & a'_{n,n}
+                    \end{array}
+                \right]
+                \begin{bmatrix}
+                    x_{1}  \\
+                    x_{2}  \\
+                    \vdots \\
+                    x_{n}
+                \end{bmatrix}
+                =
+                \begin{bmatrix}
+                    b'_{1}  \\
+                    b'_{2}  \\
+                    \vdots \\
+                    b'_{n}
+                \end{bmatrix}
+        \end{align}
+
+            Em geral, à exceção da primeira equação, os parâmetros $a'$ e $b'$ serão diferentes dos parâmetros $a$ e $b$ do sistema original, mas o vetor de respostas $\overrightarrow{x}=\{x_1,x_2,\ldots,x_n\}$ será o mesmo. A vantagem da forma triangular é que os valores de $x_i$ podem ser encontrados por substituição regressiva (de $x_n$ para $x_1$):
+
+            \begin{align}
+                x_{i} = \frac{b'_i - \sum_{j=i+1}^{n} a'_{i,j} x_j}{a'_{i,i}}, \; \text{com} \; i=n,n-2,\ldots,1 \label{eq:subsregressiva}
+            \end{align}
+
+            O processo de eliminação de Gauss, para transformar o sistema de equações original em um sistema de forma triangular, é feito de maneira sucessiva, anulando os valores da i-ésima coluna de todas as linhas abaixo da i-ésima linha.
+            O algoritmo de eliminação de Gauss segue a seguinte lógica:
+
+            \begin{subequations}
+                \begin{align}
+                    a^{(k+1)}_{i,j} &= a^{(k)}_{i,j} - \frac{a^{(k)}_{i,k}}{a^{(k)}_{k,k}} a^{(k)}_{k,j}  \\
+                    b^{(k+1)}_{i} &= b^{(k)}_{i} - \frac{a^{(k)}_{i,k}}{a^{(k)}_{k,k}} b^{(k)}_{k}
+                \end{align} \label{eq:atualizacao}
+            \end{subequations}
+
+            \noindent com
+            \begin{align}
+                k &= 1,2,\ldots,n-1 \nonumber \\
+                i &= k+1,k+2,\ldots,n \nonumber \\
+                j &= k,k+1,\ldots,n \nonumber
+            \end{align}
+
+            \noindent e
+            \begin{itemize}
+                \item[] $a^{(k)}_{i,j}$ é o valor da matriz de coeficientes na posição $(i,j)$ após o k-ésimo passo\footnote{Seguindo esta notação: $a'_{i,j} = a^{(i-1)}_{i,j}$.}
+                \item[] $b^{(k)}_{i}$ é o valor do vetor de constantes na posição $(i)$ após o k-ésimo passo\footnote{De forma correspondente: $b'_i = b^{(i-1)}_i$.}
+            \end{itemize}
+
+            Como em \ref{eq:atualizacao} o termo $a^{(k)}_{k,k}$ (pivô) não pode ser nulo, pode ser necessário trocar a ordem de algumas das equações. Esta operação é o pivotamento parcial. Mesmo quando o termo não é nulo, é uma boa estratégia fazer o pivotamento para reduzir erros de arredondamento ($a^{(k)}_{k,k}$ muito pequeno). Diferentes estratégias podem ser aplicadas para escolher que equações que devem trocar de lugar:
+
+            \begin{itemize}
+                \item Quando $a^{(k)}_{k,k}=0$, trocar com a \emph{próxima} linha (menor $p$, tal que $k \leq p \leq n$) com $a^{(k)}_{p,k} \neq 0$ (Eliminação de Gauss com Substituição Regressiva).
+                \item Trocar com a \emph{próxima} linha que maximiza o módulo do pivô: $|a^{(k)}_{p,k}|=\max_{k \leq i \leq n} |a^{(k)}_{i,k}|$ (Eliminação de Gauss com Pivotamento Parcial)
+                \item Trocar com a \emph{próxima} linha que maximiza o módulo do pivô com relação aos elementos da sua linha: $\frac{|a^{(k)}_{p,k}|}{\max_{1 \leq j \leq n} |a_{p,j}|}=\max_{k \leq i \leq n} \frac{|a^{(k)}_{i,k}|}{\max_{1 \leq j \leq n} |a_{i,j}|}$ (Eliminação de Gauss com Pivotamento Parcial com Escala)
+            \end{itemize}
+
+            Se, após a troca, $a^{(k)}_{k,k}$ continuar nulo, o sistema não tem resposta única. O algoritmo deve retornar que não consegue resolver o sistema de equações.
+
+            Resumindo, o Método de Eliminação de Gauss se resume a:
+
+            \begin{enumerate}
+                \item Da primeira à penúltima linha ($k = 1,2,\ldots,n-1$):
+                \begin{enumerate}
+                    \item Avaliar realizar pivotamento em função de algum dos critérios enumerados acima.
+                    \item Se $a^{(k)}_{k,k}=0$, emitir mensagem de erro e sair do código.
+                    \item Aplicar \ref{eq:atualizacao} aos elementos das linhas seguintes ($i = k+1,k+2,\ldots,n$).
+                \end{enumerate}
+                \item Aplicar \ref{eq:subsregressiva} e retornar o vetor de respostas $\overrightarrow{x}=\{x_1,x_2,\ldots,x_n\}$.
+            \end{enumerate}
 
     \subsection{Fluxo Bifásico Incompressível em Meio Poroso}
 
