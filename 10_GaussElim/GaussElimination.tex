@@ -49,6 +49,9 @@
 \algrenewcommand\algorithmicforall{\textbf{Para todos}}
 \algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
 
+\newcommand*{\squareb}{\textcolor{black}{\rule{0.5em}{0.5em}}}
+\newcommand*{\squareg}{\textcolor{gray}{\rule{0.5em}{0.5em}}}
+
 % \usepackage[fleqn]{nccmath}
 % \usepackage{multicol}
 
@@ -261,16 +264,16 @@ country={Brasil}}
             \bigskip
             \renewcommand{\arraystretch}{0.8}
             \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
-                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
+                \squareb & \squareb & \squareg &          &          &          &           &          &          &          \\
+                \squareb & \squareb & \squareg &          &          &          &           &          &          &          \\
+                \squareg &           & \squareb & \squareb & \squareg &          &           &          &          &          \\
+                \squareg &           & \squareb & \squareb & \squareg &          &           &          &          &          \\
+                         &           & \squareg &          & \squareb & \squareb & \squareg  &          &          &          \\
+                         &           & \squareg &          & \squareb & \squareb & \squareg  &          &          &          \\
+                         &           &          & $\ddots$ &          &          & $\ddots$  & $\ddots$ &          &          \\
+                         &           &          &          &          &          &           &          &          &          \\
+                         &           &          &          &          &          & \squareg  &          & \squareb & \squareb \\
+                         &           &          &          &          &          & \squareg  &          & \squareb & \squareb \\
             \end{tabularx}
         \end{table}
 
@@ -282,16 +285,16 @@ country={Brasil}}
             \bigskip
             \renewcommand{\arraystretch}{0.8}
             \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
-                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} &  $\ddots$                              & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
-                \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
+                \squareb & \squareb & \squareg &          &          &          & \squareg &          &          &          \\
+                \squareb & \squareb & \squareg &          &          &          & \squareg &          &          &          \\
+                \squareg &          & \squareb & \squareb & \squareg &          &          & $\ddots$ &          &          \\
+                \squareg &          & \squareb & \squareb & \squareg &          &          &          &          &          \\
+                         &          & \squareg &          & \squareb & \squareb & \squareg &          &          &          \\
+                         &          & \squareg &          & \squareb & \squareb & \squareg &          &          &          \\
+                \squareg &          &          & $\ddots$ &          &          & $\ddots$ & $\ddots$ &          &          \\
+                \squareg &          &          &          &          &          &          &          &          &          \\
+                         & $\ddots$ &          &          &          &          & \squareg &          & \squareb & \squareb \\
+                         &          &          &          &          &          & \squareg &          & \squareb & \squareb \\
             \end{tabularx}
         \end{table}
 
