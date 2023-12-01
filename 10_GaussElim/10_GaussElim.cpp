@@ -418,7 +418,6 @@ int main(){
     // test01();
     std::ofstream outputFile("results.txt");
     if (outputFile.is_open()) {
-        tests(outputFile, false);
         tests(outputFile, true);
         outputFile.close();
     } else {
