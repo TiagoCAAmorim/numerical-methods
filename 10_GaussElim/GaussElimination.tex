@@ -141,7 +141,7 @@
 %%             country={}}
 %% \fntext[label3]{}
 
-\title{Performance do Método de Eliminação de Gauss para Resolver Sistema de Equações de Problemas de Fluxo em Meio Poroso\tnoteref{label_title}}
+\title{Performance do Método de Eliminação de Gauss para Resolver Sistema de Equações de Problemas de Fluxo em Meio Poroso Incompressíveis\tnoteref{label_title}}
 \tnotetext[label_title]{Relatório número 10 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
 
 %% use optional labels to link authors explicitly to addresses:
@@ -172,7 +172,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-    Uma simulação de fluxo em meio poroso depende da resolução de um conjunto de equações não lineares a cada passo de tempo. Para modelos incompressíveis este conjunto de equações é \emph{fracamente} não linear, e o Método do Ponto Fixo é uma opção de método de solução. Para resolver uma iteração do Método do Ponto Fixo foi avaliado o uso do Método de Eliminação de Gauss com Pivotamento Parcial com Escala.
+    Uma simulação de fluxo em meio poroso depende da resolução de um conjunto de equações não lineares a cada passo de tempo. Para modelos incompressíveis este conjunto de equações é \emph{fracamente} não linear, e o Método do Ponto Fixo é uma opção de método de solução. A cada iteração do Método do Ponto Fixo é preciso resolver um sistema de equações lineares, e foi avaliado o uso do Método de Eliminação de Gauss com Pivotamento Parcial com Escala para realizar esta etapa dos cálculos.
     Os testes realizados mostraram que o Método de Eliminação de Gauss gera bons resultados. O uso de escala não afetou a qualidade das respostas. Também ficou evidente que é um método computacionalmente lento.
 
 \end{abstract}
@@ -207,7 +207,9 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
+    Ao longo de uma simulação de fluxo em meio poroso é preciso repetidamente resolver sistemas de equações não lineares. Diferentes métodos podem ser utilizados nesta resolução, como o método de Newton-Raphson ou o do Ponto Fixo. Ambos métodos precisam resolver sistemas de equações lineares a cada iteração.
 
+    Este trabalho avalia a aplicabilidade do Método de Eliminação de Gaus com Pivotamento Parcial com Escala para resolver o sistema de equações lineares de uma iteração do Método do Ponto Fixo. A avaliação é feita para um modelo de fluxo em meio poroso incompressível com duas fases (água e óleo).
 
 \section{Metodologia}
 
@@ -289,19 +291,29 @@ country={Brasil}}
                 j &= k,k+1,\ldots,n \nonumber
             \end{align}
 
-            \noindent e
+            \noindent onde
             \begin{itemize}
                 \item[] $a^{(k)}_{i,j}$ é o valor da matriz de coeficientes na posição $(i,j)$ após o k-ésimo passo\footnote{Seguindo esta notação: $a'_{i,j} = a^{(i-1)}_{i,j}$.}
                 \item[] $b^{(k)}_{i}$ é o valor do vetor de constantes na posição $(i)$ após o k-ésimo passo\footnote{De forma correspondente: $b'_i = b^{(i-1)}_i$.}
             \end{itemize}
 
-            Como em \ref{eq:atualizacao} o termo $a^{(k)}_{k,k}$ (pivô) não pode ser nulo, pode ser necessário trocar a ordem de algumas das equações. Esta operação é o pivotamento parcial. Mesmo quando o termo não é nulo, é uma boa estratégia fazer o pivotamento para reduzir erros de arredondamento ($a^{(k)}_{k,k}$ muito pequeno). Diferentes estratégias podem ser aplicadas para escolher que equações que devem trocar de lugar:
+            Como em \ref{eq:atualizacao} o termo $a^{(k)}_{k,k}$ (pivô) não pode ser nulo, pode ser necessário trocar a ordem de algumas das equações. Esta operação é o pivotamento parcial. Mesmo quando o termo não é nulo, é uma boa estratégia fazer o pivotamento para reduzir erros de arredondamento (e.g.: $a^{(k)}_{k,k}$ muito pequeno). Diferentes estratégias podem ser utilizadas para escolher que equações que devem trocar de lugar (em ordem de menos para mais sofisticada):
 
-            \begin{itemize}
-                \item Quando $a^{(k)}_{k,k}=0$, trocar com a \emph{próxima} linha (menor $p$, tal que $k \leq p \leq n$) com $a^{(k)}_{p,k} \neq 0$ (Eliminação de Gauss com Substituição Regressiva).
-                \item Trocar com a \emph{próxima} linha que maximiza o módulo do pivô: $|a^{(k)}_{p,k}|=\max_{k \leq i \leq n} |a^{(k)}_{i,k}|$ (Eliminação de Gauss com Pivotamento Parcial)
-                \item Trocar com a \emph{próxima} linha que maximiza o módulo do pivô com relação aos elementos da sua linha: $\frac{|a^{(k)}_{p,k}|}{\max_{1 \leq j \leq n} |a_{p,j}|}=\max_{k \leq i \leq n} \frac{|a^{(k)}_{i,k}|}{\max_{1 \leq j \leq n} |a_{i,j}|}$ (Eliminação de Gauss com Pivotamento Parcial com Escala)
-            \end{itemize}
+            \begin{enumerate}
+                \item Eliminação de Gauss com Substituição Regressiva
+                \begin{itemize}
+                    \item [] Quando $a^{(k)}_{k,k}=0$, trocar com a \emph{próxima} linha (menor $p$, tal que $k \leq p \leq n$) com $a^{(k)}_{p,k} \neq 0$.
+                \end{itemize}
+                \item Eliminação de Gauss com Pivotamento Parcial
+                \begin{itemize}
+                    \item[] Trocar com a \emph{próxima} linha que maximiza o módulo do pivô: $|a^{(k)}_{p,k}|=\max_{k \leq i \leq n} |a^{(k)}_{i,k}|$
+                \end{itemize}
+                \item Eliminação de Gauss com Pivotamento Parcial com Escala
+                \begin{itemize}
+                    \item[] Trocar com a \emph{próxima} linha que maximiza o módulo do pivô com relação aos elementos da sua linha:
+                    \item[] $\frac{|a^{(k)}_{p,k}|}{\max_{1 \leq j \leq n} |a_{p,j}|}=\max_{k \leq i \leq n} \frac{|a^{(k)}_{i,k}|}{\max_{1 \leq j \leq n} |a_{i,j}|}$
+                \end{itemize}
+            \end{enumerate}
 
             Se, após a troca, $a^{(k)}_{k,k}$ continuar nulo, o sistema não tem resposta única. O algoritmo deve retornar que não consegue resolver o sistema de equações.
 
@@ -310,16 +322,18 @@ country={Brasil}}
             \begin{enumerate}
                 \item Da primeira à penúltima linha ($k = 1,2,\ldots,n-1$):
                 \begin{enumerate}
-                    \item Avaliar realizar pivotamento em função de algum dos critérios enumerados acima.
+                    \item Realizar pivotamento em função de algum dos critérios enumerados acima (1,2 ou 3).
                     \item Se $a^{(k)}_{k,k}=0$, emitir mensagem de erro e sair do código.
                     \item Aplicar \ref{eq:atualizacao} aos elementos das linhas seguintes ($i = k+1,k+2,\ldots,n$).
                 \end{enumerate}
                 \item Aplicar \ref{eq:subsregressiva} e retornar o vetor de respostas $\overrightarrow{x}=\{x_1,x_2,\ldots,x_n\}$.
             \end{enumerate}
 
+            Como o método realiza, a cada passo, operações em todas as linhas abaixo da linha atual, é de se esperar que as operações necessárias cresçam muito rapidamente com o número de variáveis\footnote{Maiores discussões em \cite{burden2016analise}.}.
+
     \subsection{Fluxo Bifásico Incompressível em Meio Poroso}
 
-        As equações que regem o problema de fluxo em meio poroso deriva fundamentalmente da equação de conservação de massa \ref{eq:consmassa} com a equação de fluxo em meio poroso\ref{eq:darcy}, a lei de Darcy \cite{dake1983fundamentals}.
+        As equações que regem o problema de fluxo em meio poroso derivam fundamentalmente da equação de conservação de massa \ref{eq:consmassa} e da equação de fluxo em meio poroso \ref{eq:darcy}, a lei de Darcy \cite{dake1983fundamentals}.
 
         \begin{align}
             &\sum_{p} \nabla \cdot  (y_{cp} \rho_p v_p) + \sum_{p} (y_{cp} \rho_p q_p) + \sum_{p} \frac{\partial}{\partial t} \left( \phi y_{cp} \rho_p S_p\right) = 0 \label{eq:consmassa} \\
@@ -334,9 +348,11 @@ country={Brasil}}
             & + q_{cp}^{w} = \frac{1}{\Delta t} \sum_{p} (V \phi y_{cp} \rho_p S_p)_i^{t_i+\Delta t} - (V \phi y_{cp} \rho_p S_p)_i^{t_i} \label{eq:geralumd}
         \end{align}
 
-        Na sua forma mais geral o problema de fluxo em meio poroso precisa ser resolvido para cada um dos componentes que constituem as fases envolvidas. É comum utilizar uma abordagem simplificada, em que poucos componentes são utilizados para representar os fluidos envolvidos. Esta simplificação é usualmente aplicada quando as trocas de fase são \emph{bem comportadas} e passíveis de serem representadas por um conjunto de tabelas, em substituição às equações de estado. Esta abordagem é conhecida como \emph{Black-Oil}. As equações também se simplificam ao substituir as densidades ($\rho_p$) e concentrações de componentes ($y_{cp}$) pelo fator volume de formação da fase ($B$) e as relações volumétricas entre as fases e os componentes ($R$)\footnote{Ver dedução completa em \cite{dake1983fundamentals}.}.
+        Na sua forma mais geral o problema de fluxo em meio poroso precisa ser resolvido para cada um dos componentes que constituem as fases envolvidas. É comum utilizar uma abordagem simplificada, em que poucos componentes são utilizados para representar os fluidos envolvidos. Esta simplificação é usualmente aplicada quando as trocas de fase são \emph{bem comportadas} e passíveis de serem representadas por um conjunto de tabelas, em substituição às equações de estado. Esta abordagem é conhecida como \emph{Black-Oil}.
 
-        Quando apenas água e óleo estão envolvidos na simulação, apenas duas equações de conservação de massa são necessárias. Como a soma das saturações é igual à unidade ($S_w + S_o = 1$) e negligenciando a tensão interfacial entre a água e o óleo ($p_o = p_w = p$), para cada célula é preciso resolver apenas duas variáveis: $p$ e $S_w$.
+        As equações também se simplificam ao substituir as densidades ($\rho_p$) e concentrações de componentes ($y_{cp}$) pelo fator volume de formação da fase ($B$) e as relações volumétricas entre as fases e os componentes ($R$)\footnote{Ver dedução completa em \cite{dake1983fundamentals}.}.
+
+        Quando apenas água e óleo estão envolvidos na simulação, apenas duas equações de conservação de massa são necessárias. Como a soma das saturações é igual à unidade ($S_w + S_o = 1$) e negligenciando a tensão interfacial entre a água e o óleo ($p_o = p_w = p$), para cada célula é preciso resolver apenas duas variáveis: $p$ e $S_w$:
 
         \begin{align}
             &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
@@ -352,7 +368,7 @@ country={Brasil}}
             \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
         \end{align}
 
-        Observa-se que a pressão ($p$) e a saturação de água ($S_w$) da i-ésima célula tem influência apenas na própria célula e nas células vizinhas. Desta forma, a matriz dos coeficientes deste problema é diagonalmente dominante (tabela \ref{tab:unidimensional}\footnote{Os quadrados em preto e cinza indicam os valores não nulos da matriz, associados, respetivamente, às equações da própria célula e da célula com as células vizinhas.}).
+        Observa-se que a pressão ($p$) e a saturação de água ($S_w$) da i-ésima célula tem influência apenas na própria célula e nas células vizinhas. Desta forma, a matriz dos coeficientes deste problema tem termos não nulos em três \emph{bandas} ao redor da diagonal principal (tabela \ref{tab:unidimensional}\footnote{Os quadrados em preto e cinza indicam os valores não nulos da matriz, associados, respectivamente, aos termos das equações com os parâmetros da própria célula e com os parâmetros das células vizinhas.}).
 
         \begin{table}
             \centering
@@ -374,7 +390,7 @@ country={Brasil}}
             \end{tabularx}
         \end{table}
 
-        Na forma bi e tridimensional de \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} são adicionados termos de conexão com as células vizinhas nas direções $j$ e $k$, utilizando termos equivalentes aos apresentados para a direção $i$. Na matriz de coeficientes aparecem novos valores não nulos fora da diagonal (tabela \ref{tab:bidimensional}).
+        Na forma bi e tridimensional de \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} são adicionados termos de conexão com as células vizinhas nas direções $j$ e $k$, utilizando termos equivalentes aos apresentados para a direção $i$. Na matriz de coeficientes aparecem novos valores não nulos fora da diagonal principal (tabela \ref{tab:bidimensional}).
         \begin{table}
             \centering
             \caption{Formato da matrix de coeficientes para modelo bidimensional.}
@@ -400,9 +416,9 @@ country={Brasil}}
 
             Em uma simulação \emph{Black-Oil} com água e óleo, a simulação de fluxo parte de um conjunto de valores de $p$ e $S_w$ no tempo inicial, para cada uma das células, e uma série de controles de produção ($q^{std}_p$). O simulador precisa resolver o conjunto de equações não lineares \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} a cada passo de tempo.
 
-            A implementação mais conhecida para resolver este conjunto de equações não lineares é o Método de Newton-Raphson. Para sistemas incompressíveis ($\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não linear, e apenas os valores de $k_{ro}$ e $k_{rw}$ são função das variáveis de estado. O conjunto de equações resultantes pode ser resolvido adequadamente com o Método do Ponto Fixo. As equações são resolvidas como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
+            A implementação mais conhecida para resolver este conjunto de equações não lineares é o Método de Newton-Raphson. Para sistemas incompressíveis (onde $\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não linear, e apenas os valores de $k_{ro}$ e $k_{rw}$ são função das variáveis de estado. O conjunto de equações resultantes pode ser resolvido adequadamente com o Método do Ponto Fixo. As equações são resolvidas como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
 
-            A proposta deste trabalho é avaliar a performance do Método de Eliminação de Gauss com Pivotamento Parcial (troca de linhas) e Escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador, desenvolvido em Python, encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram gerados arquivos csv com as matrizes de coeficientes e vetores de constantes para a resolução de uma iteração do Método do Ponto Fixo, para diferentes refinamentos de malha.
+            A proposta deste trabalho é avaliar a performance do Método de Eliminação de Gauss com Pivotamento Parcial com Escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador, desenvolvido em Python, encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram gerados arquivos CSV com as matrizes de coeficientes e vetores de constantes para a resolução de uma iteração do Método do Ponto Fixo, para diferentes refinamentos de malha.
 
             Também foram exportados os resultados de cada uma das respostas destes sistemas de equações. No simulador de fluxo a resolução do sistema de equações foi feito com o pacote Numpy. Segundo a documentação do pacote, são utilizadas rotinas do LAPACK \cite{dongarra1992lapack}.
 
@@ -412,12 +428,12 @@ country={Brasil}}
 
         \begin{description}
             \item[readCSV] Função que recebe um \emph{string} com o camimnho de um arquivo CSV e faz a sua leitura. É assumido que é utilizado vírgula como separador. A função retorna uma matrix de \emph{double}.
-            \item[SolveGauss] Função que recebe uma matrix de \emph{double} e um vetor de \emph{double}, e resolve o sistema de equações lineares usando eliminação por Gauss com pivotamento parcial. Existe a opção de realizar o pivotamento com e sem uso de escala (opção padrão e com uso de escala).
+            \item[SolveGauss] Função que recebe uma matrix de \emph{double} e um vetor de \emph{double}, e resolve o sistema de equações lineares usando Eliminação de Gauss com Pivotamento Parcial. Existe a opção de realizar o pivotamento com e sem uso de escala.
         \end{description}
 
 \section{Resultados}
 
-        Foram realizadas duas avaliações. A primeira foi da qualidade das respostas encontradas com o Método de Eliminação de Gauss. Foram comparadas as respostas do método de solução de sistema de equações lineares utilizado no simulador de fluxo em meio poroso (do pacote Numpy), com as respostas da implementação do Método de Eliminação de Gauss. Foram feitos testes com as duas variações: sem e com uso de escala.
+        Foram realizadas duas avaliações. A primeira foi da qualidade das respostas encontradas com o Método de Eliminação de Gauss. As respostas da implementação do Método de Eliminação de Gauss foram comparadas com as respostas do método de solução de sistema de equações lineares utilizado no simulador de fluxo em meio poroso (do pacote Numpy). Foram feitos testes com as duas variações do Método de Eliminação de Gauss: sem e com uso de escala.
 
         A medida da qualidade das respostas de cada método foi baseada no residual na forma $R = Ax-B$, onde $A$ é a matriz de coeficientes, $B$ é o vetor de constantes e $x$ é o vetor da solução do sistema linear $Ax=B$. Foram avaliadas duas normas do vetor residual: $L^2$ (\ref{eq:normadois}) e $L^\infty$ (\ref{eq:normainf}).
 
@@ -471,7 +487,7 @@ country={Brasil}}
             \label{fig:normaeleinf}
         \end{figure}
 
-        O Método de Eliminação de Gauss com Pivotamento Parcial com Escala gera resultados de boa qualidade, mesmo para sistemas com um grande número de variáveis (figura \ref{fig:errodois}), mas é um método lento. A figura \ref{fig:tempo} mostra que o tempo necessário para resolver cada um dos sistemas de equações propostos cresce rapidamente. Um modelo de fluxo bidimensional com 80 divisões em cada direção tem um total de $80 \times 80 \times 2 = 12.800$ variáveis. A solução de uma iteração deste modelo tomou mais de 6 horas para ser completada\footnote{Testes realizados com uma CPU Intel Core i7-8550U.}.
+        O Método de Eliminação de Gauss com Pivotamento Parcial com Escala gera resultados de boa qualidade, mesmo para sistemas com um grande número de variáveis (figura \ref{fig:errodois}), mas, como esperado, é um método lento. A figura \ref{fig:tempo} mostra que o tempo necessário para resolver cada um dos sistemas de equações propostos cresce rapidamente. Um modelo de fluxo bidimensional com 80 divisões em cada direção tem um total de $80 \times 80 \times 2 = 12.800$ variáveis. A solução de uma iteração deste modelo tomou mais de 6 horas para ser completada\footnote{Testes realizados com uma CPU Intel Core i7-8550U.}.
 
         \begin{figure}[hbt!]
             \begin{tikzpicture}
@@ -499,7 +515,6 @@ country={Brasil}}
                     legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
                     ]
                     \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=Minutes] {results_with_scaling_table.txt};
-                    % \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
                 \end{semilogyaxis}
             \end{tikzpicture}
             \caption{Tempo necessário para resolver sistemas de equações com o Método de Eliminação de Gauss com Pivotamento Parcial com Escala.}
