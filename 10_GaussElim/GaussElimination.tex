@@ -295,9 +295,9 @@ country={Brasil}}
 
             Em uma simulação \emph{Black-Oil} com água e óleo, a simulação de fluxo parte de um conjunto de valores de $p$ e $S_w$ no tempo inicial, para cada uma das células, e uma série de controles de produção ($q^{std}_p$). O simulador precisa resolver o conjunto de equações não-lineares \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} a cada passo de tempo.
 
-            A implementação mais conhecida para resolver este conjunto de equações é o método de Newton-Raphson. Para sistemas incompressíveis ($\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não-linear. O conjunto de equações resultantes pode ser resolvido adequadamente como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
+            A implementação mais conhecida para resolver este conjunto de equações não-lineares é o Método de Newton-Raphson. Para sistemas incompressíveis ($\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não-linear, e apenas os valores de $k_{ro}$ e $k_{rw}$ são função das variáveis de estado. O conjunto de equações resultantes pode ser resolvido adequadamente com o Método do Ponto Fixo. As equações são resolvidas como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
 
-            A proposta deste trabalho é avaliar a performance do método de eliminação de Gauss, com pivotamento parcial (troca de linhas) com escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram geradas matrizes de coeficientes e vetores de constantes da resolução de uma iteração, para diferentes refinamentos de malha.
+            A proposta deste trabalho é avaliar a performance do Método de Eliminação de Gauss com Pivotamento Parcial (troca de linhas) e Escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador, desenvolvido em Python, encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram gerados arquivos csv com as matrizes de coeficientes e vetores de constantes para a resolução de uma iteração do Método do Ponto Fixo, para diferentes refinamentos de malha.
 
             Também foram exportados os resultados de cada uma das respostas destes sistemas de equações. No simulador de fluxo a resolução do sistema de equações foi feito com o pacote Numpy. Segundo a documentação do pacote, são utilizadas rotinas do LAPACK \cite{dongarra1992lapack}.
 
@@ -312,54 +312,100 @@ country={Brasil}}
 
 \section{Resultados}
 
-        Foram realizadas duas avaliações. A primeira foi da qualidade das respostas encontradas com o método da eliminação de Gauss. Foram comparadas as respostas do método de solução de sistema de equações lineares utilizado no simulador de fluxo em meio poroso (do pacote Numpy), com as respostas da implementação do método da eliminação de Gauss. Foram feitos testes com as duas variações: sem e com uso de escala.
+        Foram realizadas duas avaliações. A primeira foi da qualidade das respostas encontradas com o Método de Eliminação de Gauss. Foram comparadas as respostas do método de solução de sistema de equações lineares utilizado no simulador de fluxo em meio poroso (do pacote Numpy), com as respostas da implementação do Método de Eliminação de Gauss. Foram feitos testes com as duas variações: sem e com uso de escala.
 
-        A medida da qualidade das respostas de cada método foi baseada no residual na forma $R = Ax-B$, onde $A$ é a matriz de coeficientes, $B$ é o vetor de constantes e $x$ é a reposta da solução do sistema linear $Ax=B$. Foram avaliadas duas normas do vetor residual: $L^2$ (\ref{eq:normadois}) e $L^\infty$ (\ref{eq:normainf}).
+        A medida da qualidade das respostas de cada método foi baseada no residual na forma $R = Ax-B$, onde $A$ é a matriz de coeficientes, $B$ é o vetor de constantes e $x$ é o vetor da solução do sistema linear $Ax=B$. Foram avaliadas duas normas do vetor residual: $L^2$ (\ref{eq:normadois}) e $L^\infty$ (\ref{eq:normainf}).
 
         \begin{align}
             ||x||_2 &:= \sqrt{\sum_{i}x_i^2} \label{eq:normadois} \\
             ||x||_\infty &:= \max_{i} |x_i| \label{eq:normainf}
         \end{align}
 
+        As figuras \ref{fig:normaeledois} e \ref{fig:normaeleinf} comparam as normas dos residuais da solução dos sistemas de equações propostos com três métodos:
+        \begin{itemize}
+            \item Eliminação de Gauss com Pivotamento Parcial
+            \item Eliminação de Gauss com Pivotamento Parcial e Escala
+            \item \emph{Rotinas do Numpy}\footnote{Este residual foi calculado com base nas respostas geradas com as rotinas de cálculo utilizadas no simulador de fluxo. Estes resultados fazem parte desta comparação para representar respostas de \emph{melhor qualidade}.}
+        \end{itemize}
 
-        \begin{table}
-            \centering
-            \caption{Normas dos residuais de cada processo de solução de um sistema de equações.}
-            \label{tab:respostas}
-            \bigskip
-            % \renewcommand{\arraystretch}{1.0}
-            \small
-            \begin{tabular}{c|cc|cc|cc}
-                Num. & \multicolumn{2}{c|}{Numpy} & \multicolumn{2}{c|}{Gauss} & \multicolumn{2}{c}{G.Escala} \\
-                Param. & $||R||_2$ & $||R||_\infty$ & $||R||_2$ & $||R||_\infty$ & $||R||_2$ & $||R||_\infty$ \\
-                \hline
-                6 &
-            \end{tabular}
-        \end{table}
+        Observa-se que para o problema proposto de resolver sistemas de equações de um modelo de fluxo em meio poroso bidimensional, não há necessidade de usar escala no Método de Eliminação de Gauss. Uma segunda constatação é de que a qualidade das respostas geradas com o Método de Eliminação de Gauss é tão boa quanto a dos métodos numéricos implementados no Numpy, que seguramente são mais sofisticados que os métodos implementados para esta avaliação.
 
-        % \begin{figure}[hbt!]
-        %     \begin{tikzpicture}
-        %         \begin{semilogyaxis}[
-        %             grid=both,
-        %             xlabel = {$t$},
-        %             ylabel = {$|w_i-y(t)|/|y(t)|$},
-        %             legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
-        %             ]
-        %             \addplot[color=blue, solid, smooth, thick] table [x=t, y=S_error] {test1_rungekutta4_intN.txt};
-        %             \addplot[color=black, solid, smooth, thick] table [x=t, y=y2_err] {test1_rungekutta4_intRK.txt};
-        %             \legend{Simpson+Trapézio, Runge-Kutta};
-        %         \end{semilogyaxis}
-        %     \end{tikzpicture}
-        %     \caption{Erro da aproximação da acumulada de $y(t)$ com o método de Runge-Kutta de quarta ordem e por integração numérica com Simpson e Trapézio Composto, do PVI número \ref{item:pvi1}.}
-        %     \label{fig:teste1}
-        % \end{figure}
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {$||x||_2$},
+                    legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=NormR] {results_sens_table.txt};
+                    \addplot[color=red, dashed, smooth, thick, mark=o] table [x=Parameters, y=NormRScl] {results_sens_table.txt};
+                    \addplot[color=black, solid, smooth, thick, mark=*] table [x=Parameters, y=NormRTrue] {results_sens_table.txt};
+                    \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Norma $L^2$ do residual das soluções de sistemas de equações lineares com diferentes métodos.}
+            \label{fig:normaeledois}
+        \end{figure}
 
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {$||x||_\infty$},
+                    legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=MaxR] {results_sens_table.txt};
+                    \addplot[color=red, dashed, smooth, thick, mark=o] table [x=Parameters, y=MaxRScl] {results_sens_table.txt};
+                    \addplot[color=black, solid, smooth, thick, mark=*] table [x=Parameters, y=MaxRTrue] {results_sens_table.txt};
+                    \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Norma $L^\infty$ do residual das soluções de sistemas de equações lineares com diferentes métodos.}
+            \label{fig:normaeleinf}
+        \end{figure}
+
+        O Método de Eliminação de Gauss com Pivotamento Parcial e Escala gera resultados de boa qualidade, mesmo para sistemas com um grande número de variáveis (figura \ref{fig:errodois}), mas é um método lento. A figura \ref{fig:tempo} mostra que o tempo necessário para resolver cada um dos sistemas de equações propostos cresce rapidamente. Um modelo de fluxo bidimensional com 80 divisões em cada direção tem um total de $80 \times 80 \times 2 = 12.800$ variáveis. A solução de uma iteração deste modelo tomou mais de 6 horas para ser completada.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {$||x||$},
+                    legend style={at={(0.90,0.65)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=NormR] {results_with_scaling_table.txt};
+                    \addplot[color=red, solid, smooth, thick, mark=*] table [x=Parameters, y=MaxR] {results_with_scaling_table.txt};
+                    \legend{$||x||_2$, $||x||_\infty$};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Normas do residual das soluções dos sistemas de equações lineares resolvidos com o Método de Eliminação de Gauss com Pivotamento Parcial e Escala.}
+            \label{fig:errodois}
+        \end{figure}
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{semilogyaxis}[
+                    grid=both,
+                    xlabel = {Número de Parâmetros},
+                    ylabel = {Minutos},
+                    legend style={at={(0.90,0.85)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, smooth, thick, mark=*] table [x=Parameters, y=Minutes] {results_with_scaling_table.txt};
+                    % \legend{Elim.Gauss, Elim.Gauss+Esc., \emph{Numpy}};
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            \caption{Tempo necessário para resolver sistemas de equações com o Método de Eliminação de Gauss com Pivotamento Parcial e Escala.}
+            \label{fig:tempo}
+        \end{figure}
 
         O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/10_GaussElim/10_GaussElim.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
 
     \section{Conclusão}
 
-
+        O Método de Eliminação de Gauss com Pivotamento Parcial e Escala
 
     % \label{}
 
