@@ -297,24 +297,23 @@ void check_result(
     std::vector<double> error = vecDif(b_vec, matMult(a_mat, x_out));
     // printVector(x_out, output);
     // printVector(error, output);
-    output << "  Maximum residual: " << error[MaxAbs(error)] << std::endl;
+    output << "  Maximum residual: " << std::abs(error[MaxAbs(error)]) << std::endl;
     output << "  ||residual||: " << vecNorm2(error) << std::endl;
 
     output << "Provided True Response" << std::endl;
     std::vector<double> error_true = vecDif(b_vec, matMult(a_mat, x_true));
     // printVector(x_true, output);
     // printVector(error_true, output);
-    output << "  Maximum residual: " << error_true[MaxAbs(error_true)] << std::endl;
+    output << "  Maximum residual: " << std::abs(error_true[MaxAbs(error_true)]) << std::endl;
     output << "  ||residual||: " << vecNorm2(error_true) << std::endl;
 
     output << "Delta Responses" << std::endl;
     std::vector<double> x_delta = vecDif(x_true, x_out);
     // printVector(x_delta, output);
     output << "  ||delta||: " << vecNorm2(x_delta) << std::endl;
-    output << "  Maximum difference: " << x_delta[MaxAbs(x_delta)] << std::endl;
-    output << "  Maximum difference odd: " << x_delta[MaxAbs(x_delta, 0, x_delta.size(), 2)] << std::endl;
-    output << "  Maximum difference even: " << x_delta[MaxAbs(x_delta, 1, x_delta.size(), 2)] << std::endl;
-
+    output << "  Maximum difference: " << std::abs(x_delta[MaxAbs(x_delta)]) << std::endl;
+    output << "  Maximum difference odd: " << std::abs(x_delta[MaxAbs(x_delta, 0, x_delta.size(), 2)]) << std::endl;
+    output << "  Maximum difference even: " << std::abs(x_delta[MaxAbs(x_delta, 1, x_delta.size(), 2)]) << std::endl;
 }
 
 void test01(){
