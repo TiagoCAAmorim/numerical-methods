@@ -23,6 +23,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{multirow}
+\usepackage{tabularx}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
@@ -247,7 +248,7 @@ country={Brasil}}
             \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
         \end{align}
 
-        Observa-se que a pressão ($p$) e a saturação de água ($S_w$) da i-ésima célula tem influência apenas na própria célula e nas células vizinhas. Desta forma, a matriz dos coeficientes deste problema é diagonalmente dominante (tabela \ref{tab:unidimensional}\footnote{Os quadrados em preto e cinza indicam os valores não-nulos da matriz, associados, respetivamente, às equações da própria célula e da célula com suas vizinhas.}).
+        Observa-se que a pressão ($p$) e a saturação de água ($S_w$) da i-ésima célula tem influência apenas na própria célula e nas células vizinhas. Desta forma, a matriz dos coeficientes deste problema é diagonalmente dominante (tabela \ref{tab:unidimensional}\footnote{Os quadrados em preto e cinza indicam os valores não nulos da matriz, associados, respetivamente, às equações da própria célula e da célula com as células vizinhas.}).
 
         \begin{table}
             \centering
@@ -255,7 +256,7 @@ country={Brasil}}
             \label{tab:unidimensional}
             \bigskip
             \renewcommand{\arraystretch}{0.8}
-            \begin{tabular}{|cccccccccc|}
+            \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
                 \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
@@ -266,17 +267,17 @@ country={Brasil}}
                 \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
-            \end{tabular}
+            \end{tabularx}
         \end{table}
 
-        Na forma bi e tridimensional de \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} são adicionados termos de conexão com as células vizinhas nas direções $j$ e $k$, utilizando termos equivalentes aos apresentados para a direção $i$. Na matriz de coeficientes aparecem novos valores não-nulos fora da diagonal (tabela \ref{tab:bidimensional}).
+        Na forma bi e tridimensional de \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} são adicionados termos de conexão com as células vizinhas nas direções $j$ e $k$, utilizando termos equivalentes aos apresentados para a direção $i$. Na matriz de coeficientes aparecem novos valores não nulos fora da diagonal (tabela \ref{tab:bidimensional}).
         \begin{table}
             \centering
             \caption{Formato da matrix de coeficientes para modelo bidimensional.}
             \label{tab:bidimensional}
             \bigskip
             \renewcommand{\arraystretch}{0.8}
-            \begin{tabular}{|cccccccccc|}
+            \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
                 \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} &  $\ddots$                              & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
@@ -287,15 +288,15 @@ country={Brasil}}
                 \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{white}{\rule{0.5em}{0.5em}} & $\ddots$                               & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
                 \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{gray}{\rule{0.5em}{0.5em}}  & \textcolor{white}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}} & \textcolor{black}{\rule{0.5em}{0.5em}}  \\
-            \end{tabular}
+            \end{tabularx}
         \end{table}
 
         \subsection{Modelo de Reservatório Proposto}
             O modelo de reservatório é plano, com forma quadrada e mesmo refinamento em ambas direções ($\Delta i = \Delta j$). Existe um injetor de água em um dos cantos (célula [1,1]) e um produtor na diagonal oposta (célula [n,n]). As propriedades de rocha ($\phi$ e $k$) são constantes.
 
-            Em uma simulação \emph{Black-Oil} com água e óleo, a simulação de fluxo parte de um conjunto de valores de $p$ e $S_w$ no tempo inicial, para cada uma das células, e uma série de controles de produção ($q^{std}_p$). O simulador precisa resolver o conjunto de equações não-lineares \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} a cada passo de tempo.
+            Em uma simulação \emph{Black-Oil} com água e óleo, a simulação de fluxo parte de um conjunto de valores de $p$ e $S_w$ no tempo inicial, para cada uma das células, e uma série de controles de produção ($q^{std}_p$). O simulador precisa resolver o conjunto de equações não lineares \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo} a cada passo de tempo.
 
-            A implementação mais conhecida para resolver este conjunto de equações não-lineares é o Método de Newton-Raphson. Para sistemas incompressíveis ($\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não-linear, e apenas os valores de $k_{ro}$ e $k_{rw}$ são função das variáveis de estado. O conjunto de equações resultantes pode ser resolvido adequadamente com o Método do Ponto Fixo. As equações são resolvidas como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
+            A implementação mais conhecida para resolver este conjunto de equações não lineares é o Método de Newton-Raphson. Para sistemas incompressíveis ($\phi$, $B$ e $\mu$ são constantes) este conjunto de equações é \emph{fracamente} não linear, e apenas os valores de $k_{ro}$ e $k_{rw}$ são função das variáveis de estado. O conjunto de equações resultantes pode ser resolvido adequadamente com o Método do Ponto Fixo. As equações são resolvidas como um conjunto de equações lineares de modo iterativo, isto é, utilizando o resultado de uma iteração como dado de entrada para resolver os termos $k_{ro}$ e $k_{rw}$ da próxima iteração, até que a convergência é atingida.
 
             A proposta deste trabalho é avaliar a performance do Método de Eliminação de Gauss com Pivotamento Parcial (troca de linhas) e Escala. A partir de um código de fluxo em meio poroso bidimensional e incompressível\footnote{O código deste simulador, desenvolvido em Python, encontra-se em \href{https://github.com/TiagoCAAmorim/IntegratedModel/tree/test_matrix}{https://github.com/ TiagoCAAmorim/IntegratedModel/}} foram gerados arquivos csv com as matrizes de coeficientes e vetores de constantes para a resolução de uma iteração do Método do Ponto Fixo, para diferentes refinamentos de malha.
 
