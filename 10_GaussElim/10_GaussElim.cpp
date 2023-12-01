@@ -340,7 +340,7 @@ void test01(){
     check_result(matrix, vector, x_out, x_true, std::cout);
 }
 
-void tests(std::ostream& output, bool is_2D){
+void tests(std::ostream& output, bool is_2D, bool both_versions){
     std::string n;
     std::string n2 = "1";
     fs::path k_filename;
@@ -349,7 +349,6 @@ void tests(std::ostream& output, bool is_2D){
     fs::path x_est_filename;
 
     fs::path currentPath = fs::current_path();
-    // output << currentPath.string() << std::endl;
 
     std::vector<std::vector<double>> k_matrix;
     std::vector<double> f_vector;
@@ -357,7 +356,7 @@ void tests(std::ostream& output, bool is_2D){
     std::vector<double> x_est;
     std::vector<double> x_out;
 
-    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30}; //, 35, 40, 45, 50, 60, 70, 80, 90, 100};
+    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
     for (int i : a) {
         n = std::to_string(i);
         if (is_2D){
@@ -382,9 +381,9 @@ void tests(std::ostream& output, bool is_2D){
         // output << "  X vector = " << x_true.size() << " x 1" << std::endl;
         // output << "  X est vector = " << x_est.size() << " x 1" << std::endl;
 
-        output << "  Gauss Elimination with Partial Pivot" << std::endl;
+        output << "  Gauss Elimination with Partial Pivot and Scaling" << std::endl;
         auto start = high_resolution_clock::now();
-        x_out = SolveGauss(k_matrix, f_vector, false);
+        x_out = SolveGauss(k_matrix, f_vector, true);
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
         output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
@@ -392,19 +391,20 @@ void tests(std::ostream& output, bool is_2D){
         check_result(k_matrix, f_vector, x_out, x_true, output);
         output << std::endl;
 
-        output << "  Gauss Elimination with Partial Pivot and Scaling" << std::endl;
-        start = high_resolution_clock::now();
-        x_out = SolveGauss(k_matrix, f_vector, true);
-        stop = high_resolution_clock::now();
-        duration = duration_cast<milliseconds>(stop - start);
-        output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
+        if (both_versions){
+            output << "  Gauss Elimination with Partial Pivot" << std::endl;
+            start = high_resolution_clock::now();
+            x_out = SolveGauss(k_matrix, f_vector, false);
+            stop = high_resolution_clock::now();
+            duration = duration_cast<milliseconds>(stop - start);
+            output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
 
-        check_result(k_matrix, f_vector, x_out, x_true, output);
-        output << std::endl;
+            check_result(k_matrix, f_vector, x_out, x_true, output);
+            output << std::endl;
+        }
+
     }
 }
-
-
 
 int main(){
     #ifdef _WIN32
@@ -418,7 +418,7 @@ int main(){
     // test01();
     std::ofstream outputFile("results.txt");
     if (outputFile.is_open()) {
-        tests(outputFile, true);
+        tests(outputFile, true, false);
         outputFile.close();
     } else {
         std::cerr << "Unable to open the file for writing.\n";
