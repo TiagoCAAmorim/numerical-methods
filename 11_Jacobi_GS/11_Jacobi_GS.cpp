@@ -350,8 +350,10 @@ std::vector<double> SolveGauss(
         }
         for (size_t j=i+1; j<n; j++){
             m = a[n_line[j]][i] / a[n_line[i]][i];
-            for (size_t k=0; k<=n; k++){
-                a[n_line[j]][k] = a[n_line[j]][k] - m * a[n_line[i]][k];
+            if (m != 0.){
+                for (size_t k=0; k<=n; k++){
+                    a[n_line[j]][k] = a[n_line[j]][k] - m * a[n_line[i]][k];
+                }
             }
         }
     }
@@ -390,9 +392,8 @@ std::vector<double> SolveSRS(
     std::vector<double> x_old = x0_vec;
     std::vector<double> x_new(a_mat.size());
     size_t n = a_mat.size();
+    std::vector<double> dx;
     double a_x;
-    double max_x;
-    double max_dx;
     double conv;
 
     if (param_w <= 0.){
@@ -420,16 +421,20 @@ std::vector<double> SolveSRS(
             x_new[i] = (1 - param_w) * x_old[i] + param_w / a_mat[i][i] * (b_vec[i] - a_x);
         }
 
-        max_dx = MaxAbsValue(vecDif(x_new, x_old));
-        max_x = MaxAbsValue(x_new);
-        if (max_x < eps){
-            max_x = MaxAbsValue(x_old);
-            if (max_x < eps){
-                conv = 0.;
-                break;
+        dx = vecDif(x_new, x_old);
+        for (size_t i=0; i < n; i++){
+            if (dx[i] != 0.) {
+                if (std::abs(x_new[i]) > eps){
+                    dx[i] = std::abs(dx[i] / x_new[i]);
+                } else if (std::abs(x_old[i]) > eps){
+                    dx[i] = std::abs(dx[i] / x_old[i]);
+                } else{
+                    dx[i] = 0.;
+                }
             }
         }
-        conv = max_dx / max_x;
+        conv = MaxAbsValue(dx);
+
         if (conv < conv_tol){
             break;
         }
@@ -673,7 +678,8 @@ int main(){
     // test01();
     std::ofstream outputFile("results.txt");
     if (outputFile.is_open()) {
-        tests(outputFile, true, false, 1E-5, 1000, 0.8, 1.2);
+        tests(outputFile, false, false, 1E-5, 2000, 0.8, 1.2);
+        tests(outputFile, true, false, 1E-5, 2000, 0.8, 1.2);
         outputFile.close();
     } else {
         std::cerr << "Unable to open the file for writing.\n";
