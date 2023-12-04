@@ -113,13 +113,22 @@ void printMatrix(std::vector<std::vector<double>> matrix, std::ostream& output){
     }
 }
 
-void printVector(std::vector<double> vector, std::ostream& output){
+void printVector(const std::string name, const std::vector<double>& vector, std::ostream& output, size_t first, size_t step){
+    output << name;
     std::string sep = "{";
-    for (size_t i=0; i<vector.size(); i++){
+    for (size_t i=first; i<vector.size(); i+=step){
         output << sep << vector[i];
         sep = ", ";
     }
-    output << "}" << std::endl;
+    output << "}";
+}
+void printVector(const std::string name, const std::vector<double>& vector, std::ostream& output){
+    printVector(name, vector, output, 0, 1);
+    output << std::endl;
+}
+void printVector(const std::vector<double>& vector, std::ostream& output){
+    printVector("", vector, output);
+    output << std::endl;
 }
 
 std::vector<std::vector<double>> readCSV(const std::string& filePath) {
@@ -666,6 +675,98 @@ void tests(
     }
 }
 
+void tests_convergence(
+    std::ostream& output,
+    const int solver,
+    const bool is_2D,
+    const int size,
+    const double conv_tol,
+    const size_t max_iterations,
+    const double param_w,
+    const size_t out_step){
+
+    std::string n;
+    std::string n2 = "1";
+    fs::path k_filename;
+    fs::path f_filename;
+    fs::path x_true_filename;
+    fs::path x_est_filename;
+
+    fs::path currentPath = fs::current_path();
+
+    std::vector<std::vector<double>> k_matrix;
+    std::vector<double> f_vector;
+    std::vector<double> x_true;
+    std::vector<double> x_est;
+    std::vector<double> x_out;
+
+    n = std::to_string(size);
+    if (is_2D){
+        n2 = n;
+    }
+    output << "Number of cells: " << n << " x " << n2 << std::endl;
+
+    k_filename = currentPath / ("no_sync/matrix/k_" + n + "_" + n2 + ".csv");
+    f_filename = currentPath / ("no_sync/matrix/f_" + n + "_" + n2 + ".csv");
+    x_true_filename = currentPath / ("no_sync/matrix/x_" + n + "_" + n2 + ".csv");
+    x_est_filename = currentPath / ("no_sync/matrix/x_prev_" + n + "_" + n2 + ".csv");
+
+    std::cout << "Reading csv files (" << n << " x " << n2 << ")..";
+    k_matrix = readCSV(k_filename.string());
+    f_vector = flattenMatrix(readCSV(f_filename.string()));
+    x_true = flattenMatrix(readCSV(x_true_filename.string()));
+    x_est = flattenMatrix(readCSV(x_est_filename.string()));
+    std::cout << " Done!" << std::endl;
+
+    output << "  K matrix = " << k_matrix.size() << " x " << k_matrix[0].size() << std::endl;
+    printVector("True\tPr: ",x_true, output,0,2);
+    printVector("\tSw: ",x_true, output,1,2);
+    output << std::endl;
+
+    switch (solver)
+    {
+    case 1:
+        output << "  Jacobi" << std::endl;
+        break;
+    case 2:
+        output << "  Gauss-Siedel" << std::endl;
+        break;
+    case 3:
+        output << "  SRS - w = " << param_w << std::endl;
+        break;
+    default:
+        return;
+    }
+
+    size_t k = 0;
+    printVector("0\tPr: ",x_est, output,0,2);
+    printVector("\tSw: ",x_est, output,1,2);
+    output << std::endl;
+    while (k < max_iterations){
+        switch (solver)
+        {
+        case 1:
+            x_out = SolveJacobi(k_matrix, f_vector, x_est, conv_tol, out_step);
+            break;
+        case 2:
+            x_out = SolveGaussSeidel(k_matrix, f_vector, x_est, conv_tol, out_step);
+            break;
+        case 3:
+            x_out = SolveSRS(k_matrix, f_vector, x_est, conv_tol, out_step, param_w);
+            break;
+        default:
+            return;
+        }
+        k += out_step;
+        printVector(std::to_string(k) + "\tPr: ",x_out, output,0,2);
+        printVector("\tSw: ",x_out, output,1,2);
+        output << "\tConvergence: " << info.get_value_double("Convergence") << std::endl;
+        x_est = x_out;
+    }
+    check_result(k_matrix, f_vector, x_out, x_true, output);
+    output << std::endl;
+}
+
 int main(){
     #ifdef _WIN32
         system("cls");
@@ -678,8 +779,10 @@ int main(){
     // test01();
     std::ofstream outputFile("results.txt");
     if (outputFile.is_open()) {
-        tests(outputFile, false, false, 1E-5, 2000, 0.8, 1.2);
-        tests(outputFile, true, false, 1E-5, 2000, 0.8, 1.2);
+        // tests(outputFile, false, false, 1E-5, 2000, 0.8, 1.2);
+        // tests(outputFile, true, false, 1E-5, 2000, 0.8, 1.2);
+        tests_convergence(outputFile, 1, false, 30, 1E-5, 1000, 0.8, 10);
+
         outputFile.close();
     } else {
         std::cerr << "Unable to open the file for writing.\n";
