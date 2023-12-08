@@ -415,9 +415,10 @@ int main(){
     #endif
 
     // test01();
-    std::ofstream outputFile("results.txt");
+    std::ofstream outputFile("results_1D.txt");
     if (outputFile.is_open()) {
-        tests(outputFile, true, false);
+        tests(outputFile, false, false);  // 1D
+        // tests(outputFile, true, false);  // 2D
         outputFile.close();
     } else {
         std::cerr << "Unable to open the file for writing.\n";
