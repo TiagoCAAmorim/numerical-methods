@@ -386,6 +386,7 @@ std::vector<double> SolveGauss(
 std::vector<double> SolveGauss(
     const std::vector<std::vector<double>>& a_mat,
     const std::vector<double>& b_vec){
+
     return SolveGauss(a_mat, b_vec, true);
 }
 
@@ -397,7 +398,7 @@ std::vector<double> SolveSRS(
     const size_t max_iterations,
     const double param_w,
     const bool is_jacobi){
-//532
+
     std::vector<double> x_old = x0_vec;
     std::vector<double> x_new(a_mat.size());
     size_t n = a_mat.size();
@@ -462,7 +463,7 @@ std::vector<double> SolveJacobi(
     const std::vector<double>& x0_vec,
     const double conv_tol,
     const size_t max_iterations){
-//517
+
     return SolveSRS(a_mat, b_vec, x0_vec, conv_tol, max_iterations, 1., true);
 }
 
@@ -472,7 +473,7 @@ std::vector<double> SolveGaussSeidel(
     const std::vector<double>& x0_vec,
     const double conv_tol,
     const size_t max_iterations){
-//520
+
     return SolveSRS(a_mat, b_vec, x0_vec, conv_tol, max_iterations, 1., false);
 }
 
@@ -483,7 +484,7 @@ std::vector<double> SolveSRS(
     const double conv_tol,
     const size_t max_iterations,
     const double param_w){
-//520
+
     return SolveSRS(a_mat, b_vec, x0_vec, conv_tol, max_iterations, param_w, false);
 }
 
@@ -777,11 +778,12 @@ int main(){
     #endif
 
     // test01();
-    std::ofstream outputFile("results.txt");
+    std::ofstream outputFile("results_2D_2k.txt");
     if (outputFile.is_open()) {
-        // tests(outputFile, false, false, 1E-5, 2000, 0.8, 1.2);
-        // tests(outputFile, true, false, 1E-5, 2000, 0.8, 1.2);
-        tests_convergence(outputFile, 1, false, 30, 1E-5, 1000, 0.8, 10);
+        // tests(outputFile, false, false, 1E-5, 2000, 0.8, 1.2); // 1D
+        tests(outputFile, true, false, 1E-5, 2000, 0.8, 1.2); // 2D
+        // tests_convergence(outputFile, 1, false, 50, 1E-5, 1000, 0.8, 10);
+        // tests_convergence(outputFile, 1, true, 10, 1E-5, 1000, 0.8, 10);
 
         outputFile.close();
     } else {
