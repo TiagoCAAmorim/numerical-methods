@@ -6,12 +6,18 @@
 #include <chrono>
 #include <cmath>
 #include <algorithm>
-
+#include <iomanip>
 // using namespace std;
-using namespace std::chrono;
-namespace fs = std::filesystem;
+// using namespace std::chrono;
+// namespace fs = std::filesystem;
 
 const double eps = 1e-17;
+
+std::string double_to_string(double value, int precision){
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(precision) << value;
+    return oss.str();
+}
 
 class Info{
     public:
@@ -572,12 +578,15 @@ class SimModel{
     public:
         SimModel();
 
+        void set_output(std::ostream& value);
+
         void set_t_end(double value);
         void set_max_dsw(double value);
         void set_max_dpr(double value);
         void set_max_dt(double value);
         void set_min_dt(double value);
         void set_conv_tol(double value);
+        void set_max_iter(int value);
         void set_use_nr(bool value);
 
         void set_ni(int value);
@@ -609,8 +618,6 @@ class SimModel{
         std::vector<double> get_qw_vec();
         std::vector<double> get_pinj_vec();
     private:
-        void initialize();
-
         int get_cell_n(int i, int j);
         double get_cell_pr(std::vector<double> x, int c);
         double get_cell_pr(std::vector<double> x, int i, int j);
@@ -636,15 +643,24 @@ class SimModel{
         double get_trw(std::vector<double> x, int c1, int c2);
         double get_trw(std::vector<double> x, int i1, int j1, int i2, int j2);
 
-        void advance_one_time_step();
-        void save_result();
-
         void build_K(std::vector<double> x, double dt);
-        void build_K();
 
         void build_F(std::vector<double> x, double dt);
-        void build_F();
-        void build_Jac();
+        void build_Jac(std::vector<double> x, double dt);
+
+        void initialize();
+        double get_convergence();
+        bool solve_fixed();
+        bool solve_newton_raphson();
+
+        double get_max_dpr();
+        double get_max_dsw();
+        bool advance_one_time_step();
+        void save_result();
+
+        void log(std::string message);
+
+        std::ostream& output;
 
         double t_end;
         double max_dsw;
@@ -652,6 +668,7 @@ class SimModel{
         double max_dt;
         double min_dt;
         double conv_tol;
+        int max_iter;
         bool use_nr;
         double dt_curr;
 
@@ -678,13 +695,14 @@ class SimModel{
         double skin;
         double wi;
 
-        std::vector<double> t_vec;
         std::vector<std::vector<double>> k_mat;
         std::vector<double> f_vec;
         std::vector<std::vector<double>> jac;
         std::vector<double> x_curr;
-        std::vector<double> x_new;
+        std::vector<double> x_next;
+        std::vector<std::vector<double>> x_list;
 
+        std::vector<double> t_vec;
         std::vector<double> dt_vec;
         std::vector<double> max_dsw_vec;
         std::vector<double> max_dpr_vec;
@@ -692,30 +710,32 @@ class SimModel{
         std::vector<double> qo_vec;
         std::vector<double> qw_vec;
         std::vector<double> pinj_vec;
-
 };
 
 double unit_conv = 0.00852702; // units: bar, mD, cP, m, m3/d
 
 SimModel::SimModel():
-    t_end(0.),
-    max_dsw(0.),
-    max_dpr(0.),
-    max_dt(0.),
-    min_dt(0.),
-    conv_tol(0.),
-    use_nr(true),
-    dt_curr(0.),
+    output(std::cout),
 
-    ni(1),
+    t_end(100.),
+    max_dsw(0.005),
+    max_dpr(1.),
+    max_dt(10.),
+    min_dt(0.001),
+    conv_tol(1.E-5),
+    max_iter(50),
+    use_nr(true),
+    dt_curr(0.1),
+
+    ni(5),
     nj(1),
-    dh(1.),
-    di(1.),
-    dj(1.),
-    dz(1.),
+    dh(100.),
+    di(100.),
+    dj(100.),
+    dz(100.),
     phi(0.01),
-    perm(1.),
-    p_init(1.),
+    perm(100.),
+    p_init(100.),
 
     bo(1.),
     bw(1.),
@@ -723,19 +743,20 @@ SimModel::SimModel():
     uw(1.),
     kr(),
 
-    qwi(1.),
-    pwf(1.),
+    qwi(100.),
+    pwf(50.),
     rw(0.1),
     skin(0.),
     wi(1.),
 
-    t_vec(),
     k_mat(),
     f_vec(),
     jac(),
     x_curr(),
-    x_new(),
+    x_next(),
+    x_list(),
 
+    t_vec(),
     dt_vec(),
     max_dsw_vec(),
     max_dpr_vec(),
@@ -744,6 +765,13 @@ SimModel::SimModel():
     qw_vec(),
     pinj_vec()
     {};
+
+void SimModel::set_output(std::ostream& value){
+    output = value;
+}
+void SimModel::log(std::string message){
+    output << message << std::endl;
+}
 
 void SimModel::set_t_end(double value){
     t_end = value;
@@ -762,6 +790,9 @@ void SimModel::set_min_dt(double value){
 }
 void SimModel::set_conv_tol(double value){
     conv_tol = value;
+}
+void SimModel::set_max_iter(int value){
+    max_iter = value;
 }
 void SimModel::set_use_nr(bool value){
     use_nr = value;
@@ -951,7 +982,7 @@ double SimModel::get_trw(std::vector<double> x, int i1, int j1, int i2, int j2){
     return get_trw(x, c1, c2);
 }
 
-void SimModel::build_K(std::vector<double> x, double dt){
+void SimModel::build_K(std::vector<double> x){
     initial_matrix(k_mat, 2*ni*nj, 2*ni*nj);
     std::vector<int> c_list;
     int nc;
@@ -959,7 +990,7 @@ void SimModel::build_K(std::vector<double> x, double dt){
     double trw;
     int c;
 
-    double vp_dt = di * dj * dz * phi / dt;
+    double vp_dt = di * dj * dz * phi / dt_curr;
     double vp_dt_bo = vp_dt / bo;
     double vp_dt_bw = (-1.) * vp_dt / bw;
     for (int j=0; j<nj; j++){
@@ -995,14 +1026,12 @@ void SimModel::build_K(std::vector<double> x, double dt){
     k_mat[2*c - 2][2*c - 2] -= wi * get_kro(x, c) / (bo * uo);
     k_mat[2*c - 1][2*c - 2] -= wi * get_krw(x, c) / (bw * uw);
 }
-void SimModel::build_K(){
-    build_K(x_new, dt_curr);
-}
-void SimModel::build_F(std::vector<double> x, double dt){
+
+void SimModel::build_F(std::vector<double> x){
     initial_vector(f_vec, 2*ni*nj);
     int c;
 
-    double vp_dt = di * dj * dz * phi / dt;
+    double vp_dt = di * dj * dz * phi / dt_curr;
     double vp_dt_bo = vp_dt / bo;
     double vp_dt_bw = (-1.) * vp_dt / bw;
     double sw;
@@ -1019,20 +1048,10 @@ void SimModel::build_F(std::vector<double> x, double dt){
     f_vec[2*c - 2] -= wi * get_kro(x, c) / (bo * uo) * pwf;
     f_vec[2*c - 1] -= wi * get_krw(x, c) / (bw * uw) * pwf;
 }
-void SimModel::build_F(){
-    build_F(x_curr, dt_curr);
+
+void SimModel::build_Jac(std::vector<double> x){
+    jac = k_mat;
 }
-void SimModel::build_Jac(){
-
-}
-
-void SimModel::advance_one_time_step(){
-
-}
-void SimModel::save_result(){
-
-}
-
 
 void SimModel::initialize(){
     if (ni < 1){
@@ -1050,6 +1069,7 @@ void SimModel::initialize(){
 
     t_vec.clear();
     t_vec.push_back(0.);
+    x_list.clear();
 
     double swi = kr.get_swi();
     x_curr.clear();
@@ -1059,8 +1079,155 @@ void SimModel::initialize(){
             x_curr.push_back(swi);
         }
     }
-    x_new = x_curr;
+
+    x_next = x_curr;
+    x_list.push_back(x_curr);
+
+    dt_vec.clear();
+    max_dsw_vec.clear();
+    max_dpr_vec.clear();
+    qo_vec.clear();
+    qw_vec.clear();
+    pinj_vec.clear();
+
+    dt_vec.push_back(0.);
+    max_dsw_vec.push_back(0.);
+    max_dpr_vec.push_back(0.);
+    qo_vec.push_back(0.);
+    qw_vec.push_back(0.);
+    pinj_vec.push_back(0.);
 }
+
+double SimModel::get_convergence(std::vector<double> x_old, std::vector<double> x_new){
+    double max_conv = 0.;
+    double conv;
+    double delta;
+    double ref_value;
+    for (size_t i=0; i<x_old.size(); i++){
+        delta = abs(x_old[i] - x_new[i]);
+        if (abs(x_new[i]) > 1.E-15){
+            conv = delta / abs(x_new[i]);
+        } else if (abs(x_old[i]) > 1.E-15){
+            conv = delta / abs(x_old[i]);
+        } else{
+            conv = 0.;
+        }
+        if (conv > max_conv){
+            max_conv = conv;
+        }
+    }
+    return max_conv;
+}
+
+bool SimModel::solve_fixed(){
+    std::vector<double> x_old;
+    initial_vector(x_old, 2*ni*nj, 0.);
+    std::vector<double> x_new = x_curr;
+    int k=0;
+    while ((get_convergence(x_old, x_new) > conv_tol) && k < max_iter){
+        x_old = x_new;
+        build_K(x_new);
+        build_F(x_curr);
+        x_new = SolveGauss(k_mat, f_vec);
+        k++;
+    }
+    x_next = x_new;
+    return (k >= max_iter);
+}
+void SimModel::solve_newton_raphson(){
+
+}
+double SimModel::get_max_dpr(){
+    dpr_max = 0.;
+    double dpr;
+    for (int j=0; j<nj; j++){
+        for (int i=0; i<ni; i++){
+            c = get_cell_n(i,j);
+            dpr = get_cell_pr(x_curr, c);
+            dpr -= get_cell_pr(x_next, c);
+            dpr = abs(dpr);
+            if (dpr > dpr_max){
+                dpr_max = dpr;
+            }
+        }
+    }
+    return dpr_max;
+}
+double SimModel::get_max_dsw(){
+    dsw_max = 0.;
+    double dsw;
+    for (int j=0; j<nj; j++){
+        for (int i=0; i<ni; i++){
+            c = get_cell_n(i,j);
+            dsw = get_cell_sw(x_curr, c);
+            dsw -= get_cell_sw(x_next, c);
+            dsw = abs(dsw);
+            if (dsw > dsw_max){
+                dsw_max = dsw;
+            }
+        }
+    }
+    return dsw_max;
+}
+bool SimModel::advance_one_time_step(){
+    bool ok;
+    if (use_nr){
+        ok = solve_newton_raphson();
+    } else{
+        ok = solve_fixed();
+    }
+    if (ok){
+        if (get_max_dpr() <= max_dpr){
+            if (get_max_dsw() <= max_dsw){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void SimModel::run_simulation(double dt){
+    initialize();
+    double t = 0.;
+    bool ok;
+    dt_curr = dt;
+    while (t < t_end){
+        ok = advance_one_time_step();
+        if (ok || dt_curr <= min_dt){
+            t += dt_curr;
+            save_result();
+            dt_curr *= 1.2;
+            if (dt_curr > max_dt){
+                dt_curr = max_dt;
+            }
+        } else{
+            dt_curr = dt_curr / 2.;
+            if (dt_curr < min_dt){
+                dt_curr = min_dt;
+            }
+            log(double_to_string(t, 3) + " days. Could not converge. New time-step: "+double_to_string(dt_curr,3)+".");
+        }
+    }
+}
+
+void SimModel::save_result(){
+    t_vec.push_back(t_vec.back() + dt_curr);
+    dt_vec(dt_curr);
+    max_dpr_vec(get_max_dpr());
+    max_dsw_vec(get_max_dsw());
+
+    double c = get_cell_n(ni-1, nj-1);
+    double qo = wi * get_kro(x_next, c) / (bo * uo) * (get_cell_pr(x_next, c) - pwf);
+    double qw = wi * get_krw(x_next, c) / (bw * uw) * (get_cell_pr(x_next, c) - pwf);
+    qo_vec.push_back(qo);
+    qw_vec.push_back(qw);
+
+    pinj_vec.push_back(get_cell_pr(x_next, 0, 0));
+
+    x_list.push_back(x_next);
+    x_curr = x_next;
+}
+
 
 // void tests(
 //     std::ostream& output,
