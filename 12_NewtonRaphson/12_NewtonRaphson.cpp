@@ -136,7 +136,7 @@ void initial_vector(std::vector<double>& vector, int n_rows, double init_value){
     vector.clear();
     vector.resize(n_rows, init_value);
 }
-void initial_vector(std::vector<std::vector<double>>& vector, int n_rows){
+void initial_vector(std::vector<double>& vector, int n_rows){
     initial_vector(vector, n_rows, 0.);
 }
 
@@ -444,6 +444,7 @@ void check_result(
 
 class RelPerm{
     public:
+        RelPerm();
 
         void set_swi(double value);
         void set_swc(double value);
@@ -454,7 +455,7 @@ class RelPerm{
         void set_krw_endp(double value);
         void set_kro_endp(double value);
 
-        double get_swi(double value);
+        double get_swi();
         double get_krw(double sw);
         double get_kro(double sw);
         double get_dkrw(double sw);
@@ -611,27 +612,29 @@ class SimModel{
         void initialize();
 
         int get_cell_n(int i, int j);
-        double get_cell_pr(std::vector<double> x, int i, int j);
         double get_cell_pr(std::vector<double> x, int c);
-        double get_cell_sw(std::vector<double> x, int i, int j);
+        double get_cell_pr(std::vector<double> x, int i, int j);
         double get_cell_sw(std::vector<double> x, int c);
+        double get_cell_sw(std::vector<double> x, int i, int j);
 
-        double get_upstream_sw(std::vector<double> x, int i1, int j1, int i2, int j2);
         double get_upstream_sw(std::vector<double> x, int c1, int c2);
-        double get_kro(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_upstream_sw(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_kro(std::vector<double> x, int c);
         double get_kro(std::vector<double> x, int c1, int c2);
-        double get_krw(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_kro(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_krw(std::vector<double> x, int c);
         double get_krw(std::vector<double> x, int c1, int c2);
-        double get_dkro(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_krw(std::vector<double> x, int i1, int j1, int i2, int j2);
         double get_dkro(std::vector<double> x, int c1, int c2);
-        double get_dkrw(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_dkro(std::vector<double> x, int i1, int j1, int i2, int j2);
         double get_dkrw(std::vector<double> x, int c1, int c2);
-        double get_tr(int i1, int j1, int i2, int j2);
+        double get_dkrw(std::vector<double> x, int i1, int j1, int i2, int j2);
         double get_tr(int c1, int c2);
-        double get_tro(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_tr(int i1, int j1, int i2, int j2);
         double get_tro(std::vector<double> x, int c1, int c2);
-        double get_trw(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_tro(std::vector<double> x, int i1, int j1, int i2, int j2);
         double get_trw(std::vector<double> x, int c1, int c2);
+        double get_trw(std::vector<double> x, int i1, int j1, int i2, int j2);
 
         void advance_one_time_step();
         void save_result();
@@ -739,7 +742,7 @@ SimModel::SimModel():
 
     qo_vec(),
     qw_vec(),
-    pinj_vec(),
+    pinj_vec()
     {};
 
 void SimModel::set_t_end(double value){
@@ -865,6 +868,9 @@ double SimModel::get_upstream_sw(std::vector<double> x, int i1, int j1, int i2, 
     return get_upstream_sw(x, c1, c2);
 }
 
+double SimModel::get_kro(std::vector<double> x, int c){
+    return get_kro(x, c, c);
+}
 double SimModel::get_kro(std::vector<double> x, int c1, int c2){
     double swi = get_upstream_sw(x,c1,c2);
     return kr.get_kro(swi);
@@ -873,6 +879,9 @@ double SimModel::get_kro(std::vector<double> x, int i1, int j1, int i2, int j2){
     int c1 = get_cell_n(i1,j1);
     int c2 = get_cell_n(i2,j2);
     return get_kro(x, c1, c2);
+}
+double SimModel::get_krw(std::vector<double> x, int c){
+    return get_krw(x, c, c);
 }
 double SimModel::get_krw(std::vector<double> x, int c1, int c2){
     double swi = get_upstream_sw(x,c1,c2);
@@ -904,12 +913,12 @@ double SimModel::get_dkrw(std::vector<double> x, int i1, int j1, int i2, int j2)
 
 double SimModel::get_tr(int c1, int c2){
     if (abs(c1-c2) == ni){
-        return k * di * dz / dj;
+        return perm * di * dz / dj;
     }
     if (abs(c1-c2) == 1){
-        return k * dj * dz / di;
+        return perm * dj * dz / di;
     }
-    return 0.
+    return 0.;
 }
 double SimModel::get_tr(int i1, int j1, int i2, int j2){
     int c1 = get_cell_n(i1,j1);
@@ -927,7 +936,7 @@ double SimModel::get_tro(std::vector<double> x, int c1, int c2){
 double SimModel::get_tro(std::vector<double> x, int i1, int j1, int i2, int j2){
     int c1 = get_cell_n(i1,j1);
     int c2 = get_cell_n(i2,j2);
-    return get_tro(c1, c2);
+    return get_tro(x, c1, c2);
 }
 double SimModel::get_trw(std::vector<double> x, int c1, int c2){
     double tr = get_tr(c1,c2);
@@ -939,11 +948,11 @@ double SimModel::get_trw(std::vector<double> x, int c1, int c2){
 double SimModel::get_trw(std::vector<double> x, int i1, int j1, int i2, int j2){
     int c1 = get_cell_n(i1,j1);
     int c2 = get_cell_n(i2,j2);
-    return get_trw(c1, c2);
+    return get_trw(x, c1, c2);
 }
 
 void SimModel::build_K(std::vector<double> x, double dt){
-    initial_matrix(k_mat, ni, nj);
+    initial_matrix(k_mat, 2*ni*nj, 2*ni*nj);
     std::vector<int> c_list;
     int nc;
     double tro;
@@ -969,31 +978,49 @@ void SimModel::build_K(std::vector<double> x, double dt){
             if (j < (nj-1)){
                 c_list.push_back(get_cell_n(i, j+1));
             }
-            nc = static_cast<int>(c_list.size())
-            for (size_t k=0; k<nc, k++){
+            nc = static_cast<int>(c_list.size());
+            for (int k=0; k<nc; k++){
                 tro = get_tro(x, c, c_list[k]);
                 trw = get_trw(x, c, c_list[k]);
-                k[2*c-2][2*c-2] -= tro;
-                k[2*c-1][2*c-2] -= trw;
-                k[2*c-2][2*c_list[k]-2] = tro;
-                k[2*c-1][2*c_list[k]-2] = trw;
+                k_mat[2*c-2][2*c-2] -= tro;
+                k_mat[2*c-1][2*c-2] -= trw;
+                k_mat[2*c-2][2*c_list[k]-2] = tro;
+                k_mat[2*c-1][2*c_list[k]-2] = trw;
             }
-            k[2*c-2][2*c-1] = vp_dt_bo;
-            k[2*c-1][2*c-1] = vp_dt_bw;
+            k_mat[2*c-2][2*c-1] = vp_dt_bo;
+            k_mat[2*c-1][2*c-1] = vp_dt_bw;
         }
     }
     c = get_cell_n(ni-1,nj-1);
-    k[2*c - 2][2*c - 2] -= (-1.) * wi * get_kro(x, c, c) / (bo * uo);
-    k[2*c - 1][2*c - 2] -= (-1.) * wi * get_krw(x, c, c) / (bw * uw);
+    k_mat[2*c - 2][2*c - 2] -= wi * get_kro(x, c) / (bo * uo);
+    k_mat[2*c - 1][2*c - 2] -= wi * get_krw(x, c) / (bw * uw);
 }
 void SimModel::build_K(){
     build_K(x_new, dt_curr);
 }
 void SimModel::build_F(std::vector<double> x, double dt){
+    initial_vector(f_vec, 2*ni*nj);
+    int c;
 
+    double vp_dt = di * dj * dz * phi / dt;
+    double vp_dt_bo = vp_dt / bo;
+    double vp_dt_bw = (-1.) * vp_dt / bw;
+    double sw;
+    for (int j=0; j<nj; j++){
+        for (int i=0; i<ni; i++){
+            c = get_cell_n(i,j);
+            sw = get_cell_sw(x, c);
+            f_vec[2*c-2] = vp_dt_bo * sw;
+            f_vec[2*c-1] = vp_dt_bw * sw;
+        }
+    }
+    f_vec[1] -= qwi;
+    c = get_cell_n(ni-1,nj-1);
+    f_vec[2*c - 2] -= wi * get_kro(x, c) / (bo * uo) * pwf;
+    f_vec[2*c - 1] -= wi * get_krw(x, c) / (bw * uw) * pwf;
 }
 void SimModel::build_F(){
-
+    build_F(x_curr, dt_curr);
 }
 void SimModel::build_Jac(){
 
@@ -1009,10 +1036,10 @@ void SimModel::save_result(){
 
 void SimModel::initialize(){
     if (ni < 1){
-        std::cerr << "ni must be a positive integer." << std:endl;
+        std::cerr << "ni must be a positive integer." << std::endl;
     }
     if (nj < 1){
-        std::cerr << "nj must be a positive integer." << std:endl;
+        std::cerr << "nj must be a positive integer." << std::endl;
     }
     di = dh;
     dj = dh;
@@ -1024,7 +1051,7 @@ void SimModel::initialize(){
     t_vec.clear();
     t_vec.push_back(0.);
 
-    double swi = kr.get_swi()
+    double swi = kr.get_swi();
     x_curr.clear();
     for (int j=0; j<nj; j++){
         for (int i=0; i<ni; i++){
@@ -1035,42 +1062,38 @@ void SimModel::initialize(){
     x_new = x_curr;
 }
 
-void tests(
-    std::ostream& output,
-    const bool is_2D,
-    const double conv_tol_p,
-    const double conv_tol_sw,
-    const double max_dt,
-    const double min_dt,
-    const size_t max_iterations){
+// void tests(
+//     std::ostream& output,
+//     const bool is_2D,
+//     const double conv_tol_p,
+//     const double conv_tol_sw,
+//     const double max_dt,
+//     const double min_dt,
+//     const size_t max_iterations){
 
-    std::vector<std::vector<double>> k_matrix;
-    std::vector<double> f_vector;
-    std::vector<double> x_out;
+//     std::vector<std::vector<double>> k_matrix;
+//     std::vector<double> f_vector;
+//     std::vector<double> x_out;
 
-    std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
-    for (int i : a) {
-        n = std::to_string(i);
-        if (is_2D){
-            n2 = n;
-        }
-        output << "Number of cells: " << n << " x " << n2 << std::endl;
+//     std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
+//     for (int i : a) {
+//         n = std::to_string(i);
 
+//         output << "Number of cells: " << n << " x " << n2 << std::endl;
 
-        if (use_gauss){
-            output << "  Gauss Elimination with Partial Pivot and Scaling" << std::endl;
-            start = high_resolution_clock::now();
-            x_out = SolveGauss(k_matrix, f_vector, true);
-            stop = high_resolution_clock::now();
-            duration = duration_cast<milliseconds>(stop - start);
-            printVector(x_out, output);
-            output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
-            check_result(k_matrix, f_vector, x_out, x_true, output);
-            output << std::endl;
-        }
+//             output << "  Gauss Elimination with Partial Pivot and Scaling" << std::endl;
+//             start = high_resolution_clock::now();
+//             x_out = SolveGauss(k_matrix, f_vector, true);
+//             stop = high_resolution_clock::now();
+//             duration = duration_cast<milliseconds>(stop - start);
+//             printVector(x_out, output);
+//             output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
+//             check_result(k_matrix, f_vector, x_out, x_true, output);
+//             output << std::endl;
+//         }
 
-    }
-}
+//     }
+// }
 
 int main(){
     #ifdef _WIN32
