@@ -13,9 +13,22 @@
 
 const double eps = 1e-17;
 
-std::string double_to_string(double value, int precision){
+std::string d2str(double value, int precision){
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(precision) << value;
+    return oss.str();
+}
+std::string d2str(double value){
+    return d2str(value, 5);
+}
+
+std::string concatenate() {
+    return "";
+}
+template <typename T, typename... Args>
+std::string concatenate(T first, Args... args) {
+    std::ostringstream oss;
+    oss << first << concatenate(args...);
     return oss.str();
 }
 
@@ -138,15 +151,15 @@ void print_vector(const std::vector<double>& vector, std::ostream& output){
     output << std::endl;
 }
 
-void initial_vector(std::vector<double>& vector, int n_rows, double init_value){
+void initial_vector(std::vector<double>& vector, size_t n_rows, double init_value){
     vector.clear();
     vector.resize(n_rows, init_value);
 }
-void initial_vector(std::vector<double>& vector, int n_rows){
+void initial_vector(std::vector<double>& vector, size_t n_rows){
     initial_vector(vector, n_rows, 0.);
 }
 
-void initial_matrix(std::vector<std::vector<double>>& matrix, int n_rows, int n_cols, double init_value){
+void initial_matrix(std::vector<std::vector<double>>& matrix, size_t n_rows, size_t n_cols, double init_value){
     matrix.resize(n_rows);
 
     for (auto& row : matrix) {
@@ -154,7 +167,7 @@ void initial_matrix(std::vector<std::vector<double>>& matrix, int n_rows, int n_
         std::fill(row.begin(), row.end(), init_value);
     }
 }
-void initial_matrix(std::vector<std::vector<double>>& matrix, int n_rows, int n_cols){
+void initial_matrix(std::vector<std::vector<double>>& matrix, size_t n_rows, size_t n_cols){
     initial_matrix(matrix, n_cols, n_rows, 0.);
 }
 
@@ -578,6 +591,8 @@ class SimModel{
     public:
         SimModel();
 
+        // ResultProcessor(std::ostream& output = std::cout) : outputStream(output) {}
+
         void set_output(std::ostream& value);
 
         void set_t_end(double value);
@@ -586,11 +601,11 @@ class SimModel{
         void set_max_dt(double value);
         void set_min_dt(double value);
         void set_conv_tol(double value);
-        void set_max_iter(int value);
+        void set_max_iter(size_t value);
         void set_use_nr(bool value);
 
-        void set_ni(int value);
-        void set_nj(int value);
+        void set_ni(size_t value);
+        void set_nj(size_t value);
 
         void set_dh(double value);
         void set_dz(double value);
@@ -617,39 +632,41 @@ class SimModel{
         std::vector<double> get_qo_vec();
         std::vector<double> get_qw_vec();
         std::vector<double> get_pinj_vec();
+
+        RelPerm kr;
     private:
-        int get_cell_n(int i, int j);
-        double get_cell_pr(std::vector<double> x, int c);
-        double get_cell_pr(std::vector<double> x, int i, int j);
-        double get_cell_sw(std::vector<double> x, int c);
-        double get_cell_sw(std::vector<double> x, int i, int j);
+        size_t get_cell_n(size_t i, size_t j);
+        double get_cell_pr(std::vector<double> x, size_t c);
+        double get_cell_pr(std::vector<double> x, size_t i, size_t j);
+        double get_cell_sw(std::vector<double> x, size_t c);
+        double get_cell_sw(std::vector<double> x, size_t i, size_t j);
 
-        double get_upstream_sw(std::vector<double> x, int c1, int c2);
-        double get_upstream_sw(std::vector<double> x, int i1, int j1, int i2, int j2);
-        double get_kro(std::vector<double> x, int c);
-        double get_kro(std::vector<double> x, int c1, int c2);
-        double get_kro(std::vector<double> x, int i1, int j1, int i2, int j2);
-        double get_krw(std::vector<double> x, int c);
-        double get_krw(std::vector<double> x, int c1, int c2);
-        double get_krw(std::vector<double> x, int i1, int j1, int i2, int j2);
-        double get_dkro(std::vector<double> x, int c1, int c2);
-        double get_dkro(std::vector<double> x, int i1, int j1, int i2, int j2);
-        double get_dkrw(std::vector<double> x, int c1, int c2);
-        double get_dkrw(std::vector<double> x, int i1, int j1, int i2, int j2);
-        double get_tr(int c1, int c2);
-        double get_tr(int i1, int j1, int i2, int j2);
-        double get_tro(std::vector<double> x, int c1, int c2);
-        double get_tro(std::vector<double> x, int i1, int j1, int i2, int j2);
-        double get_trw(std::vector<double> x, int c1, int c2);
-        double get_trw(std::vector<double> x, int i1, int j1, int i2, int j2);
+        double get_upstream_sw(std::vector<double> x, size_t c1, size_t c2);
+        double get_upstream_sw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_kro(std::vector<double> x, size_t c);
+        double get_kro(std::vector<double> x, size_t c1, size_t c2);
+        double get_kro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_krw(std::vector<double> x, size_t c);
+        double get_krw(std::vector<double> x, size_t c1, size_t c2);
+        double get_krw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_dkro(std::vector<double> x, size_t c1, size_t c2);
+        double get_dkro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_dkrw(std::vector<double> x, size_t c1, size_t c2);
+        double get_dkrw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_tr(size_t c1, size_t c2);
+        double get_tr(size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_tro(std::vector<double> x, size_t c1, size_t c2);
+        double get_tro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_trw(std::vector<double> x, size_t c1, size_t c2);
+        double get_trw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
 
-        void build_K(std::vector<double> x, double dt);
+        void build_K(std::vector<double> x);
 
-        void build_F(std::vector<double> x, double dt);
-        void build_Jac(std::vector<double> x, double dt);
+        void build_F(std::vector<double> x);
+        void build_Jac(std::vector<double> x);
 
         void initialize();
-        double get_convergence();
+        double get_convergence(std::vector<double>& x_old, std::vector<double>& x_new);
         bool solve_fixed();
         bool solve_newton_raphson();
 
@@ -658,7 +675,7 @@ class SimModel{
         bool advance_one_time_step();
         void save_result();
 
-        void log(std::string message);
+        void log_msg(std::string message);
 
         std::ostream& output;
 
@@ -668,12 +685,12 @@ class SimModel{
         double max_dt;
         double min_dt;
         double conv_tol;
-        int max_iter;
+        size_t max_iter;
         bool use_nr;
         double dt_curr;
 
-        int ni;
-        int nj;
+        size_t ni;
+        size_t nj;
 
         double dh;
         double di;
@@ -687,7 +704,6 @@ class SimModel{
         double bw;
         double uo;
         double uw;
-        RelPerm kr;
 
         double qwi;
         double pwf;
@@ -715,16 +731,18 @@ class SimModel{
 double unit_conv = 0.00852702; // units: bar, mD, cP, m, m3/d
 
 SimModel::SimModel():
+    kr(),
+
     output(std::cout),
 
-    t_end(100.),
+    t_end(10.),
     max_dsw(0.005),
     max_dpr(1.),
     max_dt(10.),
-    min_dt(0.001),
+    min_dt(0.01),
     conv_tol(1.E-5),
     max_iter(50),
-    use_nr(true),
+    use_nr(false),
     dt_curr(0.1),
 
     ni(5),
@@ -735,16 +753,15 @@ SimModel::SimModel():
     dz(100.),
     phi(0.01),
     perm(100.),
-    p_init(100.),
+    p_init(250.),
 
-    bo(1.),
+    bo(1.2),
     bw(1.),
-    uo(1.),
+    uo(0.7),
     uw(1.),
-    kr(),
 
-    qwi(100.),
-    pwf(50.),
+    qwi(300.),
+    pwf(200.),
     rw(0.1),
     skin(0.),
     wi(1.),
@@ -767,9 +784,9 @@ SimModel::SimModel():
     {};
 
 void SimModel::set_output(std::ostream& value){
-    output = value;
+    output.rdbuf(value.rdbuf());
 }
-void SimModel::log(std::string message){
+void SimModel::log_msg(std::string message){
     output << message << std::endl;
 }
 
@@ -791,16 +808,16 @@ void SimModel::set_min_dt(double value){
 void SimModel::set_conv_tol(double value){
     conv_tol = value;
 }
-void SimModel::set_max_iter(int value){
+void SimModel::set_max_iter(size_t value){
     max_iter = value;
 }
 void SimModel::set_use_nr(bool value){
     use_nr = value;
 }
-void SimModel::set_ni(int value){
+void SimModel::set_ni(size_t value){
     ni = value;
 }
-void SimModel::set_nj(int value){
+void SimModel::set_nj(size_t value){
     nj = value;
 }
 void SimModel::set_dh(double value){
@@ -866,25 +883,25 @@ std::vector<double> SimModel::get_pinj_vec(){
 }
 
 
-int SimModel::get_cell_n(int i, int j){
+size_t SimModel::get_cell_n(size_t i, size_t j){
     return i + 1 + j * ni;
 }
-double SimModel::get_cell_pr(std::vector<double> x, int c){
+double SimModel::get_cell_pr(std::vector<double> x, size_t c){
     return x[2 * c - 2];
 }
-double SimModel::get_cell_pr(std::vector<double> x, int i, int j){
-    int c = get_cell_n(i,j);
+double SimModel::get_cell_pr(std::vector<double> x, size_t i, size_t j){
+    size_t c = get_cell_n(i,j);
     return get_cell_pr(x, c);
 }
-double SimModel::get_cell_sw(std::vector<double> x, int c){
+double SimModel::get_cell_sw(std::vector<double> x, size_t c){
     return x[2 * c - 1];
 }
-double SimModel::get_cell_sw(std::vector<double> x, int i, int j){
-    int c = get_cell_n(i,j);
+double SimModel::get_cell_sw(std::vector<double> x, size_t i, size_t j){
+    size_t c = get_cell_n(i,j);
     return get_cell_sw(x, c);
 }
 
-double SimModel::get_upstream_sw(std::vector<double> x, int c1, int c2){
+double SimModel::get_upstream_sw(std::vector<double> x, size_t c1, size_t c2){
     if (c1==c2){
         return get_cell_sw(x,c1);
     } else if (get_cell_pr(x,c1) > get_cell_pr(x,c2)){
@@ -893,108 +910,108 @@ double SimModel::get_upstream_sw(std::vector<double> x, int c1, int c2){
         return get_cell_sw(x,c2);
     }
 }
-double SimModel::get_upstream_sw(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_upstream_sw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_upstream_sw(x, c1, c2);
 }
 
-double SimModel::get_kro(std::vector<double> x, int c){
+double SimModel::get_kro(std::vector<double> x, size_t c){
     return get_kro(x, c, c);
 }
-double SimModel::get_kro(std::vector<double> x, int c1, int c2){
+double SimModel::get_kro(std::vector<double> x, size_t c1, size_t c2){
     double swi = get_upstream_sw(x,c1,c2);
     return kr.get_kro(swi);
 }
-double SimModel::get_kro(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_kro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_kro(x, c1, c2);
 }
-double SimModel::get_krw(std::vector<double> x, int c){
+double SimModel::get_krw(std::vector<double> x, size_t c){
     return get_krw(x, c, c);
 }
-double SimModel::get_krw(std::vector<double> x, int c1, int c2){
+double SimModel::get_krw(std::vector<double> x, size_t c1, size_t c2){
     double swi = get_upstream_sw(x,c1,c2);
     return kr.get_krw(swi);
 }
-double SimModel::get_krw(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_krw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_krw(x, c1, c2);
 }
-double SimModel::get_dkro(std::vector<double> x, int c1, int c2){
+double SimModel::get_dkro(std::vector<double> x, size_t c1, size_t c2){
     double swi = get_upstream_sw(x,c1,c2);
     return kr.get_dkro(swi);
 }
-double SimModel::get_dkro(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_dkro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_dkro(x, c1, c2);
 }
-double SimModel::get_dkrw(std::vector<double> x, int c1, int c2){
+double SimModel::get_dkrw(std::vector<double> x, size_t c1, size_t c2){
     double swi = get_upstream_sw(x,c1,c2);
     return kr.get_dkrw(swi);
 }
-double SimModel::get_dkrw(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_dkrw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_dkrw(x, c1, c2);
 }
 
-double SimModel::get_tr(int c1, int c2){
-    if (abs(c1-c2) == ni){
+double SimModel::get_tr(size_t c1, size_t c2){
+    if (std::max(c1,c2) - std::min(c1,c2) == ni){
         return perm * di * dz / dj;
     }
-    if (abs(c1-c2) == 1){
+    if (std::max(c1,c2) - std::min(c1,c2) == 1){
         return perm * dj * dz / di;
     }
     return 0.;
 }
-double SimModel::get_tr(int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_tr(size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_tr(c1, c2);
 }
 
-double SimModel::get_tro(std::vector<double> x, int c1, int c2){
+double SimModel::get_tro(std::vector<double> x, size_t c1, size_t c2){
     double tr = get_tr(c1,c2);
     if (tr != 0.){
         tr *= unit_conv * get_kro(x,c1,c2) / (bo * uo);
     }
     return tr;
 }
-double SimModel::get_tro(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_tro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_tro(x, c1, c2);
 }
-double SimModel::get_trw(std::vector<double> x, int c1, int c2){
+double SimModel::get_trw(std::vector<double> x, size_t c1, size_t c2){
     double tr = get_tr(c1,c2);
     if (tr != 0.){
         tr *= unit_conv * get_krw(x,c1,c2) / (bw * uw);
     }
     return tr;
 }
-double SimModel::get_trw(std::vector<double> x, int i1, int j1, int i2, int j2){
-    int c1 = get_cell_n(i1,j1);
-    int c2 = get_cell_n(i2,j2);
+double SimModel::get_trw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
     return get_trw(x, c1, c2);
 }
 
 void SimModel::build_K(std::vector<double> x){
     initial_matrix(k_mat, 2*ni*nj, 2*ni*nj);
-    std::vector<int> c_list;
-    int nc;
+    std::vector<size_t> c_list;
+    size_t nc;
     double tro;
     double trw;
-    int c;
+    size_t c;
 
     double vp_dt = di * dj * dz * phi / dt_curr;
     double vp_dt_bo = vp_dt / bo;
     double vp_dt_bw = (-1.) * vp_dt / bw;
-    for (int j=0; j<nj; j++){
-        for (int i=0; i<ni; i++){
+    for (size_t j=0; j<nj; j++){
+        for (size_t i=0; i<ni; i++){
             c = get_cell_n(i,j);
             c_list.clear();
             if (i > 0){
@@ -1009,8 +1026,8 @@ void SimModel::build_K(std::vector<double> x){
             if (j < (nj-1)){
                 c_list.push_back(get_cell_n(i, j+1));
             }
-            nc = static_cast<int>(c_list.size());
-            for (int k=0; k<nc; k++){
+            nc = c_list.size();
+            for (size_t k=0; k<nc; k++){
                 tro = get_tro(x, c, c_list[k]);
                 trw = get_trw(x, c, c_list[k]);
                 k_mat[2*c-2][2*c-2] -= tro;
@@ -1029,14 +1046,14 @@ void SimModel::build_K(std::vector<double> x){
 
 void SimModel::build_F(std::vector<double> x){
     initial_vector(f_vec, 2*ni*nj);
-    int c;
+    size_t c;
 
     double vp_dt = di * dj * dz * phi / dt_curr;
     double vp_dt_bo = vp_dt / bo;
     double vp_dt_bw = (-1.) * vp_dt / bw;
     double sw;
-    for (int j=0; j<nj; j++){
-        for (int i=0; i<ni; i++){
+    for (size_t j=0; j<nj; j++){
+        for (size_t i=0; i<ni; i++){
             c = get_cell_n(i,j);
             sw = get_cell_sw(x, c);
             f_vec[2*c-2] = vp_dt_bo * sw;
@@ -1050,6 +1067,7 @@ void SimModel::build_F(std::vector<double> x){
 }
 
 void SimModel::build_Jac(std::vector<double> x){
+    x.push_back(0.);
     jac = k_mat;
 }
 
@@ -1073,8 +1091,8 @@ void SimModel::initialize(){
 
     double swi = kr.get_swi();
     x_curr.clear();
-    for (int j=0; j<nj; j++){
-        for (int i=0; i<ni; i++){
+    for (size_t j=0; j<nj; j++){
+        for (size_t i=0; i<ni; i++){
             x_curr.push_back(p_init);
             x_curr.push_back(swi);
         }
@@ -1098,17 +1116,16 @@ void SimModel::initialize(){
     pinj_vec.push_back(0.);
 }
 
-double SimModel::get_convergence(std::vector<double> x_old, std::vector<double> x_new){
+double SimModel::get_convergence(std::vector<double>& x_old, std::vector<double>& x_new){
     double max_conv = 0.;
     double conv;
     double delta;
-    double ref_value;
     for (size_t i=0; i<x_old.size(); i++){
-        delta = abs(x_old[i] - x_new[i]);
-        if (abs(x_new[i]) > 1.E-15){
-            conv = delta / abs(x_new[i]);
-        } else if (abs(x_old[i]) > 1.E-15){
-            conv = delta / abs(x_old[i]);
+        delta = std::abs(x_old[i] - x_new[i]);
+        if (std::abs(x_new[i]) > 1.E-15){
+            conv = delta / std::abs(x_new[i]);
+        } else if (std::abs(x_old[i]) > 1.E-15){
+            conv = delta / std::abs(x_old[i]);
         } else{
             conv = 0.;
         }
@@ -1121,31 +1138,35 @@ double SimModel::get_convergence(std::vector<double> x_old, std::vector<double> 
 
 bool SimModel::solve_fixed(){
     std::vector<double> x_old;
-    initial_vector(x_old, 2*ni*nj, 0.);
     std::vector<double> x_new = x_curr;
-    int k=0;
-    while ((get_convergence(x_old, x_new) > conv_tol) && k < max_iter){
+    size_t k=0;
+    double conv = 1.e5;
+    while ((conv > conv_tol) && (k < max_iter)){
         x_old = x_new;
         build_K(x_new);
         build_F(x_curr);
         x_new = SolveGauss(k_mat, f_vec);
+        conv = get_convergence(x_old, x_new);
+        log_msg(concatenate("   k=",k,", conv=",conv));
         k++;
     }
     x_next = x_new;
-    return (k >= max_iter);
+    return (k <= max_iter);
 }
-void SimModel::solve_newton_raphson(){
-
+bool SimModel::solve_newton_raphson(){
+    x_next = x_curr;
+    return true;
 }
 double SimModel::get_max_dpr(){
-    dpr_max = 0.;
+    double dpr_max = 0.;
     double dpr;
-    for (int j=0; j<nj; j++){
-        for (int i=0; i<ni; i++){
+    size_t c;
+    for (size_t j=0; j<nj; j++){
+        for (size_t i=0; i<ni; i++){
             c = get_cell_n(i,j);
             dpr = get_cell_pr(x_curr, c);
             dpr -= get_cell_pr(x_next, c);
-            dpr = abs(dpr);
+            dpr = std::abs(dpr);
             if (dpr > dpr_max){
                 dpr_max = dpr;
             }
@@ -1154,14 +1175,15 @@ double SimModel::get_max_dpr(){
     return dpr_max;
 }
 double SimModel::get_max_dsw(){
-    dsw_max = 0.;
+    double dsw_max = 0.;
     double dsw;
-    for (int j=0; j<nj; j++){
-        for (int i=0; i<ni; i++){
+    size_t c;
+    for (size_t j=0; j<nj; j++){
+        for (size_t i=0; i<ni; i++){
             c = get_cell_n(i,j);
             dsw = get_cell_sw(x_curr, c);
             dsw -= get_cell_sw(x_next, c);
-            dsw = abs(dsw);
+            dsw = std::abs(dsw);
             if (dsw > dsw_max){
                 dsw_max = dsw;
             }
@@ -1176,9 +1198,12 @@ bool SimModel::advance_one_time_step(){
     } else{
         ok = solve_fixed();
     }
+    double m_dpr = get_max_dpr();
+    double m_dsw = get_max_dsw();
+    log_msg(concatenate("   MaxDpr=",m_dpr,", MaxDsw=",m_dsw));
     if (ok){
-        if (get_max_dpr() <= max_dpr){
-            if (get_max_dsw() <= max_dsw){
+        if (m_dpr <= max_dpr){
+            if (m_dsw <= max_dsw){
                 return true;
             }
         }
@@ -1192,6 +1217,7 @@ void SimModel::run_simulation(double dt){
     bool ok;
     dt_curr = dt;
     while (t < t_end){
+        // log_msg(concatenate("[",d2str(t,3),"], Time-step=",d2str(dt_curr,3)));
         ok = advance_one_time_step();
         if (ok || dt_curr <= min_dt){
             t += dt_curr;
@@ -1205,18 +1231,22 @@ void SimModel::run_simulation(double dt){
             if (dt_curr < min_dt){
                 dt_curr = min_dt;
             }
-            log(double_to_string(t, 3) + " days. Could not converge. New time-step: "+double_to_string(dt_curr,3)+".");
+            // log_msg("["+d2str(t, 3) + "] Could not converge. New time-step: "+d2str(dt_curr,3)+".");
         }
+        dt_curr = std::min(dt_curr, t_end - t);
     }
 }
 
 void SimModel::save_result(){
     t_vec.push_back(t_vec.back() + dt_curr);
-    dt_vec(dt_curr);
-    max_dpr_vec(get_max_dpr());
-    max_dsw_vec(get_max_dsw());
+    dt_vec.push_back(dt_curr);
 
-    double c = get_cell_n(ni-1, nj-1);
+    double m_dpr = get_max_dpr();
+    double m_dsw = get_max_dsw();
+    max_dpr_vec.push_back(m_dpr);
+    max_dsw_vec.push_back(m_dsw);
+
+    size_t c = get_cell_n(ni-1, nj-1);
     double qo = wi * get_kro(x_next, c) / (bo * uo) * (get_cell_pr(x_next, c) - pwf);
     double qw = wi * get_krw(x_next, c) / (bw * uw) * (get_cell_pr(x_next, c) - pwf);
     qo_vec.push_back(qo);
@@ -1226,41 +1256,66 @@ void SimModel::save_result(){
 
     x_list.push_back(x_next);
     x_curr = x_next;
+
+    log_msg(concatenate("[",d2str(t_vec.back(),3),"], dt=",dt_curr,", MaxDpr=",m_dpr,", MaxDsw=",m_dsw,", Qo=",d2str(qo,2),", Qw=",d2str(qw,2)));
 }
 
 
-// void tests(
-//     std::ostream& output,
-//     const bool is_2D,
-//     const double conv_tol_p,
-//     const double conv_tol_sw,
-//     const double max_dt,
-//     const double min_dt,
-//     const size_t max_iterations){
+void test(
+    std::ostream& output,
+    const size_t ni,
+    const bool is_2D,
+    const bool is_NR,
+    const double max_dpr,
+    const double max_dsw,
+    const double max_dt,
+    const double min_dt,
+    const double conv_tol,
+    const size_t max_iterations){
 
-//     std::vector<std::vector<double>> k_matrix;
-//     std::vector<double> f_vector;
-//     std::vector<double> x_out;
+    SimModel model;
 
-//     std::vector<int> a = {3, 5, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100};
-//     for (int i : a) {
-//         n = std::to_string(i);
+    model.set_output(output);
+    model.set_t_end(5.*365.25);
+    model.set_max_dsw(max_dsw);
+    model.set_max_dpr(max_dpr);
+    model.set_max_dt(max_dt);
+    model.set_min_dt(min_dt);
+    model.set_conv_tol(conv_tol);
+    model.set_max_iter(max_iterations);
+    model.set_use_nr(is_NR);
+    model.set_ni(ni);
+    if (is_2D){
+        model.set_nj(ni);
+    } else{
+        model.set_nj(1);
+    }
+    model.set_dh(200.);
+    model.set_dz(30.);
+    model.set_phi(0.30);
+    model.set_perm(1000.);
+    model.set_p_init(340.);
+    model.set_bo(1.01);
+    model.set_bw(1.0);
+    model.set_uo(130.);
+    model.set_uw(1.0);
 
-//         output << "Number of cells: " << n << " x " << n2 << std::endl;
+    model.kr.set_swi(0.20);
+    model.kr.set_swc(0.20);
+    model.kr.set_sor(0.15);
+    model.kr.set_nw(2.0);
+    model.kr.set_no(1.0);
+    model.kr.set_kro_endp(1.00);
+    model.kr.set_krw_endp(0.60);
 
-//             output << "  Gauss Elimination with Partial Pivot and Scaling" << std::endl;
-//             start = high_resolution_clock::now();
-//             x_out = SolveGauss(k_matrix, f_vector, true);
-//             stop = high_resolution_clock::now();
-//             duration = duration_cast<milliseconds>(stop - start);
-//             printVector(x_out, output);
-//             output << "Elapsed time: " << duration.count() << " milliseconds" << std::endl;
-//             check_result(k_matrix, f_vector, x_out, x_true, output);
-//             output << std::endl;
-//         }
+    model.set_qwi(350.);
+    model.set_pwf(330.);
+    model.set_rw(4.*2.54/100.);
+    model.set_skin(0.0);
 
-//     }
-// }
+    model.run_simulation(0.1);
+
+}
 
 int main(){
     #ifdef _WIN32
@@ -1271,12 +1326,13 @@ int main(){
         std::cout << "Running on an unknown system" << std::endl;
     #endif
 
-    // test01();
-    std::ofstream outputFile("results_NR_1D.txt");
+    std::ofstream outputFile("results_Fixed_1D.txt");
     if (outputFile.is_open()) {
-
+        test(outputFile, 3, false, false, 1., 0.005, 10., 0.1, 1.E-5, 50);
+        std::cout << "End of simulation" << std::endl;
         outputFile.close();
     } else {
         std::cerr << "Unable to open the file for writing.\n";
     }
+    std::cout << "End of file" << std::endl;
 }
