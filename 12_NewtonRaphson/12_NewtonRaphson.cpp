@@ -254,6 +254,21 @@ std::vector<double> matMult(
     return result;
 }
 
+std::vector<double> vecAdd(
+    const std::vector<double>& vector1,
+    const std::vector<double>& vector2) {
+
+    if (vector1.size() != vector2.size()) {
+        throw std::invalid_argument("Error: Vectors must have the same size for subtraction");
+    }
+
+    std::vector<double> result(vector1.size());
+    for (size_t i = 0; i < vector1.size(); ++i) {
+        result[i] = vector1[i] + vector2[i];
+    }
+    return result;
+}
+
 std::vector<double> vecDif(
     const std::vector<double>& vector1,
     const std::vector<double>& vector2) {
@@ -644,22 +659,33 @@ class SimModel{
 
         double get_upstream_sw(std::vector<double> x, size_t c1, size_t c2);
         double get_upstream_sw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+
         double get_kro(std::vector<double> x, size_t c);
         double get_kro(std::vector<double> x, size_t c1, size_t c2);
         double get_kro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
         double get_krw(std::vector<double> x, size_t c);
         double get_krw(std::vector<double> x, size_t c1, size_t c2);
         double get_krw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+
         double get_dkro(std::vector<double> x, size_t c1, size_t c2);
         double get_dkro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
         double get_dkrw(std::vector<double> x, size_t c1, size_t c2);
         double get_dkrw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+
         double get_tr(size_t c1, size_t c2);
         double get_tr(size_t i1, size_t j1, size_t i2, size_t j2);
         double get_tro(std::vector<double> x, size_t c1, size_t c2);
         double get_tro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
         double get_trw(std::vector<double> x, size_t c1, size_t c2);
         double get_trw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+
+        double get_dtro(std::vector<double> x, size_t c1, size_t c2);
+        double get_dtro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+        double get_dtrw(std::vector<double> x, size_t c1, size_t c2);
+        double get_dtrw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2);
+
+        double get_dtrodP(std::vector<double> x, size_t c1, size_t c2);
+        double get_dtrwdP(std::vector<double> x, size_t c1, size_t c2);
 
         void build_K(std::vector<double> x);
 
@@ -1000,6 +1026,50 @@ double SimModel::get_trw(std::vector<double> x, size_t i1, size_t j1, size_t i2,
     return get_trw(x, c1, c2);
 }
 
+double SimModel::get_dtro(std::vector<double> x, size_t c1, size_t c2){
+    double dtr = get_tr(c1,c2);
+    if (dtr != 0.){
+        dtr *= unit_conv * get_dkro(x,c1,c2) / (bo * uo);
+    }
+    return dtr;
+}
+double SimModel::get_dtro(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
+    return get_dtro(x, c1, c2);
+}
+double SimModel::get_dtrw(std::vector<double> x, size_t c1, size_t c2){
+    double dtr = get_tr(c1,c2);
+    if (dtr != 0.){
+        dtr *= unit_conv * get_dkrw(x,c1,c2) / (bw * uw);
+    }
+    return dtr;
+}
+double SimModel::get_dtrw(std::vector<double> x, size_t i1, size_t j1, size_t i2, size_t j2){
+    size_t c1 = get_cell_n(i1,j1);
+    size_t c2 = get_cell_n(i2,j2);
+    return get_dtrw(x, c1, c2);
+}
+
+double SimModel::get_dtrodP(std::vector<double> x, size_t c1, size_t c2){
+    double p1 = get_cell_pr(x, c1);
+    double p2 = get_cell_pr(x, c2);
+    if (p1 > p2){
+        return get_dtro(x,c1,c2) * (p2-p1);
+    } else{
+        return 0.;
+    }
+}
+double SimModel::get_dtrwdP(std::vector<double> x, size_t c1, size_t c2){
+    double p1 = get_cell_pr(x, c1);
+    double p2 = get_cell_pr(x, c2);
+    if (p1 > p2){
+        return get_dtrw(x,c1,c2) * (p2-p1);
+    } else{
+        return 0.;
+    }
+}
+
 void SimModel::build_K(std::vector<double> x){
     initial_matrix(k_mat, 2*ni*nj, 2*ni*nj);
     std::vector<size_t> c_list;
@@ -1068,8 +1138,45 @@ void SimModel::build_F(std::vector<double> x){
 }
 
 void SimModel::build_Jac(std::vector<double> x){
-    x.push_back(0.);
     jac = k_mat;
+
+    std::vector<size_t> c_list;
+    size_t nc;
+    double dtro;
+    double dtrw;
+    size_t c;
+
+    for (size_t j=0; j<nj; j++){
+        for (size_t i=0; i<ni; i++){
+            c = get_cell_n(i,j);
+            c_list.clear();
+            if (i > 0){
+                c_list.push_back(get_cell_n(i-1, j));
+            }
+            if (j > 0){
+                c_list.push_back(get_cell_n(i, j-1));
+            }
+            if (i < (ni-1)){
+                c_list.push_back(get_cell_n(i+1, j));
+            }
+            if (j < (nj-1)){
+                c_list.push_back(get_cell_n(i, j+1));
+            }
+            nc = c_list.size();
+            for (size_t k=0; k<nc; k++){
+                dtro = get_dtrodP(x, c, c_list[k]);
+                dtrw = get_dtrwdP(x, c, c_list[k]);
+                k_mat[2*c-2][2*c-1] += dtro;
+                k_mat[2*c-1][2*c-1] += dtrw;
+                k_mat[2*c_list[k]-2][2*c-1] -= dtro;
+                k_mat[2*c_list[k]-2][2*c-1] -= dtrw;
+            }
+        }
+    }
+    c = get_cell_n(ni-1,nj-1);
+    double p_prod = get_cell_pr(x, ni-1, nj-1);
+    k_mat[2*c - 2][2*c - 1] -= wi * get_dkro(x, c, c) / (bo * uo) * (p_prod - pwf);
+    k_mat[2*c - 1][2*c - 1] -= wi * get_dkrw(x, c, c) / (bw * uw) * (p_prod - pwf);
 }
 
 void SimModel::initialize(){
@@ -1155,8 +1262,29 @@ bool SimModel::solve_fixed(){
     return (k <= max_iter);
 }
 bool SimModel::solve_newton_raphson(){
-    x_next = x_curr;
-    return true;
+    std::vector<double> x_old;
+    std::vector<double> dx;
+    std::vector<double> x_new = x_curr;
+    std::vector<std::vector<double>> kx;
+    std::vector<double> r;
+    size_t k=0;
+    double conv = 1.e5;
+    while ((conv > conv_tol) && (k < max_iter)){
+        x_old = x_new;
+        build_K(x_new);
+        build_F(x_curr);
+        r = matMult(k_mat, x_new);
+        // r = flattenMatrix(kx);
+        r = vecDif(f_vec,r);
+        build_Jac(x_new);
+        dx = SolveGauss(jac, r);
+        x_new = vecAdd(x_old, dx);
+        conv = get_convergence(x_old, x_new);
+        log_msg(concatenate("   k=",k,", conv=",conv));
+        k++;
+    }
+    x_next = x_new;
+    return (k <= max_iter);
 }
 double SimModel::get_max_dpr(){
     double dpr_max = 0.;
@@ -1201,7 +1329,7 @@ bool SimModel::advance_one_time_step(){
     }
     double m_dpr = get_max_dpr();
     double m_dsw = get_max_dsw();
-    log_msg(concatenate("   MaxDpr=",m_dpr,", MaxDsw=",m_dsw));
+    // log_msg(concatenate("   MaxDpr=",m_dpr,", MaxDsw=",m_dsw));
     if (ok){
         if (m_dpr <= max_dpr){
             if (m_dsw <= max_dsw){
@@ -1328,9 +1456,10 @@ int main(){
         std::cout << "Running on an unknown system" << std::endl;
     #endif
 
-    std::ofstream outputFile("results_Fixed_1D.txt");
+    std::ofstream outputFile("results_NR_1D.txt");
     if (outputFile.is_open()) {
-        test(outputFile, 3, false, false, 1., 0.005, 10., 0.1, 1.E-5, 50);
+        // test(outputFile, 3, false, false, 1., 0.005, 10., 0.1, 1.E-5, 50);
+        test(outputFile, 3, false, true, 1., 0.005, 10., 0.1, 1.E-5, 50);
         std::cout << "End of simulation" << std::endl;
         outputFile.close();
     } else {
