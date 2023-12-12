@@ -1166,17 +1166,17 @@ void SimModel::build_Jac(std::vector<double> x){
             for (size_t k=0; k<nc; k++){
                 dtro = get_dtrodP(x, c, c_list[k]);
                 dtrw = get_dtrwdP(x, c, c_list[k]);
-                k_mat[2*c-2][2*c-1] += dtro;
-                k_mat[2*c-1][2*c-1] += dtrw;
-                k_mat[2*c_list[k]-2][2*c-1] -= dtro;
-                k_mat[2*c_list[k]-2][2*c-1] -= dtrw;
+                jac[2*c-2][2*c-1] += dtro;
+                jac[2*c-1][2*c-1] += dtrw;
+                jac[2*c_list[k]-2][2*c-1] -= dtro;
+                jac[2*c_list[k]-2][2*c-1] -= dtrw;
             }
         }
     }
     c = get_cell_n(ni-1,nj-1);
     double p_prod = get_cell_pr(x, ni-1, nj-1);
-    k_mat[2*c - 2][2*c - 1] -= wi * get_dkro(x, c, c) / (bo * uo) * (p_prod - pwf);
-    k_mat[2*c - 1][2*c - 1] -= wi * get_dkrw(x, c, c) / (bw * uw) * (p_prod - pwf);
+    jac[2*c - 2][2*c - 1] -= wi * get_dkro(x, c, c) / (bo * uo) * (p_prod - pwf);
+    jac[2*c - 1][2*c - 1] -= wi * get_dkrw(x, c, c) / (bw * uw) * (p_prod - pwf);
 }
 
 void SimModel::initialize(){
@@ -1259,7 +1259,7 @@ bool SimModel::solve_fixed(){
         k++;
     }
     x_next = x_new;
-    return (k <= max_iter);
+    return (conv <= conv_tol);
 }
 bool SimModel::solve_newton_raphson(){
     std::vector<double> x_old;
@@ -1284,7 +1284,7 @@ bool SimModel::solve_newton_raphson(){
         k++;
     }
     x_next = x_new;
-    return (k <= max_iter);
+    return (conv <= conv_tol);
 }
 double SimModel::get_max_dpr(){
     double dpr_max = 0.;
@@ -1393,7 +1393,6 @@ void SimModel::save_result(){
 
 void test(
     std::ostream& output,
-    const size_t ni,
     const bool is_2D,
     const bool is_NR,
     const double max_dpr,
@@ -1414,15 +1413,17 @@ void test(
     model.set_conv_tol(conv_tol);
     model.set_max_iter(max_iterations);
     model.set_use_nr(is_NR);
+
+    size_t ni = 10;
     model.set_ni(ni);
     if (is_2D){
         model.set_nj(ni);
     } else{
         model.set_nj(1);
     }
-    model.set_dh(200.);
+    model.set_dh(50.);
     model.set_dz(30.);
-    model.set_phi(0.30);
+    model.set_phi(0.15);
     model.set_perm(1000.);
     model.set_p_init(340.);
     model.set_bo(1.01);
@@ -1434,7 +1435,7 @@ void test(
     model.kr.set_swc(0.20);
     model.kr.set_sor(0.15);
     model.kr.set_nw(2.0);
-    model.kr.set_no(1.0);
+    model.kr.set_no(3.0);
     model.kr.set_kro_endp(1.00);
     model.kr.set_krw_endp(0.60);
 
@@ -1444,7 +1445,6 @@ void test(
     model.set_skin(0.0);
 
     model.run_simulation(0.1);
-
 }
 
 int main(){
@@ -1456,14 +1456,39 @@ int main(){
         std::cout << "Running on an unknown system" << std::endl;
     #endif
 
-    std::ofstream outputFile("results_NR_1D.txt");
-    if (outputFile.is_open()) {
-        // test(outputFile, 3, false, false, 1., 0.005, 10., 0.1, 1.E-5, 50);
-        test(outputFile, 3, false, true, 1., 0.005, 10., 0.1, 1.E-5, 50);
+    // std::ofstream outputFile1("results_Fixed_1D.txt");
+    // if (outputFile1.is_open()) {
+    //     test(outputFile1, false, false, 1., 0.005, 10., 0.1, 1.E-5, 20);
+    //     std::cout << "End of simulation" << std::endl;
+    //     outputFile1.close();
+    // } else {
+    //     std::cerr << "Unable to open the file for writing.\n";
+    // }
+
+    // std::ofstream outputFile2("results_NR_1D.txt");
+    // if (outputFile2.is_open()) {
+    //     test(outputFile2, false, true, 1., 0.005, 10., 0.1, 1.E-5, 20);
+    //     std::cout << "End of simulation" << std::endl;
+    //     outputFile2.close();
+    // } else {
+    //     std::cerr << "Unable to open the file for writing.\n";
+    // }
+
+    std::ofstream outputFile3("results_Fixed_2D.txt");
+    if (outputFile3.is_open()) {
+        test(outputFile3, true, false, 1., 0.005, 10., 0.1, 1.E-5, 20);
         std::cout << "End of simulation" << std::endl;
-        outputFile.close();
+        outputFile3.close();
     } else {
         std::cerr << "Unable to open the file for writing.\n";
     }
-    std::cout << "End of file" << std::endl;
+
+    std::ofstream outputFile4("results_NR_2D.txt");
+    if (outputFile4.is_open()) {
+        test(outputFile4, true, true, 1., 0.005, 10., 0.1, 1.E-5, 20);
+        std::cout << "End of simulation" << std::endl;
+        outputFile4.close();
+    } else {
+        std::cerr << "Unable to open the file for writing.\n";
+    }
 }
