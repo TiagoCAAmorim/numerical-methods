@@ -420,6 +420,7 @@ std::vector<double> SolveGauss(
         }
         x[i-1] = (a[n_line[i-1]][n] - s_xa)/ a[n_line[i-1]][i-1];
     }
+    info.add_value_int("GaussCalls",info.get_value_int("GaussCalls")+1);
     return x;
 }
 
@@ -1216,6 +1217,7 @@ void SimModel::run_simulation(double dt){
     double t = 0.;
     bool ok;
     dt_curr = dt;
+    info.add_value_int("GaussCalls",0);
     while (t < t_end){
         // log_msg(concatenate("[",d2str(t,3),"], Time-step=",d2str(dt_curr,3)));
         ok = advance_one_time_step();
@@ -1257,7 +1259,7 @@ void SimModel::save_result(){
     x_list.push_back(x_next);
     x_curr = x_next;
 
-    log_msg(concatenate("[",d2str(t_vec.back(),3),"], dt=",dt_curr,", MaxDpr=",m_dpr,", MaxDsw=",m_dsw,", Qo=",d2str(qo,2),", Qw=",d2str(qw,2)));
+    log_msg(concatenate("[",d2str(t_vec.back(),3),"], dt=",dt_curr,", MaxDpr=",m_dpr,", MaxDsw=",m_dsw,", Qo=",d2str(qo,2),", Qw=",d2str(qw,2),", Gauss=",info.get_value_int("GaussCalls")));
 }
 
 
