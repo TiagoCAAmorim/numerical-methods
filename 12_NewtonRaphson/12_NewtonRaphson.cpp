@@ -7,9 +7,6 @@
 #include <cmath>
 #include <algorithm>
 #include <iomanip>
-// using namespace std;
-// using namespace std::chrono;
-// namespace fs = std::filesystem;
 
 const double eps = 1e-17;
 
@@ -446,37 +443,6 @@ std::vector<double> SolveGauss(
     return SolveGauss(a_mat, b_vec, true);
 }
 
-void check_result(
-    const std::vector<std::vector<double>>& a_mat,
-    const std::vector<double>& b_vec,
-    std::vector<double>& x_out,
-    const std::vector<double>& x_true,
-    std::ostream& output){
-
-    output << "Response" << std::endl;
-    std::vector<double> error = vecDif(b_vec, matMult(a_mat, x_out));
-    // printVector(x_out, output);
-    // printVector(error, output);
-    output << "  Maximum residual: " << std::abs(error[MaxAbs(error)]) << std::endl;
-    output << "  ||residual||: " << vecNorm2(error) << std::endl;
-
-    output << "Provided True Response" << std::endl;
-    std::vector<double> error_true = vecDif(b_vec, matMult(a_mat, x_true));
-    // printVector(x_true, output);
-    // printVector(error_true, output);
-    output << "  Maximum residual: " << std::abs(error_true[MaxAbs(error_true)]) << std::endl;
-    output << "  ||residual||: " << vecNorm2(error_true) << std::endl;
-
-    output << "Delta Responses" << std::endl;
-    std::vector<double> x_delta = vecDif(x_true, x_out);
-    // printVector(x_delta, output);
-    output << "  ||delta||: " << vecNorm2(x_delta) << std::endl;
-    output << "  Maximum difference: " << std::abs(x_delta[MaxAbs(x_delta)]) << std::endl;
-    output << "  Maximum difference odd: " << std::abs(x_delta[MaxAbs(x_delta, 0, x_delta.size(), 2)]) << std::endl;
-    output << "  Maximum difference even: " << std::abs(x_delta[MaxAbs(x_delta, 1, x_delta.size(), 2)]) << std::endl;
-}
-
-
 class RelPerm{
     public:
         RelPerm();
@@ -606,8 +572,6 @@ double RelPerm::get_dkro(double sw){
 class SimModel{
     public:
         SimModel();
-
-        // ResultProcessor(std::ostream& output = std::cout) : outputStream(output) {}
 
         void set_output(std::ostream& value);
 
@@ -1222,6 +1186,12 @@ void SimModel::initialize(){
     qo_vec.push_back(0.);
     qw_vec.push_back(0.);
     pinj_vec.push_back(0.);
+
+    if (use_nr){
+        log_msg("Using Newton-Raphson.");
+    } else{
+        log_msg("Using Fixed-Point.");
+    }
 }
 
 double SimModel::get_convergence(std::vector<double>& x_old, std::vector<double>& x_new){
@@ -1255,7 +1225,7 @@ bool SimModel::solve_fixed(){
         build_F(x_curr);
         x_new = SolveGauss(k_mat, f_vec);
         conv = get_convergence(x_old, x_new);
-        log_msg(concatenate("   k=",k,", conv=",conv));
+        // log_msg(concatenate("   k=",k,", conv=",conv));
         k++;
     }
     x_next = x_new;
@@ -1273,14 +1243,11 @@ bool SimModel::solve_newton_raphson(){
         x_old = x_new;
         build_K(x_new);
         build_F(x_curr);
-        r = matMult(k_mat, x_new);
-        // r = flattenMatrix(kx);
-        r = vecDif(f_vec,r);
+        r = vecDif(f_vec, matMult(k_mat, x_new));
         build_Jac(x_new);
         dx = SolveGauss(jac, r);
         x_new = vecAdd(x_old, dx);
         conv = get_convergence(x_old, x_new);
-        log_msg(concatenate("   k=",k,", conv=",conv));
         k++;
     }
     x_next = x_new;
@@ -1329,7 +1296,6 @@ bool SimModel::advance_one_time_step(){
     }
     double m_dpr = get_max_dpr();
     double m_dsw = get_max_dsw();
-    // log_msg(concatenate("   MaxDpr=",m_dpr,", MaxDsw=",m_dsw));
     if (ok){
         if (m_dpr <= max_dpr){
             if (m_dsw <= max_dsw){
@@ -1347,7 +1313,6 @@ void SimModel::run_simulation(double dt){
     dt_curr = dt;
     info.add_value_int("GaussCalls",0);
     while (t < t_end){
-        // log_msg(concatenate("[",d2str(t,3),"], Time-step=",d2str(dt_curr,3)));
         ok = advance_one_time_step();
         if (ok || dt_curr <= min_dt){
             t += dt_curr;
@@ -1361,7 +1326,6 @@ void SimModel::run_simulation(double dt){
             if (dt_curr < min_dt){
                 dt_curr = min_dt;
             }
-            // log_msg("["+d2str(t, 3) + "] Could not converge. New time-step: "+d2str(dt_curr,3)+".");
         }
         dt_curr = std::min(dt_curr, t_end - t);
     }
@@ -1387,12 +1351,13 @@ void SimModel::save_result(){
     x_list.push_back(x_next);
     x_curr = x_next;
 
-    log_msg(concatenate("[",d2str(t_vec.back(),3),"], dt=",dt_curr,", MaxDpr=",m_dpr,", MaxDsw=",m_dsw,", Qo=",d2str(qo,2),", Qw=",d2str(qw,2),", Gauss=",info.get_value_int("GaussCalls")));
+    log_msg(concatenate("t=",d2str(t_vec.back(),3),", dt=",dt_curr,", MaxDpr=",m_dpr,", MaxDsw=",m_dsw,", Qo=",d2str(qo,2),", Qw=",d2str(qw,2),", Gauss=",info.get_value_int("GaussCalls")));
 }
 
 
+
 void test(
-    std::ostream& output,
+    const std::string filename,
     const bool is_2D,
     const bool is_NR,
     const double max_dpr,
@@ -1400,9 +1365,18 @@ void test(
     const double max_dt,
     const double min_dt,
     const double conv_tol,
-    const size_t max_iterations){
+    const size_t max_iterations,
+    const size_t ni,
+    const double uo,
+    const double nw,
+    const double no){
 
     SimModel model;
+
+    std::ofstream output(filename);
+    if (!output.is_open()) {
+        std::cerr << "Unable to open the file for writing.\n";
+    }
 
     model.set_output(output);
     model.set_t_end(5.*365.25);
@@ -1414,28 +1388,27 @@ void test(
     model.set_max_iter(max_iterations);
     model.set_use_nr(is_NR);
 
-    size_t ni = 10;
     model.set_ni(ni);
     if (is_2D){
         model.set_nj(ni);
     } else{
         model.set_nj(1);
     }
-    model.set_dh(50.);
+    model.set_dh(500./static_cast<double>(ni));
     model.set_dz(30.);
     model.set_phi(0.15);
     model.set_perm(1000.);
     model.set_p_init(340.);
     model.set_bo(1.01);
     model.set_bw(1.0);
-    model.set_uo(130.);
+    model.set_uo(uo);
     model.set_uw(1.0);
 
     model.kr.set_swi(0.20);
     model.kr.set_swc(0.20);
     model.kr.set_sor(0.15);
-    model.kr.set_nw(2.0);
-    model.kr.set_no(3.0);
+    model.kr.set_nw(nw);
+    model.kr.set_no(no);
     model.kr.set_kro_endp(1.00);
     model.kr.set_krw_endp(0.60);
 
@@ -1445,7 +1418,12 @@ void test(
     model.set_skin(0.0);
 
     model.run_simulation(0.1);
+
+    std::cout << "End of simulation" << std::endl;
+    output.close();
 }
+
+
 
 int main(){
     #ifdef _WIN32
@@ -1456,39 +1434,35 @@ int main(){
         std::cout << "Running on an unknown system" << std::endl;
     #endif
 
-    // std::ofstream outputFile1("results_Fixed_1D.txt");
-    // if (outputFile1.is_open()) {
-    //     test(outputFile1, false, false, 1., 0.005, 10., 0.1, 1.E-5, 20);
-    //     std::cout << "End of simulation" << std::endl;
-    //     outputFile1.close();
-    // } else {
-    //     std::cerr << "Unable to open the file for writing.\n";
-    // }
 
-    // std::ofstream outputFile2("results_NR_1D.txt");
-    // if (outputFile2.is_open()) {
-    //     test(outputFile2, false, true, 1., 0.005, 10., 0.1, 1.E-5, 20);
-    //     std::cout << "End of simulation" << std::endl;
-    //     outputFile2.close();
-    // } else {
-    //     std::cerr << "Unable to open the file for writing.\n";
-    // }
+    test("results_Fixed_2D.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 2., 3.);
+    test("results_NR_2D.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 2., 3.);
 
-    std::ofstream outputFile3("results_Fixed_2D.txt");
-    if (outputFile3.is_open()) {
-        test(outputFile3, true, false, 1., 0.005, 10., 0.1, 1.E-5, 20);
-        std::cout << "End of simulation" << std::endl;
-        outputFile3.close();
-    } else {
-        std::cerr << "Unable to open the file for writing.\n";
-    }
+    //Uo sensibility
+    test("results_Fixed_2D_uo01.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 0.1, 2., 3.);
+    test("results_NR_2D_uo01.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 0.1, 2., 3.);
+    test("results_Fixed_2D_uo1.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 1., 2., 3.);
+    test("results_NR_2D_uo1.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 1., 2., 3.);
+    test("results_Fixed_2D_uo10.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 10., 2., 3.);
+    test("results_NR_2D_uo10.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 10., 2., 3.);
+    test("results_Fixed_2D_uo100.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 100., 2., 3.);
+    test("results_NR_2D_uo100.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 100., 2., 3.);
 
-    std::ofstream outputFile4("results_NR_2D.txt");
-    if (outputFile4.is_open()) {
-        test(outputFile4, true, true, 1., 0.005, 10., 0.1, 1.E-5, 20);
-        std::cout << "End of simulation" << std::endl;
-        outputFile4.close();
-    } else {
-        std::cerr << "Unable to open the file for writing.\n";
-    }
+    //Ncell sensibility
+    test("results_Fixed_2D_ni3.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 3, 130., 2., 3.);
+    test("results_NR_2D_ni3.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 3, 130., 2., 3.);
+    test("results_Fixed_2D_ni9.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 9, 130., 2., 3.);
+    test("results_NR_2D_ni9.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 9, 130., 2., 3.);
+    test("results_Fixed_2D_ni27.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 27, 130., 2., 3.);
+    test("results_NR_2D_ni27.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 27, 130., 2., 3.);
+
+    //no=nw sensibility
+    test("results_Fixed_2D_nkr1.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 1., 1.);
+    test("results_NR_2D_nkr1.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 1., 1.);
+    test("results_Fixed_2D_nkr2.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 2., 2.);
+    test("results_NR_2D_nkr2.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 2., 2.);
+    test("results_Fixed_2D_nkr3.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 3., 3.);
+    test("results_NR_2D_nkr3.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 3., 3.);
+    test("results_Fixed_2D_nkr4.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 4., 4.);
+    test("results_NR_2D_nkr4.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 4., 4.);
 }
