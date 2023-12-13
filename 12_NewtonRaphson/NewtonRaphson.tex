@@ -1,0 +1,586 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics}
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+\newcommand*{\squareb}{\textcolor{black}{\rule{0.5em}{0.5em}}}
+\newcommand*{\squareg}{\textcolor{gray}{\rule{0.5em}{0.5em}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Performance dos Métodos do Ponto Fixo e de Newton-Raphson em Problemas de Fluxo em Meio Poroso Incompressíveis\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 12 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28},
+city={Rio de Janeiro},
+postcode={20231-030},
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+    O método usualmente empregado para resolver os sistemas de equações não lineares de simulações de fluxo em meio poroso é o de Newton-Raphson. Em sistemas incompressíveis a matriz jacobiana associada ao problema se aproxima da matriz de coeficientes. Foi comparada a performance do Método de Newton-Raphson contra o Método do Ponto Fixo. Os testes realizados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo. A performance dos dois métodos se aproximam à medida que o problema fica mais linear.
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método de Newton-Raphson \sep Método do Ponto Fixo \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+        Em simuladores de fluxo em meio poroso o usual é empregar o Método de Newton-Raphson para resolver os sistemas de equações não lineares resultantes\cite{computer2022cmg}\cite{schlumberger2009technical}. Em problemas incompressíveis o termos não lineares do sistema de equações se resumem às permeabilidades relativas. Com um sistema de equações \emph{quase} linear, o Método do Ponto Fixo se mostra como uma alternativa viável. Este trabalho se propõe a avaliar a diferença entre empregar o Método de Newton-Raphson versus o Método do Ponto Fixo.
+
+\section{Metodologia}
+
+    \subsection{Fluxo em Meio Poroso Incompressível}
+
+        Em um relatório anterior\cite{relatoriogauss} é feita uma rápida discussão sobre as equações que governam o fluxo em meio poroso incompressível bifásico em uma dimensão:
+
+        \begin{align}
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_w \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_s+\Delta t} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_s} + q^{std}_w \label{eq:blackoilumdw} \\
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_o \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_o \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_s+\Delta t} - \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_s} + q^{std}_o \label{eq:blackoilumdo}
+        \end{align}
+
+        \noindent com:
+        \begin{align}
+            \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
+        \end{align}
+
+        Para passar para problemas bi e tridimensionais basta somar termos de transferência de massa entre as células vizinhas (à esquerda da igualdade em \ref{eq:blackoilumdw} e \ref{eq:blackoilumdo}). As variáveis do problema são as pressões ($p$) e saturações de água ($S_w$) das células. É possível colocar este conjunto de equações na forma $K\,x=f$ (assumindo problema unidimensional e plano\footnote{$\Delta D = 0$.}).
+
+        \begin{figure*}
+        \begin{equation}
+            K =
+            \begin{bmatrix}
+                % \begin{array}{ccccccc}
+                    -\left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} &  \left(\frac{V \phi}{\Delta t B_w}\right)_1 & \left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} & 0 & \cdots & 0 & 0 \\
+                    -\left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & -\left(\frac{V \phi}{\Delta t B_o}\right)_1 & \left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & 0 & \cdots & 0 & 0 \\
+
+                    \left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \lambda_w \right)_{1.5}-\left( \frac{A}{\Delta x} \lambda_w \right)_{2.5} &  \left(\frac{V \phi}{\Delta t B_w}\right)_2 & \cdots & 0 & 0 \\
+                    \left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \lambda_o \right)_{1.5}-\left( \frac{A}{\Delta x} \lambda_o \right)_{2.5} & -\left(\frac{V \phi}{\Delta t B_o}\right)_2 & \cdots & 0  & 0 \\
+
+                    \vdots     &     &      &  & \ddots &  & \vdots \\
+                    0 & 0 & \cdots & \left( \frac{A}{\Delta x} \lambda_w \right)_{n-\frac{1}{2}} &  0 & -\left( \frac{A}{\Delta x} \lambda_w \right)_{n-\frac{1}{2}} &  \left(\frac{V \phi}{\Delta t B_w}\right)_n \\
+                    0 & 0 & \cdots & \left( \frac{A}{\Delta x} \lambda_o \right)_{n-\frac{1}{2}} &  0 & -\left( \frac{A}{\Delta x} \lambda_o \right)_{n-\frac{1}{2}} & -\left(\frac{V \phi}{\Delta t B_o}\right)_n \\
+                % \end{array}
+            \end{bmatrix}
+            \label{eq:sistemak}
+        \end{equation}
+        \end{figure*}
+        % \begin{figure*}
+        % \begin{equation}
+        %     K =
+        %     \left[
+        %         \begin{array}{ccccccc}
+        %             -\left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} &  \left(\frac{V \phi}{\Delta t B_w}\right)_1 & \left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} & 0 & \cdots & 0 & 0 \\
+        %             -\left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & -\left(\frac{V \phi}{\Delta t B_o}\right)_1 & \left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & 0 & \cdots & 0 & 0 \\
+
+        %             \left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \lambda_w \right)_{1.5}-\left( \frac{A}{\Delta x} \lambda_w \right)_{2.5} &  \left(\frac{V \phi}{\Delta t B_w}\right)_2 & \cdots & 0 & 0 \\
+        %             \left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \lambda_o \right)_{1.5}-\left( \frac{A}{\Delta x} \lambda_o \right)_{2.5} & -\left(\frac{V \phi}{\Delta t B_o}\right)_2 & \cdots & 0  & 0 \\
+
+        %             \vdots     &     &      &  & \ddots &  & \vdots \\
+        %             0 & 0 & \cdots & \left( \frac{A}{\Delta x} \lambda_w \right)_{n-\frac{1}{2}} &  0 & -\left( \frac{A}{\Delta x} \lambda_w \right)_{n-\frac{1}{2}} &  \left(\frac{V \phi}{\Delta t B_w}\right)_n \\
+        %             0 & 0 & \cdots & \left( \frac{A}{\Delta x} \lambda_o \right)_{n-\frac{1}{2}} &  0 & -\left( \frac{A}{\Delta x} \lambda_o \right)_{n-\frac{1}{2}} & -\left(\frac{V \phi}{\Delta t B_o}\right)_n \\
+        %         \end{array}
+        %     \right]
+        %     \label{eq:sistemak}
+        % \end{equation}
+        % \end{figure*}
+
+        \begin{equation}
+            x =
+            \begin{bmatrix}
+                p_{1}  \\
+                Sw_{1}  \\
+                p_{2}  \\
+                Sw_{2}  \\
+                \vdots \\
+                p_{n} \\
+                Sw_{n}
+            \end{bmatrix}
+            \label{eq:sistemax}
+        \end{equation}
+
+        \begin{equation}
+            f =
+            \begin{bmatrix}
+                b_{1}  \\
+                b_{2}  \\
+                \vdots \\
+                b_{n}
+            \end{bmatrix}
+            \label{eq:sistemaf}
+        \end{equation}
+
+        % \begin{table}
+        %     \centering
+        %     \caption{Matrix de coeficientes para modelo unidimensional.}
+        %     \label{tab:matcoef}
+        %     \bigskip
+        %     \renewcommand{\arraystretch}{0.8}
+        %     \begin{tabularx}{0.35\textwidth}{|XXXXXXXXXX|}
+        %         -\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}} & \squareb & \squareg &          &          &          &           &          &          &          \\
+        %         \squareb & \squareb & \squareg &          &          &          &           &          &          &          \\
+        %         \squareg &           & \squareb & \squareb & \squareg &          &           &          &          &          \\
+        %         \squareg &           & \squareb & \squareb & \squareg &          &           &          &          &          \\
+        %                  &           & \squareg &          & \squareb & \squareb & \squareg  &          &          &          \\
+        %                  &           & \squareg &          & \squareb & \squareb & \squareg  &          &          &          \\
+        %                  &           &          & $\ddots$ &          &          & $\ddots$  & $\ddots$ &          &          \\
+        %                  &           &          &          &          &          &           &          &          &          \\
+        %                  &           &          &          &          &          & \squareg  &          & \squareb & \squareb \\
+        %                  &           &          &          &          &          & \squareg  &          & \squareb & \squareb \\
+        %     \end{tabularx}
+        % \end{table}
+
+    \subsection{Método de Newton-Raphson}
+
+        A descrição do Método de Eliminação de Gauss e do fluxo em meio poroso incompressível foi feita no relatório anterior\cite{relatoriogauss}, e não será repetida neste relatório.
+        Dado um sistema de $n$ equações lineares na forma $\\A \vec{x} = \vec{b}$:
+
+        \begin{align}
+            \left[
+                \begin{array}{cccc}
+                    a_{1,1}    & a_{1,2}    & \ldots & a_{1,n} \\
+                    a_{2,1}    & a_{2,2}    & \ldots & a_{2,n} \\
+                    \vdots     & \vdots     &        & \vdots  \\
+                    a_{n,1}    & a_{n,2}    & \ldots & a_{n,n}
+                \end{array}
+            \right]
+            \begin{bmatrix}
+                x_{1}  \\
+                x_{2}  \\
+                \vdots \\
+                x_{n}
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                b_{1}  \\
+                b_{2}  \\
+                \vdots \\
+                b_{n}
+            \end{bmatrix}
+            \label{eq:sistema}
+        \end{align}
+
+        O Método de Jacobi consiste em, primeiramente, explicitar cada uma das variáveis do sistema de equações ($x_i = f_i(x_1,\ldots,x_{i-1},x_{i+1},\ldots,x_n)$). A partir de uma estimativa inicial ($\vec{x}_0 = \{x_1^0,x_n^0,\ldots,x_n^0\}$) são realizadas sucessivos cálculos com estas funções, até ser atingido algum critério de convergência\cite{burden2016analise}.
+
+        A partir de \ref{eq:sistema} é possível construir equações para cada uma das variáveis do problema da seguinte forma:
+
+        \begin{align}
+            x_i = \frac{1}{a_{i,i}} ( b_i - \sum^{n}_{\substack{j=1 \\ j \neq i}} a_{i,j} x_j ) \label{eq:jacobi}
+        \end{align}
+
+        Como o termo $a_{i,i}$ aparece no divisor de \ref{eq:jacobi}, é uma condição necessária para o método não existirem valores nulos na diagonal da matriz de coeficientes. Para isso é preciso fazer trocas de linhas. Uma estratégia para melhorar o método é buscar ter valores altos na diagonal, ou buscar colocar valores na diagonal \emph{relativamente} altos com relação aos demais termos da mesma linha (maximizar $\frac{|a_{i,i}|}{\max_j |a_{i,j}|}$).
+
+        O algoritmo de Jacobi é apresentado em \ref{alg:jacobi}.
+
+        \begin{algorithm}
+            \caption{Método de Jacobi}\label{alg:jacobi}
+            \begin{algorithmic}
+                \Require $a_{i,j},\,b_i\,e\, x_i^0\; para \; i=1,2,\ldots,n\,\text{e}\\j=1,2,\ldots,n;\\\epsilon_{conv} > 0\;\text{e}\; k_{max} \in \mathbb{Z}, k_{max} > 0$
+                \ForAll{$i \in \{1, \dots, n\}$}
+                    \If{$a_{i,i} = 0$}
+                        \State \Return Erro: termo nulo na diagonal.
+                    \EndIf
+                \EndFor
+                \State $k \gets 1$
+                \While{$k \leq k_{max}$}
+                    \ForAll{$i \in \{1, \dots, n\}$}
+                        \State $x_i^k \gets \frac{1}{a_{i,i}} ( b_i - \sum^{n}_{\substack{j=1 \\ j \neq i}} a_{i,j} x_j^{k-1} )$
+                    \EndFor
+                    \If{$||\vec{x}_k - \vec{x}_{k-1}|| < \epsilon_{conv}$}
+                        \State \Return $x_i^k \; para \; i=1,2,\ldots,n$
+                    \EndIf
+                    \State $k \gets k+1$
+                \EndWhile
+                \State Avisar que método não atingiu convergência
+                \State \Return $x_i^k \; para \; i=1,2,\ldots,n$
+            \end{algorithmic}
+        \end{algorithm}
+
+        Diferentes critérios de convergência podem ser utilizados para definir quando a convergência é atingida. Definindo duas normas: $L^2$ (\ref{eq:normadois}) e $L^\infty$ (\ref{eq:normainf}):
+
+        \begin{align}
+            ||x||_2 &:= \sqrt{\sum_{i}x_i^2} \label{eq:normadois} \\
+            ||x||_\infty &:= \max_{i} |x_i| \label{eq:normainf}
+        \end{align}
+
+        Podemos utilizar diferentes critérios de convergência, como:
+
+        \begin{align}
+            \epsilon &= ||x_i^k - x_i^{k-1}||_2 \label{eq:conva} \\
+            \epsilon &= ||x_i^k - x_i^{k-1}||_\infty \label{eq:convb} \\
+            \epsilon &= \frac{||x_i^k - x_i^{k-1}||_2}{||x_i^k||_2} \label{eq:convc} \\
+            \epsilon &= \frac{||x_i^k - x_i^{k-1}||_\infty}{||x_i^k||_\infty} \label{eq:convd} \\
+        \end{align}
+
+    \subsection{Método de Gauss-Siedel}
+
+        O Método de Gauss-Siedel parte da ideia do Método de Jacobi, mas utiliza a estimativa \emph{mais atual} de cada variável. Ou seja, ao invés de usar os valores de $x_i^{k-1}$ em cada passo da iteração, é utilizado o valor de $x_i^k$, quando disponível.
+
+        As discussões sobre os termos da diagonal e critérios de convergência feitas para o Método de Jacobi seguem válidas para este método. O algoritmo do método é apresentado em \ref{alg:gausssiedel}.
+
+        \begin{algorithm}
+            \caption{Método de Gauss-Siedel}\label{alg:gausssiedel}
+            \begin{algorithmic}
+                \Require $a_{i,j},\,b_i\,e\, x_i^0\; para \; i=1,2,\ldots,n\,\text{e}\\j=1,2,\ldots,n;\\\epsilon_{conv} > 0\;\text{e}\; k_{max} \in \mathbb{Z}, k_{max} > 0$
+                \ForAll{$i \in \{1, \dots, n\}$}
+                    \If{$a_{i,i} = 0$}
+                        \State \Return Erro: termo nulo na diagonal.
+                    \EndIf
+                \EndFor
+                \State $k \gets 1$
+                \While{$k \leq k_{max}$}
+                    \ForAll{$i \in \{1, \dots, n\}$}
+                        \State $x_i^k \gets \frac{1}{a_{i,i}} ( b_i - \sum^{i-1}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k})$
+                    \EndFor
+                    \If{$||\vec{x}_k - \vec{x}_{k-1}|| < \epsilon_{conv}$}
+                        \State \Return $x_i^k \; para \; i=1,2,\ldots,n$
+                    \EndIf
+                    \State $k \gets k+1$
+                \EndWhile
+                \State Avisar que método não atingiu convergência
+                \State \Return $x_i^k \; para \; i=1,2,\ldots,n$
+            \end{algorithmic}
+        \end{algorithm}
+
+    \subsection{Métodos SRS}
+
+        Podemos calcular o residual da m-ésima variável na k-ésima iteração do Método de Gauss-Siedel como:
+
+        \begin{align}
+            r_i^k &= b_i - \sum^{i}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k} \label{eq:residual}
+        \end{align}
+
+        Maniplando \ref{eq:residual} e substituindo na equação de atualização de $x_i$ do Método de Gauss-Siedel, temos:
+
+        \begin{align}
+            r_i^k &= b_i - \sum^{i-1}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k} \nonumber \\
+            r_i^k + a_{i,i} x_i^{k-1} &= b_i - \sum^{i-1}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k} \nonumber \\
+            \frac{r_i^k}{a_{i,i}} + x_i^{k-1} &= \frac{1}{a_{i,i}} ( b_i - \sum^{i-1}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k}) \nonumber \\
+            x_i^k &= x_i^{k-1} + \frac{r_i^k}{a_{i,i}} \label{eq:atualizaxi}
+        \end{align}
+
+        A equação \ref{eq:atualizaxi} pode ser encarada como uma sequência. Uma forma de ajudar na convergência de ${x_i}$ é aplicar um modificador no termo que atualiza $x_i$:
+
+        \begin{align}
+            x_i^k &= x_i^{k-1} + \omega \frac{r_i^k}{a_{i,i}}, \;\text{com} \; \omega > 0 \label{eq:atualizaxiw}
+        \end{align}
+
+        Quando $0 < \omega < 1$ temos métodos de sub-relaxação, e quando $\omega > 1$ temos métodos de sobre-relaxação. A equação \ref{eq:atualizaxiw} ainda pode ser manipulada para explicitar $x_i^{k-1}$ do lado direito e chegar ao Método SRS (sobre-relaxação sucessiva):
+
+        \begin{align}
+            x_i^k = &(1 - \omega) x_i^{k-1} \nonumber \\
+            &+ \omega \frac{1}{a_{i,i}} \left( b_i - \sum^{i-1}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k} \right) \label{eq:atualizaxisrs}
+        \end{align}
+
+        O algoritmo do Método SRS é parecido com o algoritmo de Gauss-Seidel. O algoritimo é apresentado em \ref{alg:srs}.
+
+        \begin{algorithm}
+            \caption{Método SRS}\label{alg:srs}
+            \begin{algorithmic}
+                \Require $a_{i,j},\,b_i\,e\, x_i^0\; para \; i=1,2,\ldots,n\,\text{e}\\j=1,2,\ldots,n;\\\omega > 0,\; \epsilon_{conv} > 0\;\text{e}\; k_{max} \in \mathbb{Z}, k_{max} > 0$
+                \ForAll{$i \in \{1, \dots, n\}$}
+                    \If{$a_{i,i} = 0$}
+                        \State \Return Erro: termo nulo na diagonal.
+                    \EndIf
+                \EndFor
+                \State $k \gets 1$
+                \While{$k \leq k_{max}$}
+                    \ForAll{$i \in \{1, \dots, n\}$}
+                        \State $x_{i,GS} \gets \frac{1}{a_{i,i}} \left( b_i - \sum^{i-1}_{j=1} a_{i,j} x_j^{k-1} - \sum^{n}_{j=i+1} a_{i,j} x_j^{k} \right)$
+                        \State $x_i^k \gets (1 - \omega) x_i^{k-1} + \omega x_{i,GS}$
+                    \EndFor
+                    \If{$||\vec{x}_k - \vec{x}_{k-1}|| < \epsilon_{conv}$}
+                        \State \Return $x_i^k \; para \; i=1,2,\ldots,n$
+                    \EndIf
+                    \State $k \gets k+1$
+                \EndWhile
+                \State Avisar que método não atingiu convergência
+                \State \Return $x_i^k \; para \; i=1,2,\ldots,n$
+            \end{algorithmic}
+        \end{algorithm}
+
+    \subsection{Problema proposto}
+
+        O problema proposto é a resolução de uma das iterações do Método do Ponto Fixo que foi implementado para resolver um modelo de fluxo em meio poroso incompressível. Foram gerados arquivos com a matriz de coeficientes e o vetor de constantes para dois tipos de modelo (uni e bidimensional) e diferentes refinamentos de malha.
+
+        O relatório anterior\cite{relatoriogauss} descreve em mais detalhes o problema a ser resolvido.
+
+\section{Implementação} \label{sec:implementacao}
+
+        Todo o código utilizado nesta análise foi desenvolvido em C++. As principais funções são:
+
+        \begin{description}
+            \item[readCSV] Função que recebe um \emph{string} com o camimnho de um arquivo CSV e faz a sua leitura. É assumido que é utilizado vírgula como separador. A função retorna uma matrix de \emph{double}.
+            \item[SolveGauss] Função que recebe uma matriz de \emph{double} e um vetor de \emph{double}, e resolve o sistema de equações lineares usando Eliminação de Gauss com Pivotamento Parcial. Existe a opção de realizar o pivotamento com e sem uso de escala.
+            \item[SolveSRS] Função que recebe uma matriz de \emph{double} e um vetor de \emph{double}, e resolve o sistema de equações lineares usando o Método SRS. Ao definir $\omega = 1$ o algoritmo coincide com o Método de Gauss-Siedel. Existe a opção de solicitar que sejam sempre utilizados os valores de $x_j^{k-1}$ nos cálculos de $x_i^{k}$, que junto com $\omega = 1$ leva ao Método de Jacobi.
+        \end{description}
+
+\section{Resultados}
+
+        Uma primeira dificuldade encontrada na implementação foi a definição do critério de convergência. Existe uma diferença significativa entre a ordem de grandeza das variáveis do problema proposto (saturações e pressões), de forma que um critério do tipo \ref{eq:convd} não é muito adequado. Foi preciso adotar um critério de convergência ligeiramente diferente dos listados anteriormente. A proposta foi de utilizar o máximo erro relativo por variável:
+
+        \begin{align}
+            \epsilon &= \left|\left|\frac{x_i^k - x_i^{k-1}}{x_i^k}\right|\right|_\infty \label{eq:conve}
+        \end{align}
+
+        Em \ref{eq:conve} a divisão é feita elemento a elemento (\emph{piecewise}).
+
+        O primeiro teste realizado foi o de verificar a qualidade das respostas das resoluções de diferentes sistemas de equações lineares de modelos unidimensionais. Foi adotado um valor de convergência baixo ($10^{-5}$) e um número máximo iterações alto ($2000$). Foram testados os três métodos expostos, e o Método SRS foi testado com $\omega = 0.8$ e $\omega = 1.2$.
+
+        % \begin{figure}[hbt!]
+        %     \begin{tikzpicture}
+        %         \begin{loglogaxis}[
+        %             grid=both,
+        %             xlabel = {Número de Parâmetros},
+        %             ylabel = {$\epsilon$},
+        %             ymax = 2e-2,
+        %             legend style={at={(0.50,0.80)}, anchor=east, font=\footnotesize},
+        %             ]
+        %             \addplot[color=red, solid, thick, mark=*] table [x=var, y=ConvJac, col sep=comma] {results_1D_2k.csv};
+        %             \addplot[color=black, solid, thick, mark=*] table [x=var, y=ConvGS, col sep=comma] {results_1D_2k.csv};
+        %             \addplot[color=blue, solid, thick, mark=*] table [x=var, y=ConvSRS08, col sep=comma] {results_1D_2k.csv};
+        %             \addplot[color=cyan, solid, thick, mark=*] table [x=var, y=ConvSRS12, col sep=comma] {results_1D_2k.csv};
+        %             \legend{Jacobi, Gauss-Siedel, SRS $\omega = 0.8$, SRS $\omega = 1.2$};
+        %         \end{loglogaxis}
+        %     \end{tikzpicture}
+        %     \caption{Valor da norma de convergência após até duas mil iterações na resolução de problemas unidimensionais.}
+        %     \label{fig:convergencia2k}
+        % \end{figure}
+
+
+        O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/12_NewtonRaphson/12_NewtonRaphson.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+\section{Conclusão}
+
+            Os resultados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo, necessitando de menos iterações para convergir. Para problemas mais simples, com menos células, curvas de permeabilidade relativa mais próximas do linear ou razão de mobilidade mais próxima da unidade, os dois métodos tem performance parecida. À medida que os problemas ficam \emph{mais não lineares}, a diferença entre os métodos aumenta.
+
+    % \label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
