@@ -172,7 +172,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-    O método usualmente empregado para resolver os sistemas de equações não lineares de simulações de fluxo em meio poroso é o de Newton-Raphson. Em sistemas incompressíveis a matriz jacobiana associada ao problema se aproxima da matriz de coeficientes. Foi comparada a performance do Método de Newton-Raphson contra o Método do Ponto Fixo. Os testes realizados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo. A performance dos dois métodos se aproximam à medida que o problema fica mais linear.
+    O método usualmente empregado para resolver os sistemas de equações não lineares de simulações de fluxo em meio poroso é o de Newton-Raphson. Em sistemas incompressíveis a matriz jacobiana associada ao problema é próxima da matriz de coeficientes. Foi comparada a performance do Método de Newton-Raphson contra o Método do Ponto Fixo. Os testes realizados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo. A performance dos dois métodos se aproximam à medida que o problema fica mais linear.
 
 \end{abstract}
 
@@ -206,7 +206,7 @@ country={Brasil}}
 %% main text
 \section{Introdução}
 
-        Em simuladores de fluxo em meio poroso o usual é empregar o Método de Newton-Raphson para resolver os sistemas de equações não lineares resultantes\cite{computer2022cmg}\cite{schlumberger2009technical}. Em problemas incompressíveis o termos não lineares do sistema de equações se resumem às permeabilidades relativas. Com um sistema de equações \emph{quase} linear, o Método do Ponto Fixo se mostra como uma alternativa viável. Este trabalho se propõe a avaliar a diferença entre empregar o Método de Newton-Raphson versus o Método do Ponto Fixo.
+        Em simuladores de fluxo em meio poroso o usual é empregar o Método de Newton-Raphson para resolver os sistemas de equações não lineares resultantes\cite{computer2022cmg}\cite{schlumberger2009technical}. Em problemas incompressíveis os termos não lineares do sistema de equações se resumem às permeabilidades relativas. Com um sistema de equações \emph{quase} linear, o Método do Ponto Fixo se mostra como uma alternativa viável. Este trabalho se propõe a avaliar a diferença entre empregar o Método de Newton-Raphson versus o Método do Ponto Fixo.
 
 \section{Metodologia}
 
@@ -277,7 +277,7 @@ country={Brasil}}
             \label{eq:jacobiano}
         \end{equation}
 
-        Definindo $\Delta \vec{x}^{k} = \vec{x}^{k+1} - \vec{x}^{k}$, é possível reescrever a Equação \ref{eq:nrndimensional} como um sistema de equações lineares (Equação \ref{eq:nrndimensional2}). Desta forma não é preciso inverter a matriz jacobiana para encontrar $\vec{x}^{k+1}$.
+        Definindo $\Delta \vec{x}^{k} = \vec{x}^{k+1} - \vec{x}^{k}$, é possível reescrever a Equação \ref{eq:nrndimensional} como um sistema de equações lineares (Equação \ref{eq:nrndimensional2}). Desta forma, ao invés de inverter a matriz jacobiana, é resolvido um sistema de equações lineares para encontrar $\vec{x}^{k+1}$.
 
         \begin{equation}
             J(\vec{x}^k) \Delta \vec{x}^{k} = -F(\vec{x}^k) \label{eq:nrndimensional2}
@@ -305,12 +305,12 @@ country={Brasil}}
 
         \begin{subequations}
         \begin{align}
-            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
-            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_w \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
-            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_s+\Delta t} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_s} + q^{std}_w \label{eq:blackoilumdw} \\
-            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i+\tfrac{1}{2}} (p_{i+1} - p_{i} - \gamma_o \Delta D_{i+\tfrac{1}{2}})  \nonumber \\
-            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i-\tfrac{1}{2}} (p_{i-1} - p_{i} - \gamma_o \Delta D_{i-\tfrac{1}{2}}) \nonumber \\
-            &  = \frac{1}{\Delta t} \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_s+\Delta t} - \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_s} + q^{std}_o \label{eq:blackoilumdo}
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}}^{t_{s+1}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})^{t_{s+1}}  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i-\tfrac{1}{2}}^{t_{s+1}} (p_{i-1} - p_{i} - \gamma_w \Delta D_{i-\tfrac{1}{2}})^{t_{s+1}} \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_{s+1}} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_s} + q^{std}_w \label{eq:blackoilumdw} \\
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i+\tfrac{1}{2}}^{t_{s+1}} (p_{i+1} - p_{i} - \gamma_o \Delta D_{i+\tfrac{1}{2}}) ^{t_{s+1}} \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i-\tfrac{1}{2}}^{t_{s+1}} (p_{i-1} - p_{i} - \gamma_o \Delta D_{i-\tfrac{1}{2}})^{t_{s+1}}\nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_{s+1}} - \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_s} + q^{std}_o \label{eq:blackoilumdo}
         \end{align}
         \label{eq:blackoilumd}
         \end{subequations}
@@ -322,7 +322,9 @@ country={Brasil}}
 
         Para passar para problemas bi e tridimensionais basta somar termos de transferência de massa entre as células vizinhas (à esquerda da igualdade em \ref{eq:blackoilumd}).
 
-        As variáveis do problema são as pressões ($p$) e saturações de água ($S_w$) das células. É possível colocar este conjunto de equações na forma $K\,x=f$. As equações \ref{eq:sistemak}, \ref{eq:sistemax} e \ref{eq:sistemaf} assumem problema unidimensional e plano\footnote{$\Delta D = 0$.}. Os termos fonte podem ficar tanto em $f$ como em $K$ (eg.: poço controlado por pressão de fundo). Os termos com $Sw$ em $f$ são avaliados no passo de tempo anterior.
+        As variáveis do problema são as pressões ($p$) e saturações de água ($S_w$) das células. É possível colocar este conjunto de equações na forma $K\,x=f$. As equações \ref{eq:sistemak}, \ref{eq:sistemax} e \ref{eq:sistemaf} assumem problema unidimensional e plano\footnote{$\Delta D = 0$.}.
+
+        Por simplicidade, os termos fonte ($q^{std}_{p,i}$) foram colocados em $f$. Estes termos podem aparecer tanto em $f$ como em $K$. Será função do tipo do controle do poço. Poços controlados por vazão terão seus termos em $f$, e poços controlados por pressão de fundo terão seus termos em $f$ e $K$.
 
         \begin{figure*}
         \begin{equation}
@@ -370,9 +372,9 @@ country={Brasil}}
             \label{eq:sistemaf}
         \end{equation}
 
-        Para utilizar o Método de Newton-Raphson é preciso encontrar o Jacobiano do sistema de equações não lineares a ser resolvido. Os únicos termos não lineares das equações são as permeabilidades relativas: $K_{rw}$ e $K_{ro}$. O termo fonte também pode pode aparecer, caso seja função da pressão de reservatório.
+        Para utilizar o Método de Newton-Raphson é preciso encontrar a matriz jacobiana do sistema de equações não lineares a ser resolvido. Os únicos termos não lineares das equações são as permeabilidades relativas: $k_{rw}$ e $k_{ro}$. O termo fonte também pode pode aparecer, caso seja controlado por pressão de fundo.
 
-        É possível observar que o jacobiano será a matrix de coeficientes ($K$, Equação \ref{eq:sistemak}), acrescida das derivadas parciais do termos não lineares das transmissibilidades ($J_{tr}$, Equação \ref{eq:sistemajactr}) e dos termos fonte ($J_{q}$, Equação \ref{eq:sistemajacq}): $J=K+J_{tr}+J_q$. A equação \ref{eq:sistemajactr} assume que o termo $i-\frac{1}{2}$ é avaliado na célula $i-1$ (esquema implícito, com maior pressão em $i-1$).
+        É possível observar que a matriz jacobiana será a matriz de coeficientes ($K$, Equação \ref{eq:sistemak}), acrescida das derivadas parciais do termos não lineares das transmissibilidades ($J_{tr}$, Equação \ref{eq:sistemajactr}) e dos termos fonte ($J_{q}$, Equação \ref{eq:sistemajacq}): $J=K+J_{tr}+J_q$. A equação \ref{eq:sistemajactr} assume que o termo $i-\frac{1}{2}$ é avaliado na célula $i-1$ (esquema implícito, com maior pressão em $i-1$).
 
         \begin{figure*}
             \begin{equation}
@@ -429,7 +431,7 @@ country={Brasil}}
             Sw_d = \frac{Sw - Swi}{1-Sor-Swi} \nonumber
         \end{align}
 
-        O modelo tem dois poços: um injetor de água controlado por vazão constante na célula $[0,0]$ e um produtor controlado por pressão de fundo ($Pwf$) na célula $[ni,nj]$.
+        O modelo tem dois poços: um injetor de água controlado por vazão constante ($q^{std}_{w}$) na célula $[0,0]$ e um produtor controlado por pressão de fundo ($p_{wf}$) na célula $[ni,nj]$.
 
         Os valores dos parâmetros do modelo proposto estão no \ref{sec:parametros}.
 
@@ -439,7 +441,7 @@ country={Brasil}}
 
         O modelo de fluxo em meio poroso é implementado em uma classe: \emph{SimModel}. Nesta classe são informadas as propriedades de reservatório, fluido, permeabilidade relativa e parâmetros dos poços. Existe a opção de usar Newton-Raphson ou Ponto Fixo para resolver os sistema de equações não lineares. O principal método da classe é \emph{run\_simulation}, que faz a simulação do modelo de fluxo em meio poroso.
 
-        As condições iniciais ($p^{t=0}$ e $Sw^{t=0}$) e as condições de contorno (limites do reservatório e poços) são dadas. A simulação de fluxo assume um passo de tempo ($\Delta t$) e tenta resolver as Equações \ref{eq:blackoilumd}. Ao final de cada resolução de um passo de tempo é avaliado se o resultado é aceito ou se é reduzido o passo de tempo e refeita a resolução das Equações \ref{eq:blackoilumd}.
+        As condições iniciais ($p^{t=0}$ e $Sw^{t=0}$) e as condições de contorno (limites do reservatório e controles dos poços) são dadas. A simulação de fluxo assume um passo de tempo ($\Delta t$) e tenta resolver as Equações \ref{eq:blackoilumd}. Ao final de cada resolução de um passo de tempo é avaliado se o resultado é aceito ou se é reduzido o passo de tempo e refeita a resolução das Equações \ref{eq:blackoilumd}.
 
         Para controlar os erros de balanço de massa, é avaliado se as máximas variações de $p$ e $Sw$ estão dentro dos limites estabelecidos. Se os limites não forem satisfeitos, o passo de tempo é reduzido e os cálculos refeitos. Se os limites forem atendidos o valor do passo de tempo será incrementado para o próximo cálculo. O algoritmo implementado é apresentado em \ref{alg:simulacao}.
 
@@ -450,9 +452,9 @@ country={Brasil}}
                 \State $t \gets 0$
                 \Repeat
                     \State Resolve $p^{t+\Delta t}$, $Sw^{t+\Delta t}$
-                    \State $\Delta p \gets \max |p^{t+\Delta t} - p^t|$
-                    \State $\Delta Sw \gets \max |Sw^{t+\Delta t} - Sw^t|$
-                    \State $convergiu \gets \Delta p < \epsilon_{\Delta p}$ e $\Delta Sw^t < \epsilon_{\Delta Sw}$
+                    \State $\Delta p_{max} \gets \max |p^{t+\Delta t} - p^t|$
+                    \State $\Delta Sw_{max} \gets \max |Sw^{t+\Delta t} - Sw^t|$
+                    \State $convergiu \gets \Delta p_{max} < \epsilon_{\Delta p}$ e $\Delta Sw_{max} < \epsilon_{\Delta Sw}$
                     \If{ $convergiu$ ou $\Delta t = \Delta t_{min}$ }
                         \State $t \gets t + \Delta t$
                         \State $\Delta t \gets \min (1.2 \Delta t, \Delta t_{max})$
@@ -476,7 +478,7 @@ country={Brasil}}
                 \Repeat
                     \State $k_{ro} \gets fk_{ro}(\vec{x}^k)$
                     \State $k_{rw} \gets fk_{rw}(\vec{x}^k)$
-                    \State Monta matrix $K$ (\ref{eq:sistemak})
+                    \State Monta matriz $K$ (\ref{eq:sistemak})
                     \State Monta vetor $f$ (\ref{eq:sistemaf})
                     \State Resolve $K \, \vec{x}^{k+1} = f $
                     \State $k \gets k+1$
@@ -485,7 +487,7 @@ country={Brasil}}
             \end{algorithmic}
         \end{algorithm}
 
-        Em ambos métodos foi utilizado o mesmo critério de parada. A proposta foi de utilizar o máximo erro relativo por variável:
+        Em ambos métodos foi utilizado o mesmo critério de parada, discutido anteriormente\cite{relatoriojacobi}. A proposta foi de utilizar o máximo erro relativo por variável:
 
         \begin{align}
             \epsilon &= \left|\left|\frac{x_i^k - x_i^{k-1}}{x_i^k}\right|\right|_\infty \label{eq:conve}
@@ -537,7 +539,7 @@ country={Brasil}}
             \label{fig:chamadasgauss}
         \end{figure}
 
-        Foi feito um estudo de sensibilidade para avaliar o impacto de diferentes parâmetros no número total de iterações que cada método precisou para resolver a simulação (Tabela \ref{tab:sens}). A sensibilidade mostra que o número de iterações não é diretamente proporcional aos valores dos parâmetros testados (exceto o número de células), mas que o Método de Newton-Raphson sempre tem um resultado melhor.
+        Foi feito um estudo de sensibilidade para avaliar o impacto de diferentes parâmetros no número total de iterações que cada método precisou para resolver a simulação (Tabela \ref{tab:sens}). A sensibilidade mostra que o número de iterações não é diretamente proporcional aos valores dos parâmetros testados (exceto o número de células), mas que o Método de Newton-Raphson sempre tem um resultado melhor. O parâmetro que mais influenciou a diferença entre a performance dos métodos foi a viscosidade.
 
         \begin{figure*}
             \caption{Sensibilidade do número total de iterações.}
@@ -557,11 +559,11 @@ country={Brasil}}
                     \hline
                     $n_i = n_j = 3$ & 4 927 & 3 867 & 22\% \\
                     $n_i = n_j = 9$ & 35 511 & 26 983 & 24\% \\
-                    $n_i = n_j = 27$ &  &  & \\
+                    % $n_i = n_j = 27$ &  &  & \\
                     \hline
                     $n_o = n_w = 1.5$ & 63 159 & 50 185 & 21\% \\
                     $n_o = n_w = 2.0$ & 44 684 & 34 786 & 22\% \\
-                    $n_o = n_w = 3.0$ &  &  & \\
+                    $n_o = n_w = 3.0$ & 28 155 & 20 175 & 28\%  \\
                 \end{tabular}
             \end{center}
         \end{figure*}
