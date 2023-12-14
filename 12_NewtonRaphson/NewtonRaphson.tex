@@ -172,7 +172,7 @@ country={Brasil}}
 
 \begin{abstract}
 
-    O método usualmente empregado para resolver os sistemas de equações não lineares de simulações de fluxo em meio poroso é o de Newton-Raphson. Em sistemas incompressíveis a matriz jacobiana associada ao problema é próxima da matriz de coeficientes. Foi comparada a performance do Método de Newton-Raphson contra o Método do Ponto Fixo. Os testes realizados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo. A performance dos dois métodos se aproximam à medida que o problema fica mais linear.
+    O método usualmente empregado para resolver os sistemas de equações não lineares de simulações de fluxo em meio poroso é o de Newton-Raphson. Foi comparada a performance do Método de Newton-Raphson contra o Método do Ponto Fixo para resolver sistemas incompressíveis. Os testes realizados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo. A performance dos dois métodos se aproximam à medida que o problema fica mais linear.
 
 \end{abstract}
 
@@ -437,8 +437,6 @@ country={Brasil}}
 
     \section{Implementação} \label{sec:implementacao}
 
-        Todo o código utilizado nesta análise foi desenvolvido em C++.
-
         O modelo de fluxo em meio poroso é implementado em uma classe: \emph{SimModel}. Nesta classe são informadas as propriedades de reservatório, fluido, permeabilidade relativa e parâmetros dos poços. Existe a opção de usar Newton-Raphson ou Ponto Fixo para resolver os sistema de equações não lineares. O principal método da classe é \emph{run\_simulation}, que faz a simulação do modelo de fluxo em meio poroso.
 
         As condições iniciais ($p^{t=0}$ e $Sw^{t=0}$) e as condições de contorno (limites do reservatório e controles dos poços) são dadas. A simulação de fluxo assume um passo de tempo ($\Delta t$) e tenta resolver as Equações \ref{eq:blackoilumd}. Ao final de cada resolução de um passo de tempo é avaliado se o resultado é aceito ou se é reduzido o passo de tempo e refeita a resolução das Equações \ref{eq:blackoilumd}.
@@ -539,7 +537,7 @@ country={Brasil}}
             \label{fig:chamadasgauss}
         \end{figure}
 
-        Foi feito um estudo de sensibilidade para avaliar o impacto de diferentes parâmetros no número total de iterações que cada método precisou para resolver a simulação (Tabela \ref{tab:sens}). A sensibilidade mostra que o número de iterações não é diretamente proporcional aos valores dos parâmetros testados (exceto o número de células), mas que o Método de Newton-Raphson sempre tem um resultado melhor. O parâmetro que mais influenciou a diferença entre a performance dos métodos foi a viscosidade.
+        Foi feito um estudo de sensibilidade para avaliar o impacto de diferentes parâmetros no número total de iterações que cada método precisou para resolver a simulação (Tabela \ref{tab:sens}). A sensibilidade mostra que o número de iterações não é diretamente proporcional aos valores dos parâmetros testados (exceto o número de células), mas que o Método de Newton-Raphson sempre tem um resultado melhor. O parâmetro que mais influenciou a diferença entre a performance dos métodos foi a viscosidade. A viscosidade acaba afetando a razão de mobilidade das fases, e por consequência, a velocidade de deslocamento da água no meio poroso.
 
         \begin{figure*}
             \caption{Sensibilidade do número total de iterações.}
