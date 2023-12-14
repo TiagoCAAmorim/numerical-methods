@@ -1453,8 +1453,8 @@ int main(){
     test("results_NR_2D_ni3.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 3, 130., 2., 3.);
     test("results_Fixed_2D_ni9.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 9, 130., 2., 3.);
     test("results_NR_2D_ni9.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 9, 130., 2., 3.);
-    test("results_Fixed_2D_ni27.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 27, 130., 2., 3.);
-    test("results_NR_2D_ni27.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 27, 130., 2., 3.);
+    // test("results_Fixed_2D_ni27.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 27, 130., 2., 3.);
+    // test("results_NR_2D_ni27.txt"   , true, true,  1., 0.005, 10., 0.1, 1.E-5, 20, 27, 130., 2., 3.);
 
     //no=nw sensibility
     test("results_Fixed_2D_nkr1.txt", true, false, 1., 0.005, 10., 0.1, 1.E-5, 20, 10, 130., 1., 1.);
