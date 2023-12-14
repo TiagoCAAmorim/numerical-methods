@@ -1,0 +1,677 @@
+\documentclass[final,5p]{elsarticle}
+
+% \documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+\usepackage[portuguese]{babel}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{statistics}
+\usepackage{pgfplotstable}
+
+\usepackage{placeins}
+\usepackage{hyperref}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage[noEnd=true, indLines=true]{algpseudocodex}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada:}}
+\algrenewcommand\algorithmicwhile{\textbf{Enquanto}}
+\algrenewcommand\algorithmicrepeat{\textbf{Repete}}
+\algrenewcommand\algorithmicuntil{\textbf{Até}}
+\algrenewcommand\algorithmicif{\textbf{Se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{Caso contrário}}
+\algrenewcommand\algorithmicensure{\textbf{Objetivo:}}
+\algrenewcommand\algorithmicreturn{\textbf{Retorna:}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
+\algrenewcommand\algorithmicforall{\textbf{Para todos}}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\) \textcolor{black!50}{\emph{#1}}}
+
+\newcommand*{\squareb}{\textcolor{black}{\rule{0.5em}{0.5em}}}
+\newcommand*{\squareg}{\textcolor{gray}{\rule{0.5em}{0.5em}}}
+
+% \usepackage[fleqn]{nccmath}
+% \usepackage{multicol}
+
+
+%=========== Gloabal Tikz settings
+% \pgfplotsset{compat=newest}
+% \usetikzlibrary{math}
+% \pgfplotsset{
+%     height = 10cm,
+%     width = 10cm,
+%     tick pos = left,
+%     legend style={at={(0.98,0.30)}, anchor=east},
+%     legend cell align=left,
+%     }
+%  \pgfkeys{
+%     /pgf/number format/.cd,
+%     fixed,
+%     precision = 1,
+%     set thousands separator = {}
+% }
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% \journal{Nuclear Physics B}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%% \fntext[label3]{}
+
+\title{Performance dos Métodos do Ponto Fixo e de Newton-Raphson em Problemas de Fluxo em Meio Poroso Incompressíveis\tnoteref{label_title}}
+\tnotetext[label_title]{Relatório número 12 como parte dos requisitos da disciplina IM253: Métodos Numéricos para Fenômenos de Transporte.}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \affiliation[label1]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+%%
+%% \affiliation[label2]{organization={},
+%%             addressline={},
+%%             city={},
+%%             postcode={},
+%%             state={},
+%%             country={}}
+
+\author{Tiago C. A. Amorim\fnref{label_author}}
+\tnotetext[label_author]{Atualmente cursando doutorado no Departamento de Engenharia de Petróleo da Faculdade de Engenharia Mecânica da UNICAMP (Campinas/SP, Brasil).}
+\ead{t100675@dac.unicamp.br}
+\affiliation[Tiago C. A. Amorim]{organization={Petrobras},%Department and Organization
+addressline={Av. Henrique Valadares, 28},
+city={Rio de Janeiro},
+postcode={20231-030},
+state={RJ},
+country={Brasil}}
+
+\begin{abstract}
+
+    O método usualmente empregado para resolver os sistemas de equações não lineares de simulações de fluxo em meio poroso é o de Newton-Raphson. Em sistemas incompressíveis a matriz jacobiana associada ao problema é próxima da matriz de coeficientes. Foi comparada a performance do Método de Newton-Raphson contra o Método do Ponto Fixo. Os testes realizados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo. A performance dos dois métodos se aproximam à medida que o problema fica mais linear.
+
+\end{abstract}
+
+
+%%Graphical abstract
+% \begin{graphicalabstract}
+%\includegraphics{grabs}
+% \end{graphicalabstract}
+
+%%Research highlights
+% \begin{highlights}
+% \item Research highlight 1
+% \item Research highlight 2
+% \end{highlights}
+
+\begin{keyword}
+    Método de Newton-Raphson \sep Método do Ponto Fixo \sep Fluxo em Meio Poroso
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+\section{Introdução}
+
+        Em simuladores de fluxo em meio poroso o usual é empregar o Método de Newton-Raphson para resolver os sistemas de equações não lineares resultantes\cite{computer2022cmg}\cite{schlumberger2009technical}. Em problemas incompressíveis os termos não lineares do sistema de equações se resumem às permeabilidades relativas. Com um sistema de equações \emph{quase} linear, o Método do Ponto Fixo se mostra como uma alternativa viável. Este trabalho se propõe a avaliar a diferença entre empregar o Método de Newton-Raphson versus o Método do Ponto Fixo.
+
+\section{Metodologia}
+
+    \subsection{Método do Ponto Fixo}
+
+        Dado um sistema de equações:
+
+        \begin{align}
+            f&_1(x_1,x_2,\ldots,x_n) = 0 \nonumber \\
+            f&_2(x_1,x_2,\ldots,x_n) = 0 \nonumber \\
+            \vdots &  \nonumber \\
+            f&_n(x_1,x_2,\ldots,x_n) = 0 \label{eq:sistemaeqs}
+        \end{align}
+
+        No Método do Ponto Fixo o sistema \ref{eq:sistemaeqs} é resolvido transformando cada função $f_i(\vec{x}) = 0$ em $g_i(\vec{x}) = x_i$. Nesta forma o problema é resolvido de forma iterativa (Equação \ref{eq:fixondimensional})\cite{burden2016analise}.
+
+        \begin{equation}
+            \vec{x}^{k+1} = G(\vec{x}^k) \label{eq:fixondimensional}
+        \end{equation}
+
+        \noindent onde
+
+        \begin{equation}
+            G(\vec{x}) = \{g_1(\vec{x}), g_2(\vec{x}), \ldots, g_n(\vec{x})\}
+        \end{equation}
+
+        O algoritmo do Método do Ponto Fixo é apresentado em \ref{alg:pontofixo}.
+
+        \begin{algorithm}
+            \caption{Método do Ponto Fixo}\label{alg:pontofixo}
+            \begin{algorithmic}
+                \Require $\vec{x}^0$
+                \State $k \gets 0$
+                \Repeat
+                    \State $\vec{x}^{k+1} \gets G(\vec{x}^{k}) $
+                    \State $k \gets k+1$
+                \Until{$||\vec{x}^{k} - \vec{x}^{k-1}||<\epsilon$}
+                \State \Return $\vec{x}^{k}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        Diferentes critérios de convergência foram discutidos no relatório anterior\cite{relatoriojacobi}.
+
+    \subsection{Método de Newton-Raphson}
+
+        O método de Newton-Raphson para função de uma variável é um método iterativo que depende do valor da função e de sua derivada para gerar uma série de estimativas da raiz de $f(x)$ (Equação \ref{eq:nrunidimensional}).
+
+        \begin{equation}
+            x^{k+1} = x^{k} - \frac{f(x^k)}{f'(x^k)} \label{eq:nrunidimensional}
+        \end{equation}
+
+        A \emph{versão} do método para encontrar a raiz de um sistema de equações $F(\vec{x}) = \{f_1(\vec{x}), f_2(\vec{x}), \ldots, f_n(\vec{x})\}$ faz uso da matriz jacobiana (Equação \ref{eq:nrndimensional})\cite{burden2016analise}.
+
+        \begin{equation}
+            \vec{x}^{k+1} = \vec{x}^{k} - J(\vec{x}^k)^{-1}F(\vec{x}^k) \label{eq:nrndimensional}
+        \end{equation}
+
+        \noindent onde
+
+        \begin{equation}
+            J =
+            \begin{bmatrix}
+                \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \ldots & \frac{\partial f_1}{\partial x_n} \\
+                \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \ldots & \frac{\partial f_2}{\partial x_n} \\
+                \vdots     & \vdots     &        & \vdots  \\
+                \frac{\partial f_n}{\partial x_1} & \frac{\partial f_n}{\partial x_2} & \ldots & \frac{\partial f_n}{\partial x_n}
+            \end{bmatrix}
+            \label{eq:jacobiano}
+        \end{equation}
+
+        Definindo $\Delta \vec{x}^{k} = \vec{x}^{k+1} - \vec{x}^{k}$, é possível reescrever a Equação \ref{eq:nrndimensional} como um sistema de equações lineares (Equação \ref{eq:nrndimensional2}). Desta forma, ao invés de inverter a matriz jacobiana, é resolvido um sistema de equações lineares para encontrar $\vec{x}^{k+1}$.
+
+        \begin{equation}
+            J(\vec{x}^k) \Delta \vec{x}^{k} = -F(\vec{x}^k) \label{eq:nrndimensional2}
+        \end{equation}
+
+        O algoritmo do Método de Newton Raphson é apresentado em \ref{alg:newtonraphson}.
+
+        \begin{algorithm}
+            \caption{Método de Newton-Raphson}\label{alg:newtonraphson}
+            \begin{algorithmic}
+                \Require $\vec{x}^0$
+                \State $k \gets 0$
+                \Repeat
+                    \State Resolve $J(\vec{x}^k) \Delta \vec{x}^{k} = -F(\vec{x}^k)$
+                    \State $\vec{x}^{k+1} \gets \vec{x}^{k} + \Delta \vec{x}^{k}$
+                    \State $k \gets k+1$
+                \Until{$||\Delta \vec{x}^{k-1}||<\epsilon$}
+                \State \Return $\vec{x}^{k}$
+            \end{algorithmic}
+        \end{algorithm}
+
+    \subsection{Fluxo em Meio Poroso Incompressível}
+
+        Em um relatório anterior\cite{relatoriogauss} é feita uma rápida discussão sobre as equações que governam o fluxo em meio poroso incompressível bifásico em uma dimensão (Equações \ref{eq:blackoilumd}).
+
+        \begin{subequations}
+        \begin{align}
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i+\tfrac{1}{2}}^{t_{s+1}} (p_{i+1} - p_{i} - \gamma_w \Delta D_{i+\tfrac{1}{2}})^{t_{s+1}}  \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_w \right)_{i-\tfrac{1}{2}}^{t_{s+1}} (p_{i-1} - p_{i} - \gamma_w \Delta D_{i-\tfrac{1}{2}})^{t_{s+1}} \nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi S_w}{B_w}\right)_i^{t_{s+1}} - \left(\frac{V \phi S_w}{B_w}\right)_i^{t_s} + q^{std}_w \label{eq:blackoilumdw} \\
+            &\left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i+\tfrac{1}{2}}^{t_{s+1}} (p_{i+1} - p_{i} - \gamma_o \Delta D_{i+\tfrac{1}{2}}) ^{t_{s+1}} \nonumber \\
+            &+ \left( \frac{\Delta y \Delta z}{\Delta x} \lambda_o \right)_{i-\tfrac{1}{2}}^{t_{s+1}} (p_{i-1} - p_{i} - \gamma_o \Delta D_{i-\tfrac{1}{2}})^{t_{s+1}}\nonumber \\
+            &  = \frac{1}{\Delta t} \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_{s+1}} - \left(\frac{V \phi (1-S_w)}{B_o}\right)_i^{t_s} + q^{std}_o \label{eq:blackoilumdo}
+        \end{align}
+        \label{eq:blackoilumd}
+        \end{subequations}
+
+        \noindent com:
+        \begin{align}
+            \lambda_p = \frac{k k_{rp}}{B_p \mu_p} \nonumber
+        \end{align}
+
+        Para passar para problemas bi e tridimensionais basta somar termos de transferência de massa entre as células vizinhas (à esquerda da igualdade em \ref{eq:blackoilumd}).
+
+        As variáveis do problema são as pressões ($p$) e saturações de água ($S_w$) das células. É possível colocar este conjunto de equações na forma $K\,x=f$. As equações \ref{eq:sistemak}, \ref{eq:sistemax} e \ref{eq:sistemaf} assumem problema unidimensional e plano\footnote{$\Delta D = 0$.}.
+
+        Por simplicidade, os termos fonte ($q^{std}_{p,i}$) foram colocados em $f$. Estes termos podem aparecer tanto em $f$ como em $K$. Será função do tipo do controle do poço. Poços controlados por vazão terão seus termos em $f$, e poços controlados por pressão de fundo terão seus termos em $f$ e $K$.
+
+        \begin{figure*}
+        \begin{equation}
+            K =
+            \begin{bmatrix}
+                    -\left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} &  \left(\frac{V \phi}{\Delta t B_w}\right)_1 & \left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} & 0 & \cdots & 0 & 0 \\
+                    -\left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & -\left(\frac{V \phi}{\Delta t B_o}\right)_1 & \left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & 0 & \cdots & 0 & 0 \\
+
+                    \left( \frac{A}{\Delta x} \lambda_w \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \lambda_w \right)_{1.5}-\left( \frac{A}{\Delta x} \lambda_w \right)_{2.5} &  \left(\frac{V \phi}{\Delta t B_w}\right)_2 & \cdots & 0 & 0 \\
+                    \left( \frac{A}{\Delta x} \lambda_o \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \lambda_o \right)_{1.5}-\left( \frac{A}{\Delta x} \lambda_o \right)_{2.5} & -\left(\frac{V \phi}{\Delta t B_o}\right)_2 & \cdots & 0  & 0 \\
+
+                    \vdots     &     &      &  & \ddots &  & \vdots \\
+                    0 & 0 & \cdots & \left( \frac{A}{\Delta x} \lambda_w \right)_{n-\frac{1}{2}} &  0 & -\left( \frac{A}{\Delta x} \lambda_w \right)_{n-\frac{1}{2}} &  \left(\frac{V \phi}{\Delta t B_w}\right)_n \\
+                    0 & 0 & \cdots & \left( \frac{A}{\Delta x} \lambda_o \right)_{n-\frac{1}{2}} &  0 & -\left( \frac{A}{\Delta x} \lambda_o \right)_{n-\frac{1}{2}} & -\left(\frac{V \phi}{\Delta t B_o}\right)_n
+            \end{bmatrix}
+            \label{eq:sistemak}
+        \end{equation}
+        \end{figure*}
+
+        \begin{equation}
+            x =
+            \begin{bmatrix}
+                p_{1}  \\
+                Sw_{1}  \\
+                p_{2}  \\
+                Sw_{2}  \\
+                \vdots \\
+                p_{n} \\
+                Sw_{n}
+            \end{bmatrix}
+            \label{eq:sistemax}
+        \end{equation}
+
+        \begin{equation}
+            f =
+            \begin{bmatrix}
+                - \left(\frac{V \phi S_w}{B_w}\right)_1^{t_s} + q^{std}_{w,1}  \\
+                  \left(\frac{V \phi S_w}{B_o}\right)_1^{t_s} + q^{std}_{o,1}  \\
+                - \left(\frac{V \phi S_w}{B_w}\right)_2^{t_s} + q^{std}_{w,2}  \\
+                  \left(\frac{V \phi S_w}{B_o}\right)_2^{t_s} + q^{std}_{o,2}  \\
+                \vdots \\
+                - \left(\frac{V \phi S_w}{B_w}\right)_n^{t_s} + q^{std}_{w,n}  \\
+                  \left(\frac{V \phi S_w}{B_o}\right)_n^{t_s} + q^{std}_{o,n}  \\
+            \end{bmatrix}
+            \label{eq:sistemaf}
+        \end{equation}
+
+        Para utilizar o Método de Newton-Raphson é preciso encontrar a matriz jacobiana do sistema de equações não lineares a ser resolvido. Os únicos termos não lineares das equações são as permeabilidades relativas: $k_{rw}$ e $k_{ro}$. O termo fonte também pode pode aparecer, caso seja controlado por pressão de fundo.
+
+        É possível observar que a matriz jacobiana será a matriz de coeficientes ($K$, Equação \ref{eq:sistemak}), acrescida das derivadas parciais do termos não lineares das transmissibilidades ($J_{tr}$, Equação \ref{eq:sistemajactr}) e dos termos fonte ($J_{q}$, Equação \ref{eq:sistemajacq}): $J=K+J_{tr}+J_q$. A equação \ref{eq:sistemajactr} assume que o termo $i-\frac{1}{2}$ é avaliado na célula $i-1$ (esquema implícito, com maior pressão em $i-1$).
+
+        \begin{figure*}
+            \begin{equation}
+                J_{tr} =
+                \begin{bmatrix}
+                        0 &  -\left( \frac{A}{\Delta x} \frac{\partial \lambda_w}{\partial Sw_1} \right)_{1.5} & 0 & 0 & \cdots & 0 & 0 \\
+                        0 &  -\left( \frac{A}{\Delta x} \frac{\partial \lambda_o}{\partial Sw_1} \right)_{1.5} - \frac{\partial q^{std}_{o,1}}{\partial Sw_1} & 0 & 0 & \cdots & 0 & 0 \\
+
+                        0 & \left( \frac{A}{\Delta x} \frac{\partial \lambda_w}{\partial Sw_1} \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \frac{\partial \lambda_w}{\partial Sw_2} \right)_{1.5}-\left( \frac{A}{\Delta x} \frac{\partial \lambda_w}{\partial Sw_2} \right)_{2.5} & \cdots & 0 & 0 \\
+                        0 & \left( \frac{A}{\Delta x} \frac{\partial \lambda_o}{\partial Sw_1} \right)_{1.5} & 0 & -\left( \frac{A}{\Delta x} \frac{\partial \lambda_o}{\partial Sw_2} \right)_{1.5}-\left( \frac{A}{\Delta x} \frac{\partial \lambda_o}{\partial Sw_2} \right)_{2.5} & \cdots & 0 & 0 \\
+
+                        \vdots     &     &      &  & \ddots &  & \vdots \\
+                        0 & 0 & \cdots & 0 &  \left( \frac{A}{\Delta x} \frac{\partial \lambda_w}{\partial Sw_{n-1}} \right)_{n-\frac{1}{2}} & 0 & 0 \\
+                        0 & 0 & \cdots & 0 &  \left( \frac{A}{\Delta x} \frac{\partial \lambda_o}{\partial Sw_{n-1}} \right)_{n-\frac{1}{2}} & 0 & 0
+                \end{bmatrix}
+                \label{eq:sistemajactr}
+            \end{equation}
+            \end{figure*}
+
+            \begin{figure*}
+                \begin{equation}
+                J_{q} =
+                \begin{bmatrix}
+                        -\frac{\partial q^{std}_{w,1}}{\partial p_1} & - \frac{\partial q^{std}_{w,1}}{\partial Sw_1} & 0 & 0 & \cdots & 0 & 0 \\
+                        -\frac{\partial q^{std}_{o,1}}{\partial p_1} & - \frac{\partial q^{std}_{o,1}}{\partial Sw_1} & 0 & 0 & \cdots & 0 & 0 \\
+
+                        0 & 0 & -\frac{\partial q^{std}_{w,2}}{\partial p_2} & -\frac{\partial q^{std}_{w,2}}{\partial Sw_2} & \cdots & 0 & 0 \\
+                        0 & 0 & -\frac{\partial q^{std}_{o,2}}{\partial p_2} & -\frac{\partial q^{std}_{o,2}}{\partial Sw_2} & \cdots & 0 & 0 \\
+
+                        \vdots     &     &      &  & \ddots &  & \vdots \\
+                        0 & 0 & \cdots & 0 &  0 & -\frac{\partial q^{std}_{w,n}}{\partial p_n} &  -\frac{\partial q^{std}_{w,n}}{\partial Sw_n} \\
+                        0 & 0 & \cdots & 0 &  0 & -\frac{\partial q^{std}_{w,n}}{\partial p_n} &  -\frac{\partial q^{std}_{o,n}}{\partial Sw_n}
+                \end{bmatrix}
+                \label{eq:sistemajacq}
+            \end{equation}
+            \end{figure*}
+
+    \subsection{Problema proposto}
+
+        O problema proposto é a resolução de uma simulação de um modelo de fluxo em meio poroso incompressível. O problema é bidimensional quadrado ($ni=nj$), em uma malha uniforme ($\Delta x$, $\Delta y$ e $\Delta z$ constantes). As propriedades de fluido ($Bw$, $Bo$, $\mu_w$ e $\mu_o$) e de rocha ($\phi$ e $k$) são constantes.
+
+        As curvas de permeabilidade relativa foram construídas com a formulação de Corey (Equações \ref{eq:corey})\footnote{Por simplicidade, foi assumido que as saturações de água inicial, crítica e conata coincidem.}. Ao utilizar esta formulação é possível calcular analiticamente as derivadas de $k_{rw}$ e $k_{ro}$ com relação a $Sw$.
+
+        \begin{subequations}
+            \begin{align}
+                k_{rw} &= k_{rw}^{(Sw=1-Sor)} Sw_d^{nw}  \\
+                k_{ro} &= k_{ro}^{(Sw=Swi)} (1-Sw_d)^{no}
+            \end{align}
+            \label{eq:corey}
+        \end{subequations}
+
+        \noindent com:
+        \begin{align}
+            Sw_d = \frac{Sw - Swi}{1-Sor-Swi} \nonumber
+        \end{align}
+
+        O modelo tem dois poços: um injetor de água controlado por vazão constante ($q^{std}_{w}$) na célula $[0,0]$ e um produtor controlado por pressão de fundo ($p_{wf}$) na célula $[ni,nj]$.
+
+        Os valores dos parâmetros do modelo proposto estão no \ref{sec:parametros}.
+
+    \section{Implementação} \label{sec:implementacao}
+
+        Todo o código utilizado nesta análise foi desenvolvido em C++.
+
+        O modelo de fluxo em meio poroso é implementado em uma classe: \emph{SimModel}. Nesta classe são informadas as propriedades de reservatório, fluido, permeabilidade relativa e parâmetros dos poços. Existe a opção de usar Newton-Raphson ou Ponto Fixo para resolver os sistema de equações não lineares. O principal método da classe é \emph{run\_simulation}, que faz a simulação do modelo de fluxo em meio poroso.
+
+        As condições iniciais ($p^{t=0}$ e $Sw^{t=0}$) e as condições de contorno (limites do reservatório e controles dos poços) são dadas. A simulação de fluxo assume um passo de tempo ($\Delta t$) e tenta resolver as Equações \ref{eq:blackoilumd}. Ao final de cada resolução de um passo de tempo é avaliado se o resultado é aceito ou se é reduzido o passo de tempo e refeita a resolução das Equações \ref{eq:blackoilumd}.
+
+        Para controlar os erros de balanço de massa, é avaliado se as máximas variações de $p$ e $Sw$ estão dentro dos limites estabelecidos. Se os limites não forem satisfeitos, o passo de tempo é reduzido e os cálculos refeitos. Se os limites forem atendidos o valor do passo de tempo será incrementado para o próximo cálculo. O algoritmo implementado é apresentado em \ref{alg:simulacao}.
+
+        \begin{algorithm}
+            \caption{Simulação em Meio Poroso}\label{alg:simulacao}
+            \begin{algorithmic}
+                \Require $p^{t=0}$, $Sw^{t=0}$, $t_{fim}$ e $\Delta t$
+                \State $t \gets 0$
+                \Repeat
+                    \State Resolve $p^{t+\Delta t}$, $Sw^{t+\Delta t}$
+                    \State $\Delta p_{max} \gets \max |p^{t+\Delta t} - p^t|$
+                    \State $\Delta Sw_{max} \gets \max |Sw^{t+\Delta t} - Sw^t|$
+                    \State $convergiu \gets \Delta p_{max} < \epsilon_{\Delta p}$ e $\Delta Sw_{max} < \epsilon_{\Delta Sw}$
+                    \If{ $convergiu$ ou $\Delta t = \Delta t_{min}$ }
+                        \State $t \gets t + \Delta t$
+                        \State $\Delta t \gets \min (1.2 \Delta t, \Delta t_{max})$
+                    \Else
+                        \State $\Delta t \gets \max (0.5 \Delta t, \Delta t_{min})$
+                    \EndIf
+                \Until{$t \geq t_{fim}$}
+                \State \Return $\vec{x}^{k}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        Duas funções foram implementadas para resolver o comando \textbf{Resolve} $p^{t+\Delta t}$, $Sw^{t+\Delta t}$: Newton-Raphson e Ponto Fixo. O algoritmo de Newton-Raphson segue \ref{alg:newtonraphson}.
+
+        O Método do Ponto Fixo implementado é ligeiramente diferente do apresentado em \ref{alg:pontofixo}. Os termos não lineares seguem a proposta do método, e são avaliados com os valores dos parâmetros da iteração anterior ($\vec{x}^k$). Os termos lineares são resolvidos como um sistema de equações lineares. O algoritmo modificado é apresentado em \ref{alg:pontofixomod}.
+
+        \begin{algorithm}
+            \caption{Método do Ponto Fixo Modificado}\label{alg:pontofixomod}
+            \begin{algorithmic}
+                \Require $\vec{x}^0=\{p^{t}$, $Sw^{t}\}$
+                \State $k \gets 0$
+                \Repeat
+                    \State $k_{ro} \gets fk_{ro}(\vec{x}^k)$
+                    \State $k_{rw} \gets fk_{rw}(\vec{x}^k)$
+                    \State Monta matriz $K$ (\ref{eq:sistemak})
+                    \State Monta vetor $f$ (\ref{eq:sistemaf})
+                    \State Resolve $K \, \vec{x}^{k+1} = f $
+                    \State $k \gets k+1$
+                \Until{$||\vec{x}^{k} - \vec{x}^{k-1}||<\epsilon$}
+                \State \Return $\vec{x}^k=\{p^{t+\Delta t}$, $Sw^{t+\Delta t}\}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        Em ambos métodos foi utilizado o mesmo critério de parada, discutido anteriormente\cite{relatoriojacobi}. A proposta foi de utilizar o máximo erro relativo por variável:
+
+        \begin{align}
+            \epsilon &= \left|\left|\frac{x_i^k - x_i^{k-1}}{x_i^k}\right|\right|_\infty \label{eq:conve}
+        \end{align}
+
+        Em \ref{eq:conve} a divisão é feita elemento a elemento (\emph{piecewise}).
+
+        Todas as resoluções de sistemas lineares são feitas com o Método de Eliminação de Gauss com Pivotamento Parcial e Escala\cite{relatoriogauss}.
+
+\section{Resultados}
+
+        Um mesmo modelo de reservatório com $n_i=n_j=10$ foi simulado por 5 anos, utilizando os métodos de Newton-Raphson e do Ponto Fixo para resolver as equações não-lineares. Observa-se que os resultados foram idênticos (Gráfico \ref{fig:vazao}).
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {Tempo [d]},
+                    ylabel = {Vazão $m^3/d$},
+                    legend style={at={(0.90,0.50)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=green, solid, thick] table [x=t, y=Qo, col sep=comma] {results_NR_2D.csv};
+                    \addplot[color=black, dashed, thick] table [x=t, y=Qo, col sep=comma] {results_Fixed_2D.csv};
+                    \addplot[color=blue, solid, thick] table [x=t, y=Qw, col sep=comma] {results_NR_2D.csv};
+                    \addplot[color=cyan, dashed, thick] table [x=t, y=Qw, col sep=comma] {results_Fixed_2D.csv};
+                    \legend{Qo NR, Qo PF, Qw NR, Qw PF};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Vazão de óleo e água para a resolução com os métodos de Newton-Raphson (NR) e do Ponto Fixo (PF).}
+            \label{fig:vazao}
+        \end{figure}
+
+        Foi implementado um contador de chamadas à rotina de solução de sistemas de equações lineares para ser um indicador da performance de cada método. O Gráfico \ref{fig:chamadasgauss} mostra que enquanto a produção é apenas de óleo os dois métodos tem a mesma performance. À medida que mais água chega do produtor, o método de Newton-Raphson consegue convergir com um número menor de iterações. O Método de Newton-Raphson usou 24\% menos iterações que o Método do Ponto Fixo.
+
+        \begin{figure}[hbt!]
+            \begin{tikzpicture}
+                \begin{axis}[
+                    grid=both,
+                    xlabel = {Tempo [d]},
+                    ylabel = {Iterações},
+                    legend style={at={(0.90,0.20)}, anchor=east, font=\footnotesize},
+                    ]
+                    \addplot[color=blue, solid, thick] table [x=t, y=Gauss, col sep=comma] {results_NR_2D.csv};
+                    \addplot[color=red, solid, thick] table [x=t, y=Gauss, col sep=comma] {results_Fixed_2D.csv};
+                    \legend{NR, PF};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Número total de iterações para a resolução com os métodos de Newton-Raphson (NR) e do Ponto Fixo (PF).}
+            \label{fig:chamadasgauss}
+        \end{figure}
+
+        Foi feito um estudo de sensibilidade para avaliar o impacto de diferentes parâmetros no número total de iterações que cada método precisou para resolver a simulação (Tabela \ref{tab:sens}). A sensibilidade mostra que o número de iterações não é diretamente proporcional aos valores dos parâmetros testados (exceto o número de células), mas que o Método de Newton-Raphson sempre tem um resultado melhor. O parâmetro que mais influenciou a diferença entre a performance dos métodos foi a viscosidade.
+
+        \begin{figure*}
+            \caption{Sensibilidade do número total de iterações.}
+            \label{tab:sens}
+            \begin{center}
+                \renewcommand{\arraystretch}{1.2}
+                \begin{tabular}{c|cc|c}
+                    Parâmetro & \multicolumn{2}{c|}{Iterações}  & Redução ao usar \\
+                            & Ponto Fixo      & Newton-Raphson & Newton-Raphson \\
+                    \hline
+                    Modelo Proposto & 43 350 & 33 007 & 24\% \\
+                    \hline
+                    $\mu_o = 0.1\,cP$ & 10 822 & 10 490 & 3\% \\
+                    $\mu_o = 1.0\,cP$ & 176 682 & 176 185  & 0\% \\
+                    $\mu_o = 10\,cP$ & 85 058 & 80 633 & 5\% \\
+                    $\mu_o = 100\,cP$ & 46 877 & 37 224 & 19\% \\
+                    \hline
+                    $n_i = n_j = 3$ & 4 927 & 3 867 & 22\% \\
+                    $n_i = n_j = 9$ & 35 511 & 26 983 & 24\% \\
+                    % $n_i = n_j = 27$ &  &  & \\
+                    \hline
+                    $n_o = n_w = 1.5$ & 63 159 & 50 185 & 21\% \\
+                    $n_o = n_w = 2.0$ & 44 684 & 34 786 & 22\% \\
+                    $n_o = n_w = 3.0$ & 28 155 & 20 175 & 28\%  \\
+                \end{tabular}
+            \end{center}
+        \end{figure*}
+
+        O código foi implementado em C++ e em um único arquivo. Pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods/blob/main/12_NewtonRaphson/12_NewtonRaphson.cpp}{https://github.com/Tiago CAAmorim/numerical-methods}.
+
+\section{Conclusão}
+
+            Os resultados mostraram que o Método de Newton-Raphson é sempre melhor que o Método do Ponto Fixo, necessitando de menos iterações para convergir. Para problemas mais simples, com menos células, curvas de permeabilidade relativa mais próximas do linear ou razão de mobilidade mais próxima da unidade, os dois métodos tem performance parecida. À medida que os problemas ficam \emph{mais não lineares}, a diferença entre os métodos aumenta.
+
+    % \label{}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\appendix
+
+\section{Lista de Variáveis}
+
+    \begin{description}
+        \item[$Bo$:]Fator volume de formação do óleo no reservatório ($m^3/m^3$).
+        \item[$Bw$:]Fator volume de formação da água no reservatório ($m^3/m^3$).
+        \item[$D$:]Profundidade.
+        \item[$\Delta x$:]Discretização espacial na direção $i$.
+        \item[$\Delta y$:]Discretização espacial na direção $j$.
+        \item[$\Delta z$:]Discretização espacial na direção $k$.
+        \item[$\Delta t$:]Discretização temporal.
+        \item[$\gamma_p$:]Peso específico da fase $p$ ($\gamma_p = \rho_p g$).
+        \item[$k$:]Permeabilidade absoluta do meio poroso.
+        \item[$k_{rp}$:]Permeabilidade relativa da fase $p$.
+        \item[$\mu_p$:]Viscosidade da fase $p$.
+        \item[$n_i$:]Número de células na direção $i$.
+        \item[$n_j$:]Número de células na direção $j$.
+        \item[$p$:]Pressão.
+        \item[$p_{wf}$:]Pressão de fundo do poço.
+        \item[$\phi$:]Porosidade da rocha.
+        \item[$q_p$:]Vazão volumétrica da fase $p$.
+        \item[$q^{std}_{p}$:]Vazão volumétrica da fase $p$ medida em condições padrão (\emph{standard}).
+        \item[$\rho_p$:]Densidade da fase $p$.
+        \item[$r_w$:]Raio do poço.
+        \item[$S_p$:]Saturação da fase $p$ no meio poroso.
+        \item[$Swi$:]Saturação de água inicial (imóvel).
+        \item[$Sor$:]Saturação de óleo residual (imóvel).
+    \end{description}
+
+\section{Parâmetros do Problema Proposto} \label{sec:parametros}
+
+    \begin{description}
+        \item[$Bo$ =]1.01
+        \item[$Bw$ =]1.00
+        \item[$\Delta x$ =]50 m
+        \item[$\Delta y$ =]50 m
+        \item[$\Delta z$ =]30 m
+        \item[$k$ =]1000 mD
+        \item[$k_{ro}^{Sw=Swi}$ =]1.00
+        \item[$k_{rw}^{Sw=1-Sor}$ =]0.60
+        \item[$\mu_o$ =]130 cP
+        \item[$\mu_w$ =]1.0 cP
+        \item[$n_i$ =]10
+        \item[$n_j$ =]10
+        \item[$n_o$ =]2.0
+        \item[$n_w$ =]3.0
+        \item[$p^{t=0}$ =]340 bar
+        \item[$p_{wf}$ =]330 bar (produtor)
+        \item[$\phi$ =]15 \%
+        \item[$q^{std}_{w}$ =]350 $m^3/d$ (injetor de água)
+        \item[$r_w$ =]4 pol
+        \item[$Swi$ =]20\%
+        \item[$Sor$ =]15\%
+        \item[$t_{final} =$]5 anos
+    \end{description}
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+% \newpage
+% \FloatBarrier
+% \section{Código em C}
+
+% O código de ambos métodos foi implementado em um único arquivo. O código é apresentado em duas partes neste documento para facilitar a leitura. O código pode ser encontrado em \href{https://github.com/TiagoCAAmorim/numerical-methods}{https://github.com/TiagoCAAmorim/numerical-methods}.
+
+% \subsection{Método da Bissecção}
+% \lstinputlisting[language=C, linerange={1-229}]{./02_newton_raphson.c}
+
+% \subsection{Método de Newton-Raphson}
+% \lstinputlisting[language=C, linerange={231-445}]{./02_newton_raphson.c}
+
+% \subsection{Método da Mínima Curvatura}
+% \lstinputlisting[language=C, linerange={448-958}]{./02_newton_raphson.c}
+
+\end{document}
+\endinput
